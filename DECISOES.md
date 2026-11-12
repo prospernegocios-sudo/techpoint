@@ -46,3 +46,4 @@ Registro das decisões tomadas, com data e motivo. Decisões novas entram no fim
 | D33 | Banco atualizado e testado pela **API de gestão do Supabase** (sem Docker); testes rodam numa transação desfeita no fim | O ambiente na nuvem não tem Docker; nada de teste fica gravado |
 | D34 | **Consentimento LGPD de menores ainda não implementado** (Fase 2). Até lá, o ambiente de teste usa **apenas dados fictícios** e a conta do dono do produto | Requisito obrigatório entra antes de qualquer atleta real usar o app |
 | D35 | App em **Expo SDK 58**; build de teste Android (APK) pelo EAS | Versão atual do Expo |
+| D36 | Endereço e chave pública do Supabase ficam nas **variáveis de ambiente do EAS** (preview/production), não no arquivo `.env` | O 1º APK fechou ao abrir: o `.env` não foi enviado ao build (é ignorado pelo git). Agora o app também mostra um aviso em vez de fechar se faltar configuração |

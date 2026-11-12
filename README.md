@@ -52,6 +52,7 @@ O app usa recursos nativos (câmera, GPS, biometria e login), então é testado 
 
 ```bash
 cd app && npx eas-cli build --profile preview --platform android
+# O endereço e a chave pública do Supabase vêm das variáveis do EAS (npx eas-cli env:list --environment preview).
 ```
 
 ## Como testar

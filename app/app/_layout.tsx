@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Button, T } from '@/components/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { MeProvider } from '@/lib/me';
+import { configMissing } from '@/lib/supabase';
 import { ThemeProvider, useTheme } from '@/lib/theme';
 
 const queryClient = new QueryClient({
@@ -57,7 +58,28 @@ function Shell() {
   );
 }
 
+function ConfigMissingScreen() {
+  const { colors } = useTheme();
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', padding: 24, gap: 16 }}>
+      <T variant="title" style={{ textAlign: 'center' }}>TechPoint</T>
+      <T variant="muted" style={{ textAlign: 'center' }}>
+        Esta versão do app foi gerada sem a configuração do servidor. Avise a equipe técnica para gerar uma nova versão.
+      </T>
+    </View>
+  );
+}
+
 export default function RootLayout() {
+  if (configMissing) {
+    return (
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <ConfigMissingScreen />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    );
+  }
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>

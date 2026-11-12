@@ -6,11 +6,12 @@ import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import { AppState } from 'react-native';
 
-const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-if (!url || !anonKey) {
-  throw new Error('Configuração ausente: defina EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_ANON_KEY no app/.env');
-}
+const envUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const envKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+/** true quando o APK foi gerado sem a configuração do servidor. O app mostra um aviso em vez de fechar. */
+export const configMissing = !envUrl || !envKey;
+const url = envUrl || 'https://configuracao-ausente.invalid';
+const anonKey = envKey || 'configuracao-ausente';
 
 const CHUNK = 1800;
 const safeKey = (k: string) => k.replace(/[^A-Za-z0-9._-]/g, '_');

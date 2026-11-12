@@ -1,11 +1,12 @@
 // Menu de gestão (gestor e treinador).
 import { router, type Href } from 'expo-router';
-import { Card, Screen, T } from '@/components/ui';
-import { useMe } from '@/lib/me';
+import { Button, Card, Notice, Screen, T } from '@/components/ui';
+import { roleLabels, useMe } from '@/lib/me';
 import { useTheme } from '@/lib/theme';
 
 export default function Gestao() {
-  const { isManager, isStaff, isPlatformAdmin, org } = useMe();
+  const { isManager, isStaff, isPlatformAdmin, org, role, roles, setRole } = useMe();
+  const canBeManager = !isManager && roles.includes('manager');
   const { colors } = useTheme();
   const items: { title: string; desc: string; href: Href; show: boolean }[] = [
     { title: 'Novo treino', desc: 'Marcar um treino (ou um treino de teste agora)', href: '/cadastro/treino', show: isStaff },
@@ -18,6 +19,15 @@ export default function Gestao() {
   return (
     <Screen>
       <T variant="title">{org?.name ?? 'Gestão'}</T>
+      {canBeManager && (
+        <>
+          <Notice
+            tone="info"
+            text={`Você está no modo ${role ? roleLabels[role] : ''}. Locais, Equipes e Gestores e treinadores aparecem no modo Gestor.`}
+          />
+          <Button title="Mudar para o modo Gestor" kind="outline" onPress={() => setRole('manager')} />
+        </>
+      )}
       {items.filter((i) => i.show).map((i) => (
         <Card key={i.title} onPress={() => router.push(i.href)}>
           <T variant="subtitle">{i.title}</T>

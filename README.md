@@ -18,6 +18,8 @@ Clube piloto: **DF Vôlei**.
 
 ## Documentos
 
+- [Concorrentes e cronograma](docs/roadmap.md)
+
 - [DECISOES.md](DECISOES.md) — decisões tomadas e o porquê
 - [docs/modelo-de-dados.md](docs/modelo-de-dados.md) — tabelas do banco
 

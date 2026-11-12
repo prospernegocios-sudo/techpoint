@@ -6,15 +6,16 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { useAuth } from './auth';
 import { supabase } from './supabase';
 
-export type Role = 'manager' | 'coach' | 'athlete' | 'guardian';
+export type Role = 'admin' | 'manager' | 'coach' | 'athlete' | 'guardian';
 export const roleLabels: Record<Role, string> = {
+  admin: 'Administrador',
   manager: 'Gestor',
   coach: 'Treinador',
   athlete: 'Atleta',
   guardian: 'Responsável',
 };
 
-export type Org = { id: string; name: string };
+export type Org = { id: string; name: string; review_status?: 'pending' | 'approved' | 'suspended' };
 export type Profile = { id: string; full_name: string | null; email: string | null; is_platform_admin: boolean };
 type Membership = { org_id: string; role: Role; organizations: Org | null };
 export type MyAthlete = { id: string; org_id: string; full_name: string };
@@ -24,7 +25,7 @@ type MeData = { profile: Profile | null; memberships: Membership[]; athletes: My
 async function fetchMe(userId: string): Promise<MeData> {
   const [p, m, a] = await Promise.all([
     supabase.from('profiles').select('id, full_name, email, is_platform_admin').eq('id', userId).maybeSingle(),
-    supabase.from('memberships').select('org_id, role, organizations(id, name)').eq('profile_id', userId).eq('active', true),
+    supabase.from('memberships').select('org_id, role, organizations(id, name, review_status)').eq('profile_id', userId).eq('active', true),
     supabase.from('athletes').select('id, org_id, full_name').eq('profile_id', userId),
   ]);
   if (p.error) throw p.error;
@@ -51,6 +52,7 @@ type MeCtx = {
   athlete: MyAthlete | null; // meu cadastro de atleta na organização atual
   isStaff: boolean;
   isManager: boolean;
+  isAdmin: boolean;
   isPlatformAdmin: boolean;
 };
 
@@ -81,7 +83,7 @@ export function MeProvider({ children }: { children: ReactNode }) {
     data?.memberships.forEach((m) => m.organizations && orgMap.set(m.org_id, m.organizations));
     const orgs = [...orgMap.values()].sort((a, b) => a.name.localeCompare(b.name));
     const org = orgs.find((o) => o.id === orgId) ?? orgs[0] ?? null;
-    const order: Role[] = ['manager', 'coach', 'athlete', 'guardian'];
+    const order: Role[] = ['admin', 'manager', 'coach', 'athlete', 'guardian'];
     const roles = order.filter((r) => data?.memberships.some((m) => m.org_id === org?.id && m.role === r));
     const current = role && roles.includes(role) ? role : roles[0] ?? null;
     const athlete = data?.athletes.find((a) => a.org_id === org?.id) ?? null;
@@ -104,8 +106,10 @@ export function MeProvider({ children }: { children: ReactNode }) {
         AsyncStorage.setItem(KEY, JSON.stringify({ orgId: org?.id, role: r })).catch(() => {});
       },
       athlete,
-      isStaff: current === 'manager' || current === 'coach',
-      isManager: current === 'manager',
+      // Administrador faz tudo que o gestor faz (e mais).
+      isStaff: current === 'admin' || current === 'manager' || current === 'coach',
+      isManager: current === 'admin' || current === 'manager',
+      isAdmin: current === 'admin',
       isPlatformAdmin,
     };
   }, [q.data, q.isLoading, q.error, orgId, role]);

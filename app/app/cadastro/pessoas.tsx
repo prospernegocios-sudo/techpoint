@@ -1,4 +1,5 @@
-// Gestores e treinadores: o acesso é dado pelo e-mail Google da pessoa.
+// Administradores, gestores e treinadores: o acesso é dado pelo e-mail Google da pessoa.
+// Só administrador dá ou tira acesso de administrador (regra também no banco).
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
@@ -11,14 +12,14 @@ import { supabase } from '@/lib/supabase';
 type Row = { id: string; role: Role; invited_email: string | null; profile_id: string | null; profiles: { full_name: string | null; email: string | null } | null };
 
 export default function Pessoas() {
-  const { org, isManager, profile } = useMe();
+  const { org, isManager, isAdmin, profile } = useMe();
   const qc = useQueryClient();
   const list = useQuery({
     queryKey: ['memberships', org?.id],
     enabled: Boolean(org),
     queryFn: async () => {
       const { data, error } = await supabase.from('memberships').select('id, role, invited_email, profile_id, profiles(full_name, email)')
-        .eq('org_id', org!.id).in('role', ['manager', 'coach']).eq('active', true).order('role');
+        .eq('org_id', org!.id).in('role', ['admin', 'manager', 'coach']).eq('active', true).order('role');
       if (error) throw error;
       return data as unknown as Row[];
     },
@@ -38,7 +39,8 @@ export default function Pessoas() {
   };
 
   const remove = (r: Row) => {
-    if (r.profile_id === profile?.id) return Alert.alert('Atenção', 'Você não pode remover o seu próprio acesso.');
+    if (r.profile_id === profile?.id && r.role !== 'admin') return Alert.alert('Atenção', 'Você não pode remover o seu próprio acesso.');
+    if (r.role === 'admin' && !isAdmin) return Alert.alert('Atenção', 'Só um administrador remove outro administrador.');
     Alert.alert('Remover acesso?', 'A pessoa deixa de ver os dados deste clube.', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Remover', style: 'destructive', onPress: async () => {
@@ -52,16 +54,17 @@ export default function Pessoas() {
   if (!isManager) return <Screen><Notice tone="danger" text="Apenas o gestor gerencia acessos." /></Screen>;
   return (
     <Screen>
-      <Stack.Screen options={{ title: 'Gestores e treinadores' }} />
+      <Stack.Screen options={{ title: 'Pessoas com acesso' }} />
       <Card>
         <T variant="subtitle">Dar acesso</T>
         <Field label="E-mail Google da pessoa" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
         <View style={styles.wrap}>
-          {(['coach', 'manager'] as Role[]).map((r) => <Chip key={r} label={roleLabels[r]} selected={role === r} onPress={() => setRole(r)} />)}
+          {((isAdmin ? ['coach', 'manager', 'admin'] : ['coach', 'manager']) as Role[]).map((r) => <Chip key={r} label={roleLabels[r]} selected={role === r} onPress={() => setRole(r)} />)}
         </View>
         {error && <Notice tone="danger" text={error} />}
         <Button title="Adicionar" onPress={add} />
         <T variant="small">Quando a pessoa entrar no app com esse e-mail, o acesso é liberado automaticamente.</T>
+        {isAdmin && <T variant="small">Administrador: responde pela entidade, edita os dados do CNPJ e gerencia outros administradores. Cada entidade pode ter vários; o último não pode ser removido.</T>}
       </Card>
       {(list.data ?? []).map((r) => (
         <Card key={r.id} onPress={() => remove(r)}>

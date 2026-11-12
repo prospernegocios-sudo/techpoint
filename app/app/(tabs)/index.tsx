@@ -78,7 +78,9 @@ export default function Home() {
       <ScrollView contentContainerStyle={{ padding: 16, gap: 14, width: '100%', maxWidth: 1000, alignSelf: 'center' }} style={{ backgroundColor: colors.background }}>
         <T variant="title">Bem-vindo ao TechPoint</T>
         <Notice tone="info" text="Sua conta ainda não está ligada a nenhum clube. Peça ao gestor ou treinador para cadastrar o seu e-mail do Google." />
-        {me.isPlatformAdmin && <Button title="Criar organização" onPress={() => router.push('/cadastro/organizacao')} />}
+        <Button title="Cadastrar minha entidade" kind="accent" onPress={() => router.push('/entidade/nova')} />
+        <T variant="small">Clube, escola ou associação com CNPJ. Você será o administrador e poderá convidar outras pessoas.</T>
+        {me.isPlatformAdmin && <Button title="Criar organização (equipe TechPoint)" kind="outline" onPress={() => router.push('/cadastro/organizacao')} />}
         <Button title="Atualizar" kind="outline" onPress={me.refetch} />
       </ScrollView>
     );

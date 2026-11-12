@@ -10,6 +10,7 @@ export default function Gestao() {
   const { colors } = useTheme();
   const items: { title: string; desc: string; href: Href; show: boolean }[] = [
     { title: 'Novo treino', desc: 'Marcar um treino (ou um treino de teste agora)', href: '/cadastro/treino', show: isStaff },
+    { title: 'Projetos incentivados', desc: 'Plano aprovado, metas, beneficiários, indicadores e relatórios emitidos', href: '/projeto', show: isStaff },
     { title: 'Relatório de frequência', desc: 'PDF e planilha para prestação de contas de projetos e patrocinadores', href: '/cadastro/relatorio', show: isStaff },
     { title: 'Atletas', desc: 'Cadastrar atletas e colocar em equipes', href: '/cadastro/atletas', show: isStaff },
     { title: 'Locais de treino', desc: 'Cadastrar local com "Estou no local agora" e raio', href: '/cadastro/locais', show: isManager },

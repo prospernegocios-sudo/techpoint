@@ -167,14 +167,8 @@ function recordCell(r: ReportRecord | undefined, thumbs: Record<string, string>)
   return `<td class="rec"><div class="recwrap">${img}<div>${lines.join('<br/>')}</div></div></td>`;
 }
 
-export function toHtml(data: ReportData, rows: ReportRow[], thumbs: Record<string, string>): string {
-  const summary = summarize(rows);
-  const totalExpected = summary.reduce((a, s) => a + s.expected, 0);
-  const totalPresent = summary.reduce((a, s) => a + s.present, 0);
-  const avg = totalExpected ? Math.round((totalPresent / totalExpected) * 100) : 0;
-  const p = data.project;
-
-  const eventsHtml = data.events.map((ev) => {
+function renderEvents(events: ReportEvent[], rows: ReportRow[], thumbs: Record<string, string>): string {
+  return events.map((ev) => {
     const evRows = rows.filter((r) => r.event.id === ev.id);
     const present = evRows.filter((r) => r.present).length;
     return `
@@ -195,9 +189,9 @@ export function toHtml(data: ReportData, rows: ReportRow[], thumbs: Record<strin
       </table>
     </div>`;
   }).join('');
+}
 
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"/>
-<style>
+const CSS = `<style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, Roboto, Arial, sans-serif; font-size: 9.5px; color: #111; margin: 0; }
   h1 { font-size: 17px; margin: 0 0 4px; } h2 { font-size: 13px; margin: 16px 0 6px; } h3 { font-size: 11px; margin: 0 0 2px; }
@@ -216,7 +210,37 @@ export function toHtml(data: ReportData, rows: ReportRow[], thumbs: Record<strin
   .note { border-top: 1px solid #999; margin-top: 14px; padding-top: 6px; color: #333; }
   .sign { display: flex; gap: 40px; margin-top: 36px; } .sign div { flex: 1; border-top: 1px solid #111; padding-top: 3px; text-align: center; }
   .lgpd { margin-top: 10px; font-size: 8.5px; color: #555; }
-</style></head><body>
+</style>`;
+
+const FOOTER = `  <div class="note">
+    <b>Como os registros foram feitos.</b> Cada atleta registrou entrada e saída pelo próprio celular, no aplicativo TechPoint.
+    No momento do registro, o aplicativo leu a localização do GPS uma única vez e tirou uma foto na hora pela câmera (não é possível usar foto da galeria).
+    O servidor conferiu o horário do treino e a distância até o local, e gravou a <b>hora do servidor</b>, que não depende do relógio do celular.
+    Quando o celular estava sem internet, o registro mostra a <b>hora do aparelho</b> e, separada, a hora em que o servidor o recebeu (aceito em até 24 horas); nesses casos o servidor atesta apenas o recebimento.
+    A permanência registrada é o intervalo entre entrada e saída, e não comprova sozinha o tempo de prática.
+    Registros fora do raio permitido só contam como presença depois da aprovação do treinador. Registros "manuais" foram feitos pelo treinador, com motivo, para atletas sem celular.
+    O <b>código de verificação</b> de cada registro é uma impressão digital dos seus dados (hora, localização, foto e situação): qualquer alteração posterior muda o código.
+  </div>
+
+  <div class="sign">
+    <div>Treinador(a) responsável</div>
+    <div>Responsável pela entidade proponente</div>
+  </div>
+
+  <div class="lgpd">Documento com dados pessoais de atletas, incluindo menores de idade (Lei 13.709/2018 — LGPD). Uso restrito à prestação de contas do projeto indicado. Não divulgar.</div>
+`;
+
+export function toHtml(data: ReportData, rows: ReportRow[], thumbs: Record<string, string>): string {
+  const summary = summarize(rows);
+  const totalExpected = summary.reduce((a, s) => a + s.expected, 0);
+  const totalPresent = summary.reduce((a, s) => a + s.present, 0);
+  const avg = totalExpected ? Math.round((totalPresent / totalExpected) * 100) : 0;
+  const p = data.project;
+
+  const eventsHtml = renderEvents(data.events, rows, thumbs);
+
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"/>
+${CSS}</head><body>
   <div class="head">
     <h1>Relatório de frequência de atletas</h1>
     <table><tbody>
@@ -237,21 +261,121 @@ export function toHtml(data: ReportData, rows: ReportRow[], thumbs: Record<strin
   <h2>Registros por treino</h2>
   ${eventsHtml || '<p>Nenhum treino encerrado no período.</p>'}
 
-  <div class="note">
-    <b>Como os registros foram feitos.</b> Cada atleta registrou entrada e saída pelo próprio celular, no aplicativo TechPoint.
-    No momento do registro, o aplicativo leu a localização do GPS uma única vez e tirou uma foto na hora pela câmera (não é possível usar foto da galeria).
-    O servidor conferiu o horário do treino e a distância até o local, e gravou a <b>hora do servidor</b>, que não depende do relógio do celular.
-    Quando o celular estava sem internet, o registro mostra a <b>hora do aparelho</b> e, separada, a hora em que o servidor o recebeu (aceito em até 24 horas); nesses casos o servidor atesta apenas o recebimento.
-    A permanência registrada é o intervalo entre entrada e saída, e não comprova sozinha o tempo de prática.
-    Registros fora do raio permitido só contam como presença depois da aprovação do treinador. Registros "manuais" foram feitos pelo treinador, com motivo, para atletas sem celular.
-    O <b>código de verificação</b> de cada registro é uma impressão digital dos seus dados (hora, localização, foto e situação): qualquer alteração posterior muda o código.
+${FOOTER}
+</body></html>`;
+}
+
+// ---------------- Relatório emitido de projeto incentivado ----------------
+export type ProjectSnapshot = {
+  generated_at: string; generated_by: string | null;
+  period: { from: string; to: string };
+  issue?: { number: number; version: number; rectifies_version: number | null; rectification_reason: string | null };
+  project: {
+    name: string; process_number: string | null; sphere: string; agency: string | null; program: string | null; proponent: string | null;
+    starts_on: string; ends_on: string; free_of_charge: boolean; public_school_min_pct: number | null;
+  };
+  org: { id: string; name: string };
+  plan: { version: number; approved_on: string | null; description: string | null } | null;
+  indicators: {
+    activities_done: number; activities_canceled: number; beneficiaries_enrolled: number; unique_beneficiaries: number;
+    attendances: number; eligible_total: number; pending_total: number; avg_frequency_pct: number | null;
+    school_public: number; school_private: number; school_unknown: number; public_school_pct: number | null;
+  };
+  goals: { code: string | null; description: string; indicator: string | null; kind: string; unit: string | null; target: number | null; verifier: string | null; result: number | null; reached: boolean | null }[];
+  teams: { id: string; name: string; category: string | null }[];
+  events: ReportEvent[];
+  canceled_events: { id: string; team_id: string; starts_at: string }[];
+  beneficiaries: { athlete_id: string; full_name: string; starts_on: string; ends_on: string | null; end_reason: string | null; school_type: string; eligible: number; present: number; pending: number; frequency_pct: number | null }[];
+  eligible: { athlete_id: string; event_id: string }[];
+  records: ReportRecord[];
+};
+
+/** Linhas do relatório do projeto: só os pares beneficiário × atividade elegível calculados no servidor. */
+export function buildProjectRows(s: ProjectSnapshot): ReportRow[] {
+  const teamName = new Map(s.teams.map((t) => [t.id, t.name]));
+  const names = new Map(s.beneficiaries.map((b) => [b.athlete_id, b.full_name]));
+  const recs = new Map<string, ReportRecord>();
+  for (const r of s.records) recs.set(`${r.event_id}|${r.athlete_id}|${r.kind}`, r);
+  const evs = new Map(s.events.map((e) => [e.id, e]));
+  return s.eligible
+    .map((p) => {
+      const ev = evs.get(p.event_id)!;
+      const checkIn = recs.get(`${p.event_id}|${p.athlete_id}|check_in`);
+      return {
+        event: ev, teamName: teamName.get(ev.team_id) ?? '', athleteId: p.athlete_id, athleteName: names.get(p.athlete_id) ?? '',
+        checkIn, checkOut: recs.get(`${p.event_id}|${p.athlete_id}|check_out`),
+        present: checkIn?.status === 'valid', pending: checkIn?.status === 'pending',
+      };
+    })
+    .sort((a, b) => a.event.starts_at.localeCompare(b.event.starts_at) || a.athleteName.localeCompare(b.athleteName));
+}
+
+const fmtNum = (v: number | null | undefined) => (v == null ? '—' : String(Number(v)).replace('.', ','));
+const fmtPct = (v: number | null | undefined) => (v == null ? 'não aplicável' : `${fmtNum(v)}%`);
+const goalKindText: Record<string, string> = {
+  unique_beneficiaries: 'Beneficiários atendidos', attendances: 'Atendimentos', avg_frequency: 'Frequência média',
+  activities_done: 'Atividades realizadas', manual: 'Lançado pelo gestor',
+};
+const schoolText: Record<string, string> = { publica: 'Pública', privada: 'Particular', nao_informado: 'Não informada (pendência)' };
+const endText: Record<string, string> = { abandono: 'abandono', lesao: 'lesão', transferencia: 'transferência', termino: 'término', outro: 'outro' };
+
+export function toProjectHtml(s: ProjectSnapshot, sha256: string, thumbs: Record<string, string>): string {
+  const rows = buildProjectRows(s);
+  const p = s.project, i = s.indicators;
+  const issue = s.issue;
+  const title = issue
+    ? `Relatório de execução nº ${issue.number}${issue.version > 1 ? ` — retificação (versão ${issue.version})` : ''}`
+    : 'Relatório de execução (prévia, não emitido)';
+  const quota = p.public_school_min_pct != null
+    ? `<tr><td>Beneficiários de escola pública</td><td>${i.school_public} de ${i.beneficiaries_enrolled}${i.school_unknown ? ` (${i.school_unknown} sem escola informada)` : ''}</td><td><b>${fmtPct(i.public_school_pct)}</b> — mínimo do projeto: ${p.public_school_min_pct}%</td></tr>`
+    : '';
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"/>${CSS}</head><body>
+  <div class="head">
+    <h1>${esc(title)}</h1>
+    ${issue && issue.version > 1 ? `<p><b>Retifica a versão ${issue.rectifies_version} deste relatório.</b> Motivo: ${esc(issue.rectification_reason)}</p>` : ''}
+    <table><tbody>
+      <tr><td><b>Projeto:</b> ${esc(p.name)}</td><td><b>Processo:</b> ${esc(p.process_number) || '—'}</td></tr>
+      <tr><td><b>Entidade proponente:</b> ${esc(p.proponent || s.org.name)}</td><td><b>Esfera / órgão / programa:</b> ${esc([p.sphere, p.agency, p.program].filter(Boolean).join(' · '))}</td></tr>
+      <tr><td><b>Vigência do projeto:</b> ${isoDayToBr(p.starts_on)} a ${isoDayToBr(p.ends_on)}</td><td><b>Período deste relatório:</b> ${isoDayToBr(s.period.from)} a ${isoDayToBr(s.period.to)}</td></tr>
+      <tr><td><b>Plano de trabalho:</b> ${s.plan ? `versão ${s.plan.version}${s.plan.approved_on ? `, aprovada em ${isoDayToBr(s.plan.approved_on)}` : ''}` : 'não cadastrado'}</td><td><b>Núcleos / equipes:</b> ${s.teams.map((t) => esc(t.name)).join(', ')}</td></tr>
+      <tr><td><b>Emitido em:</b> ${brDateTime(s.generated_at)} (horário de Brasília) por ${esc(s.generated_by)}</td><td><b>Impressão digital (SHA-256):</b> <span class="code">${sha256.slice(0, 16)}…${sha256.slice(-8)}</span></td></tr>
+    </tbody></table>
   </div>
 
-  <div class="sign">
-    <div>Treinador(a) responsável</div>
-    <div>Responsável pela entidade proponente</div>
-  </div>
+  <h2>Metas do plano</h2>
+  <table>
+    <thead><tr><th>Meta</th><th>Indicador</th><th>Apuração</th><th>Alvo</th><th>Resultado</th><th>Situação</th><th>Verificador</th></tr></thead>
+    <tbody>${s.goals.map((g) => `<tr><td><b>${esc(g.code)}</b> ${esc(g.description)}</td><td>${esc(g.indicator)}</td><td>${goalKindText[g.kind] ?? g.kind}</td>
+      <td>${fmtNum(g.target)} ${esc(g.unit)}</td><td><b>${g.kind === 'avg_frequency' ? fmtPct(g.result) : fmtNum(g.result)}</b> ${g.kind === 'avg_frequency' ? '' : esc(g.unit)}</td>
+      <td class="${g.reached === true ? 'ok' : g.reached === false ? 'warn' : ''}">${g.reached === true ? 'Alcançada' : g.reached === false ? 'Abaixo do alvo' : '—'}</td><td>${esc(g.verifier)}</td></tr>`).join('') || '<tr><td colspan="7">Nenhuma meta cadastrada.</td></tr>'}</tbody>
+  </table>
 
-  <div class="lgpd">Documento com dados pessoais de atletas, incluindo menores de idade (Lei 13.709/2018 — LGPD). Uso restrito à prestação de contas do projeto indicado. Não divulgar.</div>
+  <h2>Indicadores de execução</h2>
+  <table>
+    <thead><tr><th>Indicador</th><th>Conta</th><th>Resultado</th></tr></thead>
+    <tbody>
+      <tr><td>Atividades realizadas</td><td>treinos encerrados das equipes do projeto no período (${i.activities_canceled} cancelado(s), fora da conta)</td><td><b>${i.activities_done}</b></td></tr>
+      <tr><td>Beneficiários vinculados no período</td><td>pessoas com vínculo ativo em algum dia do período</td><td><b>${i.beneficiaries_enrolled}</b></td></tr>
+      <tr><td>Beneficiários atendidos (pessoas únicas)</td><td>pessoas com ao menos uma presença válida</td><td><b>${i.unique_beneficiaries}</b></td></tr>
+      <tr><td>Atendimentos</td><td>presenças válidas (cada presença conta uma vez)</td><td><b>${i.attendances}</b></td></tr>
+      <tr><td>Frequência média</td><td>${i.attendances} presenças ÷ ${i.eligible_total} atividades elegíveis${i.pending_total ? ` (${i.pending_total} pendente(s) de aprovação, fora da conta)` : ''}</td><td><b>${fmtPct(i.avg_frequency_pct)}</b></td></tr>
+      ${quota}
+    </tbody>
+  </table>
+
+  <h2>Beneficiários</h2>
+  <table>
+    <thead><tr><th>Beneficiário</th><th>Vínculo</th><th>Escola</th><th>Presenças</th><th>Atividades elegíveis</th><th>Pendentes</th><th>Frequência</th></tr></thead>
+    <tbody>${s.beneficiaries.map((b) => `<tr><td>${esc(b.full_name)}</td>
+      <td>desde ${isoDayToBr(b.starts_on)}${b.ends_on ? ` até ${isoDayToBr(b.ends_on)} (${endText[b.end_reason ?? ''] ?? ''})` : ''}</td>
+      <td>${schoolText[b.school_type] ?? ''}</td><td>${b.present}</td><td>${b.eligible}</td><td>${b.pending || ''}</td><td><b>${fmtPct(b.frequency_pct)}</b></td></tr>`).join('')}</tbody>
+  </table>
+
+  <h2>Registros por atividade</h2>
+  ${renderEvents(s.events, rows, thumbs) || '<p>Nenhuma atividade encerrada no período.</p>'}
+  ${s.canceled_events.length ? `<p class="muted">Atividades canceladas no período: ${s.canceled_events.map((e) => brDateTime(e.starts_at)).join(', ')}.</p>` : ''}
+
+  ${FOOTER}
+  <div class="lgpd">Este relatório é uma cópia congelada dos dados no momento da emissão. Correções geram uma retificação numerada, sem apagar a versão anterior.</div>
 </body></html>`;
 }

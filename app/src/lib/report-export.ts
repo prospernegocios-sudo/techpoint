@@ -3,7 +3,7 @@ import { File, Paths } from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { buildRows, toCsv, toHtml, type ReportData } from './report';
+import { buildProjectRows, buildRows, toCsv, toHtml, toProjectHtml, type ProjectSnapshot, type ReportData } from './report';
 import { PHOTO_BUCKET, supabase } from './supabase';
 
 export type ReportParams = {
@@ -83,4 +83,18 @@ export async function exportCsv(data: ReportData) {
 async function share(uri: string, mimeType: string, UTI: string) {
   if (!(await Sharing.isAvailableAsync())) throw new Error('Compartilhamento indisponível neste celular.');
   await Sharing.shareAsync(uri, { mimeType, UTI, dialogTitle: 'Enviar relatório' });
+}
+
+/** PDF de um relatório de projeto já emitido (dados congelados no servidor). */
+export async function exportProjectPdf(snap: ProjectSnapshot, sha256: string, onProgress: (msg: string) => void) {
+  const rows = buildProjectRows(snap);
+  const paths = [...new Set(rows.flatMap((r) => [r.checkIn?.photo_path, r.checkOut?.photo_path]).filter((x): x is string => Boolean(x)))];
+  const thumbs = await loadThumbs(paths, (d, t) => onProgress(`Preparando fotos ${d} de ${t}...`));
+  onProgress('Montando o PDF...');
+  const { uri } = await Print.printToFileAsync({ html: toProjectHtml(snap, sha256, thumbs), width: 842, height: 595, margins: { left: 24, right: 24, top: 24, bottom: 24 } });
+  const n = snap.issue ? `relatorio-${snap.issue.number}${snap.issue.version > 1 ? `-v${snap.issue.version}` : ''}` : 'previa';
+  const target = new File(Paths.cache, `${n}_${snap.project.name.replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 40)}.pdf`);
+  try { if (target.exists) target.delete(); } catch { /* ignora */ }
+  new File(uri).move(target);
+  await share(target.uri, 'application/pdf', 'com.adobe.pdf');
 }

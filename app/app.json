@@ -75,6 +75,14 @@
       "eas": {
         "projectId": "c82980f4-0d5a-472e-bcba-142e21057156"
       }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "TechPoint",
+      "themeColor": "#0B3D91",
+      "lang": "pt-BR"
     }
   }
 }

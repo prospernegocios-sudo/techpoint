@@ -191,6 +191,8 @@ const scenario = [
   tryRun('report_mix_teams', report(ORG_B, [TEAM_A1, TEAM_B])),
   `reset role;`,
   keep('report_audit', `select count(*)::int n from public.audit_log where org_id = '${ORG_A}' and action = 'report_generated'`),
+  `insert into public.attendance_records (org_id, event_id, athlete_id, kind, source, status, device_id) values ('${ORG_A}','${EV.later}','${ATH.a}','check_in','app','valid','web:abc');`,
+  keep('web_flag', `select flags from public.attendance_records where event_id = '${EV.later}' and device_id = 'web:abc'`),
   keep('report_code_check', `select app_private.attendance_code(r) as code from public.attendance_records r where athlete_id = '${ATH.a}' and event_id = '${EV.past2h}'`),
   `select name, value from results;`,
 ].join('\n');
@@ -333,4 +335,7 @@ test('relatório: atleta e gestor de outro clube não geram; times de outro club
 });
 test('cada relatório gerado fica na auditoria', () => {
   assert.equal(R.report_audit.n, 1);
+});
+test('registro feito pelo navegador fica marcado', () => {
+  assert.deepEqual(R.web_flag.flags, ['web_browser']);
 });

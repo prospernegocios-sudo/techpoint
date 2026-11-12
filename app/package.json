@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo/metro-runtime": "~58.0.17",
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@supabase/supabase-js": "^2.119.0",
@@ -26,10 +27,12 @@
     "expo-system-ui": "~58.0.7",
     "expo-web-browser": "~58.0.8",
     "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-native": "0.88.1",
     "react-native-safe-area-context": "~5.11.1",
     "react-native-screens": "~4.30.1",
     "react-native-url-polyfill": "^4.0.0",
+    "react-native-web": "^0.21.4",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -38,7 +41,6 @@
     "@types/react": "~19.3.0",
     "jest": "^30.5.2",
     "jest-expo": "~58.0.14",
-    "react-dom": "^19.3.0",
     "react-test-renderer": "^19.3.0",
     "typescript": "~6.0.3"
   },
@@ -46,7 +48,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "web": "expo start --web",
+    "web:deploy": "rm -rf dist && expo export --platform web && EAS_NO_VCS=1 eas-cli deploy --prod"
   },
   "private": true,
   "jest": {

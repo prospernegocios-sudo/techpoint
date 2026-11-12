@@ -2,6 +2,7 @@
 // (leitura: gestor e treinador; escrita: gestor; relatórios: só pela função de emissão).
 import { useQuery } from '@tanstack/react-query';
 import { File } from 'expo-file-system';
+import { Platform } from 'react-native';
 import { supabase } from './supabase';
 
 export const PROJECT_FILES_BUCKET = 'project-files';
@@ -119,9 +120,10 @@ export async function loadIssuedReport(id: string) {
 }
 
 /** Envia o PDF do plano aprovado para a pasta do projeto. */
-export async function uploadPlanFile(orgId: string, projectId: string, version: number, uri: string): Promise<string> {
+export async function uploadPlanFile(orgId: string, projectId: string, version: number, asset: { uri: string; file?: Blob }): Promise<string> {
   const path = `${orgId}/${projectId}/plano-v${version}-${Date.now()}.pdf`;
-  const bytes = await new File(uri).arrayBuffer();
+  // No navegador o seletor entrega o arquivo pronto; no celular lemos pelo endereço local.
+  const bytes = Platform.OS === 'web' && asset.file ? asset.file : await new File(asset.uri).arrayBuffer();
   const { error } = await supabase.storage.from(PROJECT_FILES_BUCKET).upload(path, bytes, { contentType: 'application/pdf', upsert: false });
   if (error) throw error;
   return path;

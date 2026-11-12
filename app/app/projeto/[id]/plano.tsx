@@ -19,7 +19,7 @@ export default function Plano() {
   const qc = useQueryClient();
   const [approved, setApproved] = useState('');
   const [description, setDescription] = useState('');
-  const [file, setFile] = useState<{ uri: string; name: string } | null>(null);
+  const [file, setFile] = useState<{ uri: string; name: string; file?: Blob } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +32,7 @@ export default function Plano() {
     const r = await DocumentPicker.getDocumentAsync({ type: 'application/pdf', copyToCacheDirectory: true });
     if (!r.canceled && r.assets[0]) {
       if ((r.assets[0].size ?? 0) > 20 * 1024 * 1024) return setError('O PDF pode ter no máximo 20 MB.');
-      setFile({ uri: r.assets[0].uri, name: r.assets[0].name });
+      setFile({ uri: r.assets[0].uri, name: r.assets[0].name, file: r.assets[0].file });
     }
   };
 
@@ -42,7 +42,7 @@ export default function Plano() {
     if (approved && !d) return setError('Confira a data de aprovação (dd/mm/aaaa).');
     setBusy(true);
     try {
-      const path = file ? await uploadPlanFile(p.org_id, p.id, next, file.uri) : null;
+      const path = file ? await uploadPlanFile(p.org_id, p.id, next, file) : null;
       const { error: e } = await supabase.from('project_plan_versions').insert({
         org_id: p.org_id, project_id: p.id, version: next, approved_on: d ? toIsoDate(d) : null,
         description: description.trim() || null, file_path: path,

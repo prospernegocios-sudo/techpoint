@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, Linking, View } from 'react-native';
+import { Image, Linking, Platform, View } from 'react-native';
 import { Button, Card, Field, Loading, Notice, Screen, T } from '@/components/ui';
 import {
   getDeviceId, newPendingRecord, preparePhoto, readLocationOnce, submitRecord,
@@ -126,6 +126,9 @@ export default function CheckinScreen() {
           <T variant="subtitle">{ev.teams?.name}</T>
           <T variant="muted">{venue?.name} · {formatTime(ev.starts_at)}–{formatTime(ev.ends_at)}</T>
         </Card>
+      )}
+      {Platform.OS === 'web' && (
+        <Notice text="Você está no site. O registro feito pelo navegador fica marcado para o treinador conferir. Para o registro completo, use o app no celular." />
       )}
       {!me.athlete && <Notice tone="danger" text="Seu cadastro de atleta não está ligado a esta conta. Fale com o gestor." />}
 

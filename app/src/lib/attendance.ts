@@ -44,6 +44,15 @@ let cachedDeviceId: string | null = null;
 export async function getDeviceId(): Promise<string> {
   if (cachedDeviceId) return cachedDeviceId;
   let id: string | null = null;
+  if (Platform.OS === 'web') {
+    // Navegador: identificador aleatório guardado no site (bem mais fraco que o do aparelho).
+    try {
+      id = globalThis.localStorage?.getItem('techpoint.device') ?? null;
+      if (!id) { id = Crypto.randomUUID(); globalThis.localStorage?.setItem('techpoint.device', id); }
+    } catch { id = null; }
+    cachedDeviceId = `web:${id ?? 'desconhecido'}`;
+    return cachedDeviceId;
+  }
   try {
     id = Platform.OS === 'android' ? Application.getAndroidId() : await Application.getIosIdForVendorAsync();
   } catch {

@@ -1,10 +1,10 @@
 // Conexão com o Supabase. A sessão de login fica guardada de forma criptografada
 // no aparelho (SecureStore), dividida em pedaços porque o SecureStore aceita
-// valores pequenos.
+// valores pequenos. No navegador, fica no armazenamento local do site.
 import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 const envUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const envKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -51,7 +51,8 @@ export const chunkedSecureStore = {
 
 export const supabase = createClient(url, anonKey, {
   auth: {
-    storage: chunkedSecureStore,
+    // No navegador não há cofre do aparelho: a sessão fica no armazenamento do site.
+    storage: Platform.OS === 'web' ? undefined : chunkedSecureStore,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,

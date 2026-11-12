@@ -5,7 +5,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { supabase } from './supabase';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -52,11 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
+      const web = Platform.OS === 'web'; // no navegador não há biometria do aparelho
       const [{ data }, hasHw, enrolled, pref] = await Promise.all([
         supabase.auth.getSession(),
-        LocalAuthentication.hasHardwareAsync().catch(() => false),
-        LocalAuthentication.isEnrolledAsync().catch(() => false),
-        SecureStore.getItemAsync(BIOMETRIC_KEY).catch(() => null),
+        web ? false : LocalAuthentication.hasHardwareAsync().catch(() => false),
+        web ? false : LocalAuthentication.isEnrolledAsync().catch(() => false),
+        web ? null : SecureStore.getItemAsync(BIOMETRIC_KEY).catch(() => null),
       ]);
       const available = hasHw && enrolled;
       const enabled = pref !== 'off';
@@ -96,6 +97,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     try {
+      if (Platform.OS === 'web') {
+        // Navegador: vai para o Google e volta para /auth-callback deste mesmo site.
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: `${window.location.origin}/auth-callback`, queryParams: { prompt: 'select_account' } },
+        });
+        if (error) throw error;
+        return { ok: true };
+      }
       const redirectTo = Linking.createURL('auth-callback');
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

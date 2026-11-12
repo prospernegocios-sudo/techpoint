@@ -41,7 +41,7 @@ export default function ProjetoPainel() {
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ padding: 16, gap: 14 }}
+      contentContainerStyle={{ padding: 16, gap: 14, width: '100%', maxWidth: 1000, alignSelf: 'center' }}
       refreshControl={<RefreshControl refreshing={ind.isRefetching} onRefresh={() => { project.refetch(); ind.refetch(); }} />}
     >
       <Stack.Screen options={{ title: 'Projeto' }} />

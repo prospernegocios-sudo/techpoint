@@ -148,7 +148,8 @@ export function Loading({ text = 'Carregando...' }: { text?: string }) {
 }
 
 export const styles = StyleSheet.create({
-  screenInner: { flex: 1, padding: 16, gap: 14 },
+  // No computador o conteúdo fica centralizado com largura confortável de leitura.
+  screenInner: { flex: 1, padding: 16, gap: 14, width: '100%', maxWidth: 1000, alignSelf: 'center' },
   button: { minHeight: 52, borderRadius: 14, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
   buttonBig: { minHeight: 76, borderRadius: 20 },
   buttonText: { fontSize: 17, fontWeight: '700' },

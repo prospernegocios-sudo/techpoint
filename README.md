@@ -64,6 +64,16 @@ cd app && npx eas-cli build --profile preview --platform android
 # O endereço e a chave pública do Supabase vêm das variáveis do EAS (npx eas-cli env:list --environment preview).
 ```
 
+## Site (plataforma web)
+
+O mesmo código gera o app e o site, usando o mesmo banco de dados. Site de teste: **https://techpoint.expo.app** (EAS Hosting, plano gratuito). No computador o menu fica na lateral; no celular, embaixo.
+
+```bash
+cd app && npm run web:deploy
+```
+
+Check-in pelo navegador funciona, mas fica marcado como "Feito pelo navegador" (o navegador não detecta GPS falso). O domínio próprio será contratado antes do lançamento.
+
 ## Como testar
 
 ```bash

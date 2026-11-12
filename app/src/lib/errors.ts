@@ -63,4 +63,5 @@ export const flagLabels: Record<string, string> = {
   low_accuracy: 'GPS impreciso',
   offline_sync: 'Enviado depois (sem internet)',
   manual: 'Registro manual',
+  web_browser: 'Feito pelo navegador',
 };

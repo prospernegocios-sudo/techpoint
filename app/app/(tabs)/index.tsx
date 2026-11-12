@@ -75,7 +75,7 @@ export default function Home() {
 
   if (!me.org) {
     return (
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }} style={{ backgroundColor: colors.background }}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 14, width: '100%', maxWidth: 1000, alignSelf: 'center' }} style={{ backgroundColor: colors.background }}>
         <T variant="title">Bem-vindo ao TechPoint</T>
         <Notice tone="info" text="Sua conta ainda não está ligada a nenhum clube. Peça ao gestor ou treinador para cadastrar o seu e-mail do Google." />
         {me.isPlatformAdmin && <Button title="Criar organização" onPress={() => router.push('/cadastro/organizacao')} />}
@@ -88,7 +88,7 @@ export default function Home() {
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ padding: 16, gap: 14 }}
+      contentContainerStyle={{ padding: 16, gap: 14, width: '100%', maxWidth: 1000, alignSelf: 'center' }}
       refreshControl={<RefreshControl refreshing={events.isRefetching} onRefresh={() => { events.refetch(); mine.refetch(); me.refetch(); refreshQueue(); }} />}
     >
       <View style={{ gap: 4 }}>

@@ -1,7 +1,7 @@
 // Início: atleta vê seus treinos e o botão de check-in/check-out;
 // gestor/treinador vê os treinos e abre a lista de presença.
 import { useFocusEffect, router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { Fragment, useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { Badge, Button, Card, Chip, Loading, Notice, T, styles } from '@/components/ui';
 import { getQueue, syncQueue } from '@/lib/attendance';
@@ -9,6 +9,18 @@ import { formatDay, formatTime } from '@/lib/format';
 import { roleLabels, useMe } from '@/lib/me';
 import { useEvents, useMyAttendance, type AttendanceRow, type EventRow } from '@/lib/queries';
 import { useTheme } from '@/lib/theme';
+
+function isToday(iso: string) {
+  return new Date(iso).toDateString() === new Date().toDateString();
+}
+
+/** Situação do treino agora: ainda vai começar, acontecendo ou encerrado. */
+function eventPhase(ev: EventRow): 'upcoming' | 'live' | 'ended' {
+  const now = Date.now();
+  if (now < new Date(ev.starts_at).getTime()) return 'upcoming';
+  if (now <= new Date(ev.ends_at).getTime()) return 'live';
+  return 'ended';
+}
 
 type Action = { kind: 'check_in' | 'check_out'; label: string } | null;
 
@@ -101,7 +113,6 @@ export default function Home() {
       {queueInfo.pending > 0 && <Notice tone="warning" text={`${queueInfo.pending} registro(s) guardado(s) no celular. Vamos enviar assim que a internet voltar.`} />}
       {queueInfo.msg && <Notice tone="info" text={queueInfo.msg} />}
 
-      <T variant="subtitle">{me.role === 'athlete' ? 'Meus treinos' : 'Próximos treinos'}</T>
       {events.isLoading && <Loading />}
       {events.error && <Notice tone="danger" text="Não foi possível carregar a agenda. Verifique a internet." />}
       {!events.isLoading && list.length === 0 && <T variant="muted">Nenhum treino nos próximos 7 dias.</T>}
@@ -110,12 +121,19 @@ export default function Home() {
         <Notice text="Seu cadastro de atleta ainda não está ligado a esta conta. Peça ao gestor para cadastrar seu e-mail do Google no seu cadastro de atleta." />
       )}
 
-      {list.map((ev) => {
+      {list.map((ev, i) => {
+        const today = isToday(ev.starts_at);
+        const prevToday = i > 0 && isToday(list[i - 1].starts_at);
+        const sectionTitle = i === 0 ? (today ? 'Hoje' : 'Próximos dias') : prevToday && !today ? 'Próximos dias' : null;
+        const phase = eventPhase(ev);
+        const title = sectionTitle ? <T variant="subtitle" style={{ marginTop: i === 0 ? 0 : 8 }}>{sectionTitle}</T> : null;
         const header = (
           <>
             <View style={[styles.row, { justifyContent: 'space-between' }]}>
-              <T variant="subtitle">{formatDay(ev.starts_at)} · {formatTime(ev.starts_at)}–{formatTime(ev.ends_at)}</T>
-              <Badge label={ev.type === 'match' ? 'Jogo' : 'Treino'} tone="primary" />
+              <T variant="subtitle" style={{ flexShrink: 1 }}>{today ? '' : `${formatDay(ev.starts_at)} · `}{formatTime(ev.starts_at)}–{formatTime(ev.ends_at)}</T>
+              {phase === 'live' ? <Badge label="Agora" tone="success" />
+                : phase === 'ended' ? <Badge label="Encerrado" tone="muted" />
+                : <Badge label={ev.type === 'match' ? 'Jogo' : 'Treino'} tone="primary" />}
             </View>
             <T variant="muted">{ev.teams?.name} · {ev.venues?.name}</T>
           </>
@@ -123,7 +141,9 @@ export default function Home() {
         if (me.role === 'athlete') {
           const { action, status } = nextAction(ev, mine.data ?? []);
           return (
-            <Card key={ev.id}>
+            <Fragment key={ev.id}>
+            {title}
+            <Card>
               {header}
               <T variant="body" style={{ fontWeight: '600' }}>{status}</T>
               {action && me.athlete && (
@@ -135,13 +155,17 @@ export default function Home() {
                 />
               )}
             </Card>
+            </Fragment>
           );
         }
         return (
-          <Card key={ev.id} onPress={() => router.push({ pathname: '/evento/[id]', params: { id: ev.id } })}>
+          <Fragment key={ev.id}>
+          {title}
+          <Card onPress={() => router.push({ pathname: '/evento/[id]', params: { id: ev.id } })}>
             {header}
             <T variant="small" color={colors.primary}>Toque para ver a lista de presença ›</T>
           </Card>
+          </Fragment>
         );
       })}
     </ScrollView>

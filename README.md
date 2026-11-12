@@ -14,7 +14,7 @@ Clube piloto: **DF Vôlei**.
 ## Status
 
 - **Fase 0 — Planejamento:** concluída.
-- **Fase 1 — Base e check-in:** em andamento (banco, regras de acesso, check-in/check-out, lista de presença e cadastros prontos; falta o primeiro APK de teste).
+- **Fase 1 — Base e check-in:** pronta para teste no celular (APK de teste gerado em 12/11/2026 pelo EAS, perfil `preview`). Aguardando validação do dono do produto.
 
 ## Documentos
 

@@ -92,9 +92,15 @@ export function statusLabel(r?: ReportRecord): string {
   return 'Válido';
 }
 
+/**
+ * Hora em que o registro aconteceu. Online: hora do servidor. Sem internet: hora do aparelho
+ * (o servidor só atesta quando recebeu; as duas aparecem separadas no relatório).
+ */
+export const eventTime = (r: ReportRecord) => (r.synced_offline && r.client_at ? r.client_at : r.server_at);
+
 export function stayMinutes(row: ReportRow): number | null {
   if (!row.checkIn || !row.checkOut) return null;
-  return Math.round((new Date(row.checkOut.server_at).getTime() - new Date(row.checkIn.server_at).getTime()) / 60000);
+  return Math.round((new Date(eventTime(row.checkOut)).getTime() - new Date(eventTime(row.checkIn)).getTime()) / 60000);
 }
 
 const coord = (n: number | null) => (n == null ? '' : n.toFixed(6));
@@ -109,15 +115,16 @@ const csvCell = (v: string | number | null | undefined) => {
 export function toCsv(data: ReportData, rows: ReportRow[]): string {
   const head = [
     'Data', 'Início do treino', 'Fim do treino', 'Equipe', 'Local', 'Atleta', 'Presença',
-    'Entrada (hora do servidor)', 'Entrada - situação', 'Entrada - distância do local (m)', 'Entrada - latitude', 'Entrada - longitude',
+    'Entrada (hora do servidor)', 'Entrada - hora do aparelho (registro sem internet)', 'Entrada - situação', 'Entrada - distância do local (m)', 'Entrada - latitude', 'Entrada - longitude',
     'Entrada - precisão do GPS (m)', 'Entrada - código de verificação',
-    'Saída (hora do servidor)', 'Saída - situação', 'Saída - distância do local (m)', 'Saída - latitude', 'Saída - longitude',
-    'Saída - código de verificação', 'Permanência (min)', 'Observações',
+    'Saída (hora do servidor)', 'Saída - hora do aparelho (registro sem internet)', 'Saída - situação', 'Saída - distância do local (m)', 'Saída - latitude', 'Saída - longitude',
+    'Saída - código de verificação', 'Permanência registrada (min)', 'Observações',
   ];
   const lines = rows.map((r) => {
     const ci = r.checkIn, co = r.checkOut;
     const notes = [
-      ci?.synced_offline ? 'entrada enviada depois (sem internet no momento)' : '',
+      ci?.synced_offline ? 'entrada feita sem internet: hora do aparelho; o servidor atesta só a hora de recebimento' : '',
+      co?.synced_offline ? 'saída feita sem internet: hora do aparelho; o servidor atesta só a hora de recebimento' : '',
       ci?.justification ? `justificativa: ${ci.justification}` : '',
       ci?.manual_reason ? `motivo manual: ${ci.manual_reason}` : '',
       co?.manual_reason ? `saída manual: ${co.manual_reason}` : '',
@@ -125,9 +132,9 @@ export function toCsv(data: ReportData, rows: ReportRow[]): string {
     return [
       brDate(r.event.starts_at), brTime(r.event.starts_at), brTime(r.event.ends_at), r.teamName, r.event.venue.name, r.athleteName,
       r.present ? 'Presente' : r.pending ? 'Pendente' : 'Ausente',
-      ci ? brDateTime(ci.server_at) : '', statusLabel(ci), meters(ci?.distance_m ?? null), coord(ci?.latitude ?? null), coord(ci?.longitude ?? null),
+      ci ? brDateTime(ci.server_at) : '', ci?.synced_offline && ci.client_at ? brDateTime(ci.client_at) : '', statusLabel(ci), meters(ci?.distance_m ?? null), coord(ci?.latitude ?? null), coord(ci?.longitude ?? null),
       meters(ci?.accuracy_m ?? null), ci?.code ?? '',
-      co ? brDateTime(co.server_at) : '', co ? statusLabel(co) : '', meters(co?.distance_m ?? null), coord(co?.latitude ?? null), coord(co?.longitude ?? null),
+      co ? brDateTime(co.server_at) : '', co?.synced_offline && co.client_at ? brDateTime(co.client_at) : '', co ? statusLabel(co) : '', meters(co?.distance_m ?? null), coord(co?.latitude ?? null), coord(co?.longitude ?? null),
       co?.code ?? '', stayMinutes(r) ?? '', notes,
     ].map(csvCell).join(';');
   });
@@ -146,10 +153,12 @@ function recordCell(r: ReportRecord | undefined, thumbs: Record<string, string>)
     ? `<img src="${thumbs[r.photo_path]}" alt="foto"/>`
     : r.source === 'manual' ? '<div class="nophoto">sem foto<br/>(manual)</div>' : '<div class="nophoto">foto<br/>indisponível</div>';
   const lines = [
-    `<b>${brTime(r.server_at)}</b> · ${esc(statusLabel(r))}`,
+    r.synced_offline && r.client_at
+      ? `<b>${brTime(r.client_at)}</b> (hora do aparelho) · ${esc(statusLabel(r))}`
+      : `<b>${brTime(r.server_at)}</b> · ${esc(statusLabel(r))}`,
     r.distance_m != null ? `${Math.round(r.distance_m)} m do local` : '',
     r.latitude != null ? `GPS ${coord(r.latitude)}, ${coord(r.longitude)}${r.accuracy_m != null ? ` (±${Math.round(r.accuracy_m)} m)` : ''}` : '',
-    r.synced_offline ? 'Enviado depois (sem internet)' : '',
+    r.synced_offline ? `Sem internet no momento. Recebido pelo servidor em ${brDateTime(r.server_at)}` : '',
     r.justification ? `Justificativa: ${esc(r.justification)}` : '',
     r.manual_reason ? `Motivo: ${esc(r.manual_reason)}${r.recorded_by_name ? ` — ${esc(r.recorded_by_name)}` : ''}` : '',
     r.reviewed_by_name ? `Aprovado por ${esc(r.reviewed_by_name)}` : '',
@@ -173,7 +182,7 @@ export function toHtml(data: ReportData, rows: ReportRow[], thumbs: Record<strin
       <h3>${brDate(ev.starts_at)} · ${brTime(ev.starts_at)}–${brTime(ev.ends_at)} · ${esc(evRows[0]?.teamName ?? '')} · ${present}/${evRows.length} presentes</h3>
       <div class="muted">Local: ${esc(ev.venue.name)} — ${coord(ev.venue.latitude)}, ${coord(ev.venue.longitude)} — raio permitido ${ev.venue.radius_m} m</div>
       <table>
-        <thead><tr><th style="width:18%">Atleta</th><th style="width:8%">Presença</th><th>Entrada</th><th>Saída</th><th style="width:7%">Permanência</th></tr></thead>
+        <thead><tr><th style="width:18%">Atleta</th><th style="width:8%">Presença</th><th>Entrada</th><th>Saída</th><th style="width:8%">Permanência registrada</th></tr></thead>
         <tbody>
         ${evRows.map((r) => `<tr>
           <td>${esc(r.athleteName)}</td>
@@ -232,6 +241,8 @@ export function toHtml(data: ReportData, rows: ReportRow[], thumbs: Record<strin
     <b>Como os registros foram feitos.</b> Cada atleta registrou entrada e saída pelo próprio celular, no aplicativo TechPoint.
     No momento do registro, o aplicativo leu a localização do GPS uma única vez e tirou uma foto na hora pela câmera (não é possível usar foto da galeria).
     O servidor conferiu o horário do treino e a distância até o local, e gravou a <b>hora do servidor</b>, que não depende do relógio do celular.
+    Quando o celular estava sem internet, o registro mostra a <b>hora do aparelho</b> e, separada, a hora em que o servidor o recebeu (aceito em até 24 horas); nesses casos o servidor atesta apenas o recebimento.
+    A permanência registrada é o intervalo entre entrada e saída, e não comprova sozinha o tempo de prática.
     Registros fora do raio permitido só contam como presença depois da aprovação do treinador. Registros "manuais" foram feitos pelo treinador, com motivo, para atletas sem celular.
     O <b>código de verificação</b> de cada registro é uma impressão digital dos seus dados (hora, localização, foto e situação): qualquer alteração posterior muda o código.
   </div>

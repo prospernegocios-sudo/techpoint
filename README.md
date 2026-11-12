@@ -19,6 +19,7 @@ Clube piloto: **DF Vôlei**.
 ## Documentos
 
 - [Concorrentes e cronograma](docs/roadmap.md)
+- [Lastro Social e métricas para projetos incentivados](docs/lastro-e-metricas-regulatorias.md) (requisitos R01–R20)
 
 - [DECISOES.md](DECISOES.md) — decisões tomadas e o porquê
 - [docs/modelo-de-dados.md](docs/modelo-de-dados.md) — tabelas do banco

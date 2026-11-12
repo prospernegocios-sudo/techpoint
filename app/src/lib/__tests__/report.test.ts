@@ -63,6 +63,16 @@ describe('relatório de frequência', () => {
     expect(line).toContain(';89;'); // 17:02 → 18:31
   });
 
+  it('registro sem internet mostra a hora do aparelho separada da hora do servidor', () => {
+    const off: ReportData = { ...data, records: [rec({ id: 'x', synced_offline: true, client_at: '2026-11-10T20:01:00Z', server_at: '2026-11-11T09:00:00Z' })] };
+    const r = buildRows(off);
+    const html = toHtml(off, r, {});
+    expect(html).toContain('<b>17:01</b> (hora do aparelho)');
+    expect(html).toContain('Recebido pelo servidor em 11/11/2026 06:00');
+    const line = toCsv(off, r).split('\r\n').find((l) => l.includes('Ana'))!;
+    expect(line).toContain('11/11/2026 06:00;10/11/2026 17:01;');
+  });
+
   it('PDF escapa nomes e mostra códigos, fotos e resumo', () => {
     const html = toHtml(data, rows, { 'a1/e1/x.jpg': 'data:image/jpeg;base64,AAAA' });
     expect(html).toContain('Ana &quot;Bia&quot; &lt;Souza&gt;');

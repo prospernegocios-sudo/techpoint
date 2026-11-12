@@ -1,0 +1,30 @@
+// Menu de gestão (gestor e treinador).
+import { router, type Href } from 'expo-router';
+import { Card, Screen, T } from '@/components/ui';
+import { useMe } from '@/lib/me';
+import { useTheme } from '@/lib/theme';
+
+export default function Gestao() {
+  const { isManager, isStaff, isPlatformAdmin, org } = useMe();
+  const { colors } = useTheme();
+  const items: { title: string; desc: string; href: Href; show: boolean }[] = [
+    { title: 'Novo treino', desc: 'Marcar um treino (ou um treino de teste agora)', href: '/cadastro/treino', show: isStaff },
+    { title: 'Atletas', desc: 'Cadastrar atletas e colocar em equipes', href: '/cadastro/atletas', show: isStaff },
+    { title: 'Locais de treino', desc: 'Cadastrar local com "Estou no local agora" e raio', href: '/cadastro/locais', show: isManager },
+    { title: 'Equipes', desc: 'Criar equipes e categorias (Sub 15, Sub 17...)', href: '/cadastro/equipes', show: isManager },
+    { title: 'Gestores e treinadores', desc: 'Dar acesso a outras pessoas pelo e-mail Google', href: '/cadastro/pessoas', show: isManager },
+    { title: 'Nova organização', desc: 'Criar um clube ou escola cliente (admin da plataforma)', href: '/cadastro/organizacao', show: isPlatformAdmin },
+  ];
+  return (
+    <Screen>
+      <T variant="title">{org?.name ?? 'Gestão'}</T>
+      {items.filter((i) => i.show).map((i) => (
+        <Card key={i.title} onPress={() => router.push(i.href)}>
+          <T variant="subtitle">{i.title}</T>
+          <T variant="muted">{i.desc}</T>
+          <T variant="small" color={colors.primary}>Abrir ›</T>
+        </Card>
+      ))}
+    </Screen>
+  );
+}

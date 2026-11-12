@@ -28,3 +28,21 @@ Registro das decisões tomadas, com data e motivo. Decisões novas entram no fim
 | D20 | Cada check-in e check-out é **um registro separado** (`attendance_records`) | Auditoria mais simples e clara |
 | D21 | Fotos e documentos em **armazenamento privado**, acessados por links temporários | Requisito de LGPD |
 | D22 | Contas das lojas (Apple/Google) **preferencialmente no CNPJ**, com D-U-N-S | Google exige 12 testadores por 14 dias para contas pessoais novas; nome de empresa passa mais confiança |
+
+## Fase 1 — Base e check-in (12/11/2026)
+
+| # | Decisão | Motivo |
+|---|---|---|
+| D23 | Login Google pelo **navegador seguro do sistema** (OAuth do Supabase com PKCE), sem SDK nativo do Google | Não exige configurar impressão digital (SHA-1) do app no Google; funciona igual em Android e iOS |
+| D24 | Identificador do app nas lojas: **br.com.techpoint.app** | Não pode mudar depois de publicado. Pode ser trocado até a Fase 6 se preferir outro |
+| D25 | Treinador vê **todos os atletas da organização** (não só das suas equipes) | Simplicidade no MVP; treinador é da comissão do clube. Revisável |
+| D26 | Check-in, check-out, presença manual e revisão passam por **funções do servidor** (o app não grava direto na tabela) | Hora, raio, janela e antifraude não podem ser burlados pelo celular |
+| D27 | Check-in fora do raio **sem justificativa é recusado**; com justificativa vira **pendente**. Localização falsa sempre vira pendente | Regra do produto: o treinador decide os casos duvidosos |
+| D28 | "Foto repetida" compara a impressão digital (SHA-256) calculada no app. Detecta reenvio da mesma foto, não fotos parecidas | Limitação aceita no MVP; comparação por semelhança pode vir depois |
+| D29 | Detecção de localização falsa funciona **só no Android** (o iPhone não informa) | Limitação do sistema operacional |
+| D30 | Sessão de login guardada **criptografada** no aparelho (SecureStore), dividida em pedaços | Segurança da conta |
+| D31 | Biometria volta a ser pedida se o app ficar **mais de 2 min** em segundo plano | Equilíbrio entre segurança e praticidade |
+| D32 | Conta do atleta é ligada ao cadastro **pelo e-mail Google**; só se tiver **10 anos ou mais** (regra no banco) | Sem códigos de convite no MVP; idade mínima garantida no servidor |
+| D33 | Banco atualizado e testado pela **API de gestão do Supabase** (sem Docker); testes rodam numa transação desfeita no fim | O ambiente na nuvem não tem Docker; nada de teste fica gravado |
+| D34 | **Consentimento LGPD de menores ainda não implementado** (Fase 2). Até lá, o ambiente de teste usa **apenas dados fictícios** e a conta do dono do produto | Requisito obrigatório entra antes de qualquer atleta real usar o app |
+| D35 | App em **Expo SDK 58**; build de teste Android (APK) pelo EAS | Versão atual do Expo |

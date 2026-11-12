@@ -13,7 +13,8 @@ Clube piloto: **DF Vôlei**.
 
 ## Status
 
-**Fase 0 — Planejamento: concluída.** Próxima: Fase 1 (base e check-in).
+- **Fase 0 — Planejamento:** concluída.
+- **Fase 1 — Base e check-in:** em andamento (banco, regras de acesso, check-in/check-out, lista de presença e cadastros prontos; falta o primeiro APK de teste).
 
 ## Documentos
 
@@ -35,6 +36,41 @@ techpoint/
 ├── README.md · DECISOES.md · .env.example
 ```
 
-## Como rodar, testar e publicar
+## Como rodar
 
-Será preenchido a partir da Fase 1.
+Pré-requisitos: Node 22+, conta no Supabase (projeto de teste) e no Expo.
+
+```bash
+cp .env.example .env            # preencha SUPABASE_PROJECT_REF e SUPABASE_ACCESS_TOKEN
+cp app/.env.example app/.env    # preencha URL e chave publishable do Supabase
+npm run db:migrate              # cria/atualiza o banco
+npm run db:seed                 # dados de exemplo do DF Vôlei
+cd app && npm install
+```
+
+O app usa recursos nativos (câmera, GPS, biometria e login), então é testado por um **APK de teste**:
+
+```bash
+cd app && npx eas-cli build --profile preview --platform android
+```
+
+## Como testar
+
+```bash
+npm run test:db                 # 26 testes: regras de acesso (RLS), check-in, raio, hora do servidor, antifraude
+cd app && npm test              # 18 testes: cálculo do raio, datas, mensagens de erro
+cd app && npm run typecheck     # verificação de tipos
+```
+
+## Estrutura atual
+
+- `supabase/migrations/` — banco, regras de acesso e funções de check-in
+- `supabase/seed.sql` — dados de exemplo (fictícios)
+- `supabase/tests/` — testes de segurança e check-in
+- `scripts/db.mjs` — aplica migrações e seed pela API do Supabase
+- `app/app/` — telas (Expo Router)
+- `app/src/lib/` — login, tema, check-in, fila offline, consultas
+
+## Como publicar
+
+Será detalhado na Fase 6.

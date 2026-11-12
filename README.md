@@ -16,6 +16,12 @@ Clube piloto: **DF Vôlei**.
 - **Fase 0 — Planejamento:** concluída.
 - **Fase 1 — Base e check-in:** pronta para teste no celular (APK de teste gerado em 12/11/2026 pelo EAS, perfil `preview`). Aguardando validação do dono do produto.
 
+## Privacidade e guarda de dados
+
+- **Fotos de check-in e check-out: guardadas por 24 meses** a partir do registro e depois apagadas (decisão D48). O registro de presença (hora, GPS, situação, código de verificação) e os relatórios emitidos continuam guardados.
+- Localização lida só no instante do registro; nada em segundo plano.
+- Até a Fase 2 (consentimento dos responsáveis), o app usa **apenas dados fictícios**.
+
 ## Documentos
 
 - [Concorrentes e cronograma](docs/roadmap.md)

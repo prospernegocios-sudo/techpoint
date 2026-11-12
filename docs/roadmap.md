@@ -1,6 +1,6 @@
 # TechPoint — Concorrentes e cronograma (proposta)
 
-> Versão 2 — 12/11/2026. **Aprovado em princípio pelo dono do produto** (ver D38–D43). Datas são estimativas e dependem dos testes no celular e da fila de builds do Expo.
+> Versão 3 — 13/11/2026. Módulo de projetos na Fase 1 e painel web antecipado (D46); patrocinadores com acesso individual (D47); fotos guardadas por 24 meses (D48). Datas são estimativas e dependem dos testes no celular e da fila de builds do Expo.
 > Fontes: planilha "TechPoint Clientes e Concorrentes" + buscas na web. Os sites dos concorrentes não puderam ser abertos diretamente; os recursos **não foram testados**.
 
 ## 1. O que os concorrentes oferecem

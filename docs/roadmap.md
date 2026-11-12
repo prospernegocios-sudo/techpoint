@@ -1,6 +1,6 @@
 # TechPoint — Concorrentes e cronograma (proposta)
 
-> Versão 1 — 12/11/2026. **Proposta para aprovação do dono do produto.** Datas são estimativas e dependem dos testes no celular e da fila de builds do Expo.
+> Versão 2 — 12/11/2026. **Aprovado em princípio pelo dono do produto** (ver D38–D43). Datas são estimativas e dependem dos testes no celular e da fila de builds do Expo.
 > Fontes: planilha "TechPoint Clientes e Concorrentes" + buscas na web. Os sites dos concorrentes não puderam ser abertos diretamente; os recursos **não foram testados**.
 
 ## 1. O que os concorrentes oferecem
@@ -49,13 +49,14 @@
 
 | Fase | Conteúdo | Duração estimada | Previsão |
 |---|---|---|---|
-| **1 — Base e check-in** | Concluída no código; falta validação no celular | — | até 20/11/2026 |
-| **2 — Responsáveis e LGPD** | Convite do atleta por link + aprovação; vínculo responsável–atleta; consentimento e termos com data; ativação por QR (10–12 anos); **push de chegada/saída**; área do responsável (presença do filho); exclusão de dados | 3 semanas | 11/12/2026 |
-| **3 — Agenda e comunicação** | Treinos recorrentes; confirmação "vou/não vou" com lembrete; convocações para jogos com resposta; comunicados (opção A); modo totem com QR | 3–4 semanas (pausa de fim de ano) | 15/01/2027 |
+| **1 — Base e check-in** | Validação no celular + **relatório de frequência para projetos incentivados** (PDF e planilha, com GPS, foto e hora do servidor) | +1 semana | 27/11/2026 |
+| **2 — Responsáveis e LGPD** | Convite do atleta por link + aprovação; vínculo responsável–atleta; consentimento e termos com data; ativação por QR (10–12 anos); **push de chegada/saída**; área do responsável (presença do filho); exclusão de dados | 3 semanas | 18/12/2026 |
+| **Play Store** | Conta de desenvolvedor, teste fechado, ficha da loja, política de privacidade, **publicação** | em paralelo | **meados de jan/2027** |
+| **3 — Agenda e comunicação** | Treinos recorrentes; confirmação "vou/não vou" com lembrete; convocações com resposta; comunicados com push; **enquetes do time**; check-in por QR em tablet | 4 semanas (pausa de fim de ano) | 22/01/2027 |
 | **4 — Desempenho** | Avaliações por critério do esporte; estatísticas e evolução; faltas, atrasos, lesões; atestados e documentos | 3 semanas | 05/02/2027 |
 | **5 — Relatórios e painel web** | Painel web (Next.js) do gestor; relatório de frequência para projetos incentivados/patrocinadores (PDF e Excel); indicadores do clube | 4 semanas | 05/03/2027 |
-| **6 — Publicação nas lojas** | Google Play e App Store; política de privacidade; testes finais; ambiente de produção | 2 semanas | 19/03/2027 |
-| **7 — Financeiro (a decidir)** | Mensalidades Pix/cartão com baixa automática; inadimplência | 3–4 semanas | abril/2027 |
+| **6 — App Store (iPhone)** | Apple; política de privacidade; testes finais; ambiente de produção | 2 semanas | 19/03/2027 |
+| **7 — Financeiro (sem custo fixo)** | Mensalidades Pix/cartão com baixa automática; inadimplência | 3–4 semanas | abril/2027 |
 
 ## 5. Decisões pendentes do dono do produto
 

@@ -28,6 +28,20 @@ type AuthCtx = {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
+// O código do Google só pode ser trocado uma vez. A troca pode ser pedida por dois
+// caminhos (retorno do navegador e abertura do app pelo link), então guardamos a promessa.
+const exchanges = new Map<string, Promise<{ ok: boolean; message?: string }>>();
+export function completeSignIn(code: string) {
+  let p = exchanges.get(code);
+  if (!p) {
+    p = supabase.auth.exchangeCodeForSession(code).then(({ error }) =>
+      error ? { ok: false, message: 'Não foi possível concluir o login. Tente de novo.' } : { ok: true },
+    );
+    exchanges.set(code, p);
+  }
+  return p;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,10 +109,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (errDesc) return { ok: false, message: `O Google recusou o login: ${errDesc}` };
       const code = url.searchParams.get('code');
       if (!code) return { ok: false, message: 'Não recebemos a confirmação do Google. Tente de novo.' };
-      const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
-      if (exErr) throw exErr;
-      setLocked(false);
-      return { ok: true };
+      const r = await completeSignIn(code);
+      if (r.ok) setLocked(false);
+      return r;
     } catch (e) {
       const msg = String((e as Error)?.message ?? e);
       if (/network|fetch/i.test(msg)) return { ok: false, message: 'Sem internet. Conecte-se para entrar pela primeira vez.' };

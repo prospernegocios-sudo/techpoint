@@ -49,14 +49,13 @@
 
 | Fase | Conteúdo | Duração estimada | Previsão |
 |---|---|---|---|
-| **1 — Base e check-in** | Validação no celular + **relatório de frequência para projetos incentivados** (PDF e planilha, com GPS, foto e hora do servidor) | +1 semana | 27/11/2026 |
-| **2 — Responsáveis e LGPD** | Convite do atleta por link + aprovação; vínculo responsável–atleta; consentimento e termos com data; ativação por QR (10–12 anos); **push de chegada/saída**; área do responsável (presença do filho); exclusão de dados | 3 semanas | 18/12/2026 |
-| **Play Store** | Conta de desenvolvedor, teste fechado, ficha da loja, política de privacidade, **publicação** | em paralelo | **meados de jan/2027** |
-| **3 — Agenda e comunicação** | Treinos recorrentes; confirmação "vou/não vou" com lembrete; convocações com resposta; comunicados com push; **enquetes do time**; check-in por QR em tablet | 4 semanas (pausa de fim de ano) | 22/01/2027 |
-| **4 — Desempenho** | Avaliações por critério do esporte; estatísticas e evolução; faltas, atrasos, lesões; atestados e documentos | 3 semanas | 05/02/2027 |
-| **5 — Relatórios e painel web** | Painel web (Next.js) do gestor; relatório de frequência para projetos incentivados/patrocinadores (PDF e Excel); indicadores do clube | 4 semanas | 05/03/2027 |
-| **6 — App Store (iPhone)** | Apple; política de privacidade; testes finais; ambiente de produção | 2 semanas | 19/03/2027 |
-| **7 — Financeiro (sem custo fixo)** | Mensalidades Pix/cartão com baixa automática; inadimplência | 3–4 semanas | abril/2027 |
+| **1 — Base, check-in e projetos** | Validação no celular; relatório de frequência (PDF com fotos e planilha); **módulo de projetos incentivados**: projeto, versões do plano aprovado, metas e indicadores, núcleos/equipes, beneficiários (entrada/saída, tipo de escola), painel de indicadores no app, relatório emitido numerado e congelado, retificação; cadastro de patrocinadores no projeto | +1,5 a 2 semanas | 04/12/2026 |
+| **2 — Responsáveis e LGPD** | Convite do atleta por link + aprovação; vínculo responsável–atleta; consentimento e termos com data (incluindo compartilhamento com patrocinadores do projeto); ativação por QR (10–12 anos); **push de chegada/saída**; área do responsável; exclusão de dados; **exclusão automática das fotos após 24 meses** | 3 semanas | 23/12/2026 |
+| **Play Store** | Conta de desenvolvedor (empresa, D-U-N-S), teste fechado, ficha da loja, política de privacidade, **publicação** | em paralelo | meados a fim de jan/2027 |
+| **3 — Painel web e relatórios** (antiga 5) | Painel web (Next.js) do gestor; **acesso individual do patrocinador** (só os projetos que patrocina, fotos com marca d'água, auditado); relatórios para órgãos e patrocinadores; verificação pública do código do registro | 4 semanas | 22/01/2027 |
+| **4 — Agenda e comunicação** (antiga 3) | Treinos recorrentes; "vou / não vou" com lembrete; convocações; comunicados com push; enquetes do time; check-in por QR em tablet | 4 semanas | 19/02/2027 |
+| **5 — Desempenho** (antiga 4) | Avaliação técnica e evolução; faltas, atrasos, lesões; atestados e documentos | 3 semanas | 12/03/2027 |
+| **6 — App Store e financeiro** | Publicação para iPhone; mensalidades Pix/cartão sem custo fixo, com bloqueio de cobrança em projetos que exigem gratuidade | 4 semanas | abril/2027 |
 
 ## 5. Decisões pendentes do dono do produto
 

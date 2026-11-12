@@ -54,3 +54,4 @@ Registro das decisões tomadas, com data e motivo. Decisões novas entram no fim
 | D41 | Financeiro fica na **Fase 7, sem custo fixo** para o clube no momento | Decisão do dono do produto |
 | D42 | Convites, convocações e comunicados usam o botão **"Compartilhar no WhatsApp"** (grátis), não a API paga | Sem custo por mensagem |
 | D43 | Fase 3 inclui **comunicados com push**, **confirmação "vou / não vou"**, **enquetes do time** (ex.: "Quem tem uniforme limpo?" sim/não/talvez) e **check-in por QR em tablet** | Participação dos pais é fundamental; QR atende quem não tem celular |
+| D44 | Relatório de frequência: **PDF com miniatura da foto em cada registro** (opção A) + planilha CSV para Excel; só treinos encerrados; horário de Brasília; **código de verificação** (SHA-256 dos dados do registro); cada geração vai para a auditoria | Prova mais forte para a prestação de contas; o PDF passa a ser o documento arquivado. Aviso de LGPD no app e no rodapé do PDF |

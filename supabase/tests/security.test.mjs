@@ -97,6 +97,10 @@ const checkin = (o = {}) => {
   return `select public.record_attendance('${p.event}', '${p.kind}', ${p.lat}, ${p.lng}, ${p.acc}, ${s(p.photo)}, ${s(p.hash)}, ${s(p.device)}, ${p.mocked}, ${p.clientAt ?? 'null'}, ${p.offline}, ${s(p.just)})`;
 };
 
+// Relatório do dia anterior até hoje (fuso de Brasília).
+const report = (org, teams) => `select public.attendance_report('${org}', array[${teams.map((t) => `'${t}'`).join(',')}]::uuid[],
+  (now() at time zone 'America/Sao_Paulo')::date - 1, (now() at time zone 'America/Sao_Paulo')::date, '{"name":"Projeto Teste"}'::jsonb)`;
+
 // ---- Cenários ----
 const scenario = [
   fixtures,
@@ -175,6 +179,19 @@ const scenario = [
 
   `reset role;`,
   keep('audit_entries', `select count(*)::int n from public.audit_log where org_id = '${ORG_A}'`),
+
+  // Relatório de frequência (prestação de contas)
+  as(U.coachA),
+  tryRun('report_coach', report(ORG_A, [TEAM_A1])),
+  tryRun('report_bad_period', `select public.attendance_report('${ORG_A}', array['${TEAM_A1}']::uuid[], current_date, current_date - 1)`),
+  as(U.athA),
+  tryRun('report_athlete', report(ORG_A, [TEAM_A1])),
+  as(U.mgrB),
+  tryRun('report_other_org', report(ORG_A, [TEAM_A1])),
+  tryRun('report_mix_teams', report(ORG_B, [TEAM_A1, TEAM_B])),
+  `reset role;`,
+  keep('report_audit', `select count(*)::int n from public.audit_log where org_id = '${ORG_A}' and action = 'report_generated'`),
+  keep('report_code_check', `select app_private.attendance_code(r) as code from public.attendance_records r where athlete_id = '${ATH.a}' and event_id = '${EV.past2h}'`),
   `select name, value from results;`,
 ].join('\n');
 
@@ -295,4 +312,25 @@ test('usuário não logado não acessa dados', () => {
 test('ações sensíveis ficam na auditoria', () => {
   // check-in, check-out, offline, pendente, revisão, manual = 6
   assert.equal(R.audit_entries.n, 6);
+});
+test('relatório de frequência: treinador gera, só com treinos encerrados e código de verificação', () => {
+  assert.equal(ok('report_coach'), true, err('report_coach'));
+  const r = res('report_coach');
+  assert.deepEqual(r.events.map((e) => e.id), [EV.past2h]); // o treino em andamento e o futuro não entram
+  assert.equal(r.members.length, 3);
+  assert.equal(r.records.length, 1);
+  assert.equal(r.records[0].synced_offline, true);
+  assert.match(r.records[0].code, /^[0-9A-F]{10}$/);
+  assert.equal(r.records[0].code, R.report_code_check.code);
+  assert.equal(r.project.name, 'Projeto Teste');
+  assert.match(err('report_bad_period'), /TP_INVALID_PERIOD/);
+});
+test('relatório: atleta e gestor de outro clube não geram; times de outro clube são ignorados', () => {
+  assert.match(err('report_athlete'), /TP_FORBIDDEN/);
+  assert.match(err('report_other_org'), /TP_FORBIDDEN/);
+  assert.equal(ok('report_mix_teams'), true, err('report_mix_teams'));
+  assert.deepEqual(res('report_mix_teams').teams.map((t) => t.id), [TEAM_B]);
+});
+test('cada relatório gerado fica na auditoria', () => {
+  assert.equal(R.report_audit.n, 1);
 });

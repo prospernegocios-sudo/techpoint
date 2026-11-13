@@ -21,6 +21,9 @@ type AuthCtx = {
   biometricEnabled: boolean;
   biometricAvailable: boolean;
   signInWithGoogle: () => Promise<{ ok: boolean; message?: string }>;
+  signInWithPassword: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>;
+  signUpWithPassword: (email: string, password: string, fullName: string) => Promise<{ ok: boolean; message?: string }>;
+  resetPassword: (email: string) => Promise<{ ok: boolean; message?: string }>;
   signOut: () => Promise<void>;
   unlock: () => Promise<boolean>;
   setBiometricEnabled: (on: boolean) => Promise<void>;
@@ -132,6 +135,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Conta com e-mail e senha (para quem não tem Google).
+  const callbackUrl = () => (Platform.OS === 'web' ? `${window.location.origin}/auth-callback` : Linking.createURL('auth-callback'));
+  const passwordError = (msg: string) => {
+    if (/invalid login|invalid credentials/i.test(msg)) return 'E-mail ou senha incorretos.';
+    if (/not confirmed/i.test(msg)) return 'Confirme seu e-mail pelo link que enviamos antes de entrar.';
+    if (/already registered|already been registered/i.test(msg)) return 'Este e-mail já tem conta. Use "Entrar" ou "Esqueci a senha".';
+    if (/password should be|weak/i.test(msg)) return 'A senha precisa ter pelo menos 8 caracteres, com letras e números.';
+    if (/rate limit|too many/i.test(msg)) return 'Muitas tentativas. Aguarde alguns minutos.';
+    if (/network|fetch/i.test(msg)) return 'Sem internet. Conecte-se e tente de novo.';
+    return 'Não foi possível concluir. Tente de novo.';
+  };
+
+  const signInWithPassword = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+    if (error) return { ok: false, message: passwordError(error.message) };
+    setLocked(false);
+    return { ok: true };
+  }, []);
+
+  const signUpWithPassword = useCallback(async (email: string, password: string, fullName: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(), password,
+      options: { data: { full_name: fullName.trim() }, emailRedirectTo: callbackUrl() },
+    });
+    if (error) return { ok: false, message: passwordError(error.message) };
+    if (!data.session) return { ok: true, message: 'Conta criada. Enviamos um link de confirmação para o seu e-mail: abra o link e depois entre com e-mail e senha.' };
+    return { ok: true };
+  }, []);
+
+  const resetPassword = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: callbackUrl() });
+    if (error) return { ok: false, message: passwordError(error.message) };
+    return { ok: true, message: 'Se o e-mail tiver conta, enviamos um link para entrar. Depois, defina uma nova senha em Perfil.' };
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setLocked(false);
@@ -149,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <Ctx.Provider
-      value={{ session, loading, locked, biometricEnabled, biometricAvailable, signInWithGoogle, signOut, unlock, setBiometricEnabled }}
+      value={{ session, loading, locked, biometricEnabled, biometricAvailable, signInWithGoogle, signInWithPassword, signUpWithPassword, resetPassword, signOut, unlock, setBiometricEnabled }}
     >
       {children}
     </Ctx.Provider>

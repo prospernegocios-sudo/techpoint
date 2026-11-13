@@ -1,12 +1,25 @@
 // Perfil: dados da conta, aparência (paleta e modo) e biometria.
+import { useState } from 'react';
 import { Switch, View } from 'react-native';
-import { Button, Card, Chip, Screen, T, styles } from '@/components/ui';
+import { Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { roleLabels, useMe } from '@/lib/me';
 import { palettes, useTheme, type ModePref, type PaletteId } from '@/lib/theme';
 
 export default function Perfil() {
-  const { signOut, biometricAvailable, biometricEnabled, setBiometricEnabled } = useAuth();
+  const { signOut, biometricAvailable, biometricEnabled, setBiometricEnabled, session } = useAuth();
+  // Conta com e-mail e senha: permite trocar a senha (inclusive depois do "Esqueci a senha").
+  const isEmailAccount = session?.user.app_metadata?.provider === 'email';
+  const [newPw, setNewPw] = useState('');
+  const [pwMsg, setPwMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
+  const changePassword = async () => {
+    if (newPw.length < 8 || !/[A-Za-z]/.test(newPw) || !/\d/.test(newPw)) return setPwMsg({ tone: 'danger', text: 'A senha precisa ter pelo menos 8 caracteres, com letras e números.' });
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    if (error) return setPwMsg({ tone: 'danger', text: 'Não foi possível trocar a senha. Entre de novo e tente outra vez.' });
+    setNewPw('');
+    setPwMsg({ tone: 'success', text: 'Senha alterada.' });
+  };
   const me = useMe();
   const { colors, palette, setPalette, mode, setMode, clubColors } = useTheme();
   const modes: { id: ModePref; label: string }[] = [
@@ -51,6 +64,14 @@ export default function Perfil() {
         </View>
       </Card>
 
+      {isEmailAccount && (
+        <Card>
+          <T variant="subtitle">Senha</T>
+          <Field label="Nova senha" value={newPw} onChangeText={setNewPw} secureTextEntry autoComplete="new-password" hint="Pelo menos 8 caracteres, com letras e números." />
+          {pwMsg && <Notice tone={pwMsg.tone} text={pwMsg.text} />}
+          <Button title="Trocar senha" kind="outline" onPress={changePassword} />
+        </Card>
+      )}
       <Button title="Sair da conta" kind="outline" onPress={signOut} />
       <T variant="small" style={{ textAlign: 'center' }}>TechPoint · versão de teste</T>
     </Screen>

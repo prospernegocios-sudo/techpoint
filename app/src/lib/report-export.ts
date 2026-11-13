@@ -58,7 +58,13 @@ async function loadThumbs(paths: string[], onProgress: (done: number, total: num
   return thumbs;
 }
 
-export async function exportPdf(data: ReportData, onProgress: (msg: string) => void) {
+async function logoUrl(orgId: string): Promise<string | null> {
+  const { data } = await supabase.from('organizations').select('logo_path').eq('id', orgId).maybeSingle();
+  return data?.logo_path ? supabase.storage.from('org-logos').getPublicUrl(data.logo_path).data.publicUrl : null;
+}
+
+export async function exportPdf(input: ReportData, onProgress: (msg: string) => void) {
+  const data = { ...input, logo_url: await logoUrl(input.org.id) };
   const rows = buildRows(data);
   const paths = [...new Set(rows.flatMap((r) => [r.checkIn?.photo_path, r.checkOut?.photo_path]).filter((x): x is string => Boolean(x)))];
   const thumbs = await loadThumbs(paths, (d, t) => onProgress(`Preparando fotos ${d} de ${t}...`));
@@ -86,7 +92,8 @@ async function share(uri: string, mimeType: string, UTI: string) {
 }
 
 /** PDF de um relatório de projeto já emitido (dados congelados no servidor). */
-export async function exportProjectPdf(snap: ProjectSnapshot, sha256: string, onProgress: (msg: string) => void) {
+export async function exportProjectPdf(input: ProjectSnapshot, sha256: string, onProgress: (msg: string) => void) {
+  const snap = { ...input, logo_url: await logoUrl(input.org.id) };
   const rows = buildProjectRows(snap);
   const paths = [...new Set(rows.flatMap((r) => [r.checkIn?.photo_path, r.checkOut?.photo_path]).filter((x): x is string => Boolean(x)))];
   const thumbs = await loadThumbs(paths, (d, t) => onProgress(`Preparando fotos ${d} de ${t}...`));

@@ -25,7 +25,7 @@ const serverMessages: Record<string, string> = {
   TP_PHOTO_REQUIRED: 'A foto é obrigatória. Tire uma foto na hora para continuar.',
   TP_PHOTO_NOT_FOUND: 'A foto não chegou ao servidor. Verifique a internet e tente de novo.',
   TP_LOCATION_REQUIRED: 'Não conseguimos sua localização. Ligue o GPS e tente de novo.',
-  TP_OUTSIDE_WINDOW: 'Fora do horário permitido. O check-in abre 30 min antes do treino e fecha 30 min depois do início; o check-out vai até 60 min após o fim.',
+  TP_OUTSIDE_WINDOW: 'Fora do horário permitido. O check-in abre 30 min antes do treino e vai até o fim do treino; o check-out vai até 60 min após o fim.',
   TP_OFFLINE_TOO_OLD: 'Este registro foi feito sem internet há muito tempo e não pode mais ser enviado. Fale com seu treinador.',
   TP_OUTSIDE_RADIUS: 'Você está fora da área do local do treino.',
   TP_NO_CHECK_IN: 'Faça o check-in antes do check-out.',
@@ -73,4 +73,5 @@ export const flagLabels: Record<string, string> = {
   offline_sync: 'Enviado depois (sem internet)',
   manual: 'Registro manual',
   web_browser: 'Feito pelo navegador',
+  late: 'Atrasado',
 };

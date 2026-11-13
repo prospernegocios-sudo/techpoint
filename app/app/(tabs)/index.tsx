@@ -2,11 +2,11 @@
 // gestor/treinador vê os treinos e abre a lista de presença.
 import { useFocusEffect, router } from 'expo-router';
 import { Fragment, useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { Image, RefreshControl, ScrollView, View } from 'react-native';
 import { Badge, Button, Card, Chip, Loading, Notice, T, styles } from '@/components/ui';
 import { getQueue, syncQueue } from '@/lib/attendance';
 import { formatDay, formatTime } from '@/lib/format';
-import { roleLabels, useMe } from '@/lib/me';
+import { orgLogoUrl, roleLabels, useMe } from '@/lib/me';
 import { useEvents, useMyAttendance, type AttendanceRow, type EventRow } from '@/lib/queries';
 import { useTheme } from '@/lib/theme';
 
@@ -37,6 +37,8 @@ function nextAction(ev: EventRow, recs: AttendanceRow[]): { action: Action; stat
     return { action: null, status: label };
   }
   if (now >= start - 30 * 60_000 && now <= start + 30 * 60_000) return { action: { kind: 'check_in', label: 'Fazer check-in' }, status: 'Check-in aberto' };
+  // Depois da tolerância continua liberado até o fim do treino, marcado como atrasado (D58).
+  if (now > start + 30 * 60_000 && now <= end) return { action: { kind: 'check_in', label: 'Fazer check-in (atrasado)' }, status: 'Treino em andamento: o check-in fica marcado como atrasado' };
   if (now < start - 30 * 60_000) return { action: null, status: `Check-in abre às ${formatTime(new Date(start - 30 * 60_000))}` };
   return { action: null, status: 'Check-in encerrado' };
 }
@@ -95,7 +97,10 @@ export default function Home() {
     >
       <View style={{ gap: 4 }}>
         <T variant="small">Olá, {me.profile?.full_name?.split(' ')[0] ?? 'atleta'}</T>
-        <T variant="title">{me.org.name}</T>
+        <View style={[styles.row, { alignItems: 'center' }]}>
+          {orgLogoUrl(me.org.logo_path) && <Image source={{ uri: orgLogoUrl(me.org.logo_path)! }} style={{ width: 44, height: 44, borderRadius: 10 }} accessibilityLabel={`Logo ${me.org.name}`} />}
+          <T variant="title" style={{ flex: 1 }}>{me.org.name}</T>
+        </View>
       </View>
 
       {me.orgs.length > 1 && (

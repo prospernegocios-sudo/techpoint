@@ -3,11 +3,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
+import { BrandingCard, type Branding } from '@/components/branding-card';
 import { OrgForm, RepCard, emptyOrg, emptyRep, orgToDb, repToDb, validateOrg, validateRep, type OrgFields, type Rep } from '@/components/org-form';
 import { Badge, Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
 import { digits, maskCpf, maskPhone, validCpf, validPhone } from '@/lib/br';
 import { toFriendlyError } from '@/lib/errors';
 import { useMe } from '@/lib/me';
+import { uploadLogo } from '@/lib/logo';
 import { supabase } from '@/lib/supabase';
 
 const TERMS_VERSION = '2026-11-teste';
@@ -22,6 +24,7 @@ export default function NovaEntidade() {
   const [reps, setReps] = useState<Rep[]>([]);
   const [partners, setPartners] = useState<{ name: string; role: string }[]>([]);
   const [accepted, setAccepted] = useState(false);
+  const [brand, setBrand] = useState<Branding>({ logo: null, logoUrl: null, primary: null, accent: null, candidates: [] });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -59,8 +62,16 @@ export default function NovaEntidade() {
     });
     setSaving(false);
     if (e) return setError(toFriendlyError(e).message);
+    const newOrg = (data as { org_id: string }).org_id;
+    // Logo e cores (opcionais): a entidade já existe, então um erro aqui não desfaz o cadastro.
+    if (brand.logo || brand.primary) {
+      try {
+        const logo_path = brand.logo ? await uploadLogo(newOrg, brand.logo) : null;
+        await supabase.from('organizations').update({ logo_path, theme_primary: brand.primary, theme_accent: brand.accent }).eq('id', newOrg);
+      } catch { /* pode enviar depois em Dados da entidade */ }
+    }
     await qc.invalidateQueries({ queryKey: ['me'] });
-    me.setOrgId((data as { org_id: string }).org_id);
+    me.setOrgId(newOrg);
     me.setRole('admin');
     router.replace('/(tabs)');
   };
@@ -85,7 +96,12 @@ export default function NovaEntidade() {
         </Card>
       )}
 
-      {step === 1 && <OrgForm value={org} onChange={setOrg} onPartners={setPartners} />}
+      {step === 1 && (
+        <View style={{ gap: 14 }}>
+          <OrgForm value={org} onChange={setOrg} onPartners={setPartners} />
+          <BrandingCard value={brand} onChange={setBrand} />
+        </View>
+      )}
 
       {step === 2 && (
         <View style={{ gap: 14 }}>

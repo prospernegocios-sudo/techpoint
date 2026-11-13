@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAuth } from './auth';
+import { useTheme } from './theme';
 import { supabase } from './supabase';
 
 export type Role = 'admin' | 'manager' | 'coach' | 'athlete' | 'guardian';
@@ -15,7 +16,10 @@ export const roleLabels: Record<Role, string> = {
   guardian: 'Responsável',
 };
 
-export type Org = { id: string; name: string; review_status?: 'pending' | 'approved' | 'suspended' };
+export type Org = {
+  id: string; name: string; review_status?: 'pending' | 'approved' | 'suspended';
+  logo_path?: string | null; theme_primary?: string | null; theme_accent?: string | null;
+};
 export type Profile = { id: string; full_name: string | null; email: string | null; is_platform_admin: boolean };
 type Membership = { org_id: string; role: Role; organizations: Org | null };
 export type MyAthlete = { id: string; org_id: string; full_name: string };
@@ -25,7 +29,7 @@ type MeData = { profile: Profile | null; memberships: Membership[]; athletes: My
 async function fetchMe(userId: string): Promise<MeData> {
   const [p, m, a] = await Promise.all([
     supabase.from('profiles').select('id, full_name, email, is_platform_admin').eq('id', userId).maybeSingle(),
-    supabase.from('memberships').select('org_id, role, organizations(id, name, review_status)').eq('profile_id', userId).eq('active', true),
+    supabase.from('memberships').select('org_id, role, organizations(id, name, review_status, logo_path, theme_primary, theme_accent)').eq('profile_id', userId).eq('active', true),
     supabase.from('athletes').select('id, org_id, full_name').eq('profile_id', userId),
   ]);
   if (p.error) throw p.error;
@@ -114,7 +118,20 @@ export function MeProvider({ children }: { children: ReactNode }) {
     };
   }, [q.data, q.isLoading, q.error, orgId, role]);
 
+  // Aplica as cores do clube atual no tema de todos que usam esta entidade.
+  const { setClubColors } = useTheme();
+  const tp = value.org?.theme_primary, ta = value.org?.theme_accent;
+  useEffect(() => {
+    setClubColors(tp && ta ? { primary: tp, accent: ta } : null);
+  }, [tp, ta, setClubColors]);
+
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+/** Endereço público do logo da entidade. */
+export function orgLogoUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  return supabase.storage.from('org-logos').getPublicUrl(path).data.publicUrl;
 }
 
 export function useMe() {

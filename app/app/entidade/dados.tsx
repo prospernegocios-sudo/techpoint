@@ -3,11 +3,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, View } from 'react-native';
+import { BrandingCard, type Branding } from '@/components/branding-card';
 import { OrgForm, RepCard, emptyOrg, emptyRep, orgFromDb, orgToDb, repFromDb, repToDb, validateOrg, validateRep, type OrgFields, type Rep } from '@/components/org-form';
 import { Badge, Button, Card, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { digits, maskCpf, maskPhone, validCpf, validPhone } from '@/lib/br';
 import { toFriendlyError } from '@/lib/errors';
-import { useMe } from '@/lib/me';
+import { orgLogoUrl, useMe } from '@/lib/me';
+import { uploadLogo } from '@/lib/logo';
 import { supabase } from '@/lib/supabase';
 
 export default function DadosEntidade() {
@@ -32,12 +34,14 @@ export default function DadosEntidade() {
   const [org, setOrg] = useState<OrgFields>(emptyOrg);
   const [reps, setReps] = useState<Rep[]>([]);
   const [mine, setMine] = useState({ cpf: '', phone: '', title: '' });
+  const [brand, setBrand] = useState<Branding>({ logo: null, logoUrl: null, primary: null, accent: null, candidates: [] });
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!q.data) return;
     setOrg(orgFromDb(q.data.org));
+    setBrand({ logo: null, logoUrl: orgLogoUrl(q.data.org.logo_path), primary: q.data.org.theme_primary, accent: q.data.org.theme_accent, candidates: [] });
     setReps(q.data.reps.map(repFromDb));
     setMine({ cpf: maskCpf(q.data.mine?.cpf ?? ''), phone: maskPhone(q.data.mine?.phone ?? ''), title: q.data.membership?.title ?? '' });
   }, [q.data]);
@@ -57,6 +61,23 @@ export default function DadosEntidade() {
     if (error) return setMsg({ tone: 'danger', text: toFriendlyError(error).message });
     setMsg({ tone: 'success', text: 'Dados da entidade salvos.' });
     qc.invalidateQueries({ queryKey: ['org-data', orgId] });
+  };
+
+  const saveBrand = async () => {
+    setMsg(null);
+    setBusy(true);
+    try {
+      const logo_path = brand.logo ? await uploadLogo(orgId!, brand.logo) : q.data.org.logo_path;
+      const { error } = await supabase.from('organizations').update({ logo_path, theme_primary: brand.primary, theme_accent: brand.accent }).eq('id', orgId!);
+      if (error) throw error;
+      setMsg({ tone: 'success', text: 'Logo e cores salvos. Todos da entidade já veem as novas cores.' });
+      qc.invalidateQueries({ queryKey: ['org-data', orgId] });
+      me.refetch();
+    } catch (e) {
+      setMsg({ tone: 'danger', text: toFriendlyError(e).message });
+    } finally {
+      setBusy(false);
+    }
   };
 
   const saveRep = async (r: Rep, i: number) => {
@@ -104,6 +125,9 @@ export default function DadosEntidade() {
         {status === 'approved' && <Badge label="Cadastro verificado" tone="success" />}
       </View>
       {msg && <Notice tone={msg.tone} text={msg.text} />}
+
+      <BrandingCard value={brand} onChange={setBrand} />
+      <Button title="Salvar logo e cores" loading={busy} onPress={saveBrand} />
 
       <OrgForm value={org} onChange={setOrg} cnpjLocked={Boolean(q.data.org.cnpj)} />
       <Button title="Salvar dados da entidade" loading={busy} onPress={saveOrg} />

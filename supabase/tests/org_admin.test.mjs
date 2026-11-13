@@ -57,6 +57,11 @@ const scenario = [
   tryRun('owner_add_people', `insert into public.memberships (org_id, profile_id, role) values (${ORG}, '${U.mgr}', 'manager'), (${ORG}, '${U.coach}', 'coach')`),
   tryRun('owner_remove_self_last', `delete from public.memberships where profile_id = '${U.owner}' and role = 'admin'`),
 
+  tryRun('owner_theme', `update public.organizations set theme_primary = '#C8102E', theme_accent = '#FFD100', logo_path = 'x/logo.png' where id = ${ORG}`),
+  as(U.mgr),
+  tryRun('mgr_theme', `update public.organizations set theme_primary = '#000000' where id = ${ORG}`),
+  `reset role;`,
+  keep('theme_after', `select theme_primary, theme_accent from public.organizations where cnpj = '${CNPJ}'`),
   as(U.other),
   tryRun('dup_cnpj', register(CNPJ, CPF2)),
   tryRun('cpf_in_use', register(CNPJ2, CPF)),
@@ -112,6 +117,10 @@ test('qualquer pessoa cadastra a própria entidade, que já funciona e vai para 
   assert.equal(R.reps_seen.n, 2);
   assert.equal(ok('owner_edit_org'), true, err('owner_edit_org'));
   assert.equal(ok('owner_add_people'), true, err('owner_add_people'));
+});
+test('só o administrador troca logo e cores do clube', () => {
+  assert.equal(ok('owner_theme'), true, err('owner_theme'));
+  assert.deepEqual(R.theme_after, { theme_primary: '#C8102E', theme_accent: '#FFD100' });
 });
 test('a entidade não se aprova sozinha', () => {
   assert.equal(ok('owner_self_approve'), false);

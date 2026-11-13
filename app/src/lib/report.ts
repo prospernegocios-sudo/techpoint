@@ -18,6 +18,8 @@ export type ReportData = {
   period: { from: string; to: string };
   project: { name?: string; number?: string; proponent?: string };
   org: { id: string; name: string };
+  /** Logo da entidade (endereço público), quando houver. */
+  logo_url?: string | null;
   teams: { id: string; name: string; category: string | null }[];
   events: ReportEvent[];
   members: { team_id: string; athlete_id: string; full_name: string; joined_at: string }[];
@@ -242,7 +244,7 @@ export function toHtml(data: ReportData, rows: ReportRow[], thumbs: Record<strin
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"/>
 ${CSS}</head><body>
   <div class="head">
-    <h1>Relatório de frequência de atletas</h1>
+    <h1>${data.logo_url ? `<img src="${esc(data.logo_url)}" alt="" style="height:34px;width:34px;object-fit:contain;vertical-align:middle;margin-right:8px;border-radius:6px"/>` : ''}Relatório de frequência de atletas</h1>
     <table><tbody>
       <tr><td><b>Projeto:</b> ${esc(p.name)}</td><td><b>Nº do projeto:</b> ${esc(p.number) || '—'}</td></tr>
       <tr><td><b>Entidade proponente:</b> ${esc(p.proponent || data.org.name)}</td><td><b>Clube:</b> ${esc(data.org.name)}</td></tr>
@@ -275,6 +277,7 @@ export type ProjectSnapshot = {
     starts_on: string; ends_on: string; free_of_charge: boolean; public_school_min_pct: number | null;
   };
   org: { id: string; name: string };
+  logo_url?: string | null;
   plan: { version: number; approved_on: string | null; description: string | null } | null;
   indicators: {
     activities_done: number; activities_canceled: number; beneficiaries_enrolled: number; unique_beneficiaries: number;
@@ -331,7 +334,7 @@ export function toProjectHtml(s: ProjectSnapshot, sha256: string, thumbs: Record
     : '';
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"/>${CSS}</head><body>
   <div class="head">
-    <h1>${esc(title)}</h1>
+    <h1>${s.logo_url ? `<img src="${esc(s.logo_url)}" alt="" style="height:34px;width:34px;object-fit:contain;vertical-align:middle;margin-right:8px;border-radius:6px"/>` : ''}${esc(title)}</h1>
     ${issue && issue.version > 1 ? `<p><b>Retifica a versão ${issue.rectifies_version} deste relatório.</b> Motivo: ${esc(issue.rectification_reason)}</p>` : ''}
     <table><tbody>
       <tr><td><b>Projeto:</b> ${esc(p.name)}</td><td><b>Processo:</b> ${esc(p.process_number) || '—'}</td></tr>

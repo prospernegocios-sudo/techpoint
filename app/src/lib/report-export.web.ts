@@ -46,7 +46,13 @@ async function printHtml(html: string, title: string) {
 
 const slug = (s: string) => s.replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 40);
 
-export async function exportPdf(data: ReportData, onProgress: (msg: string) => void) {
+async function logoUrl(orgId: string): Promise<string | null> {
+  const { data } = await supabase.from('organizations').select('logo_path').eq('id', orgId).maybeSingle();
+  return data?.logo_path ? supabase.storage.from('org-logos').getPublicUrl(data.logo_path).data.publicUrl : null;
+}
+
+export async function exportPdf(input: ReportData, onProgress: (msg: string) => void) {
+  const data = { ...input, logo_url: await logoUrl(input.org.id) };
   const rows = buildRows(data);
   onProgress('Preparando as fotos...');
   const thumbs = await photoUrls(photoPaths(rows));
@@ -64,7 +70,8 @@ export async function exportCsv(data: ReportData) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
-export async function exportProjectPdf(snap: ProjectSnapshot, sha256: string, onProgress: (msg: string) => void) {
+export async function exportProjectPdf(input: ProjectSnapshot, sha256: string, onProgress: (msg: string) => void) {
+  const snap = { ...input, logo_url: await logoUrl(input.org.id) };
   const rows = buildProjectRows(snap);
   onProgress('Preparando as fotos...');
   const thumbs = await photoUrls(photoPaths(rows));

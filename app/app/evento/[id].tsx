@@ -29,7 +29,7 @@ function RecordLine({ rec, title, onPhoto, onReview }: {
       </View>
       {rec.flags.length > 0 && (
         <View style={styles.wrap}>
-          {rec.flags.map((f) => <Badge key={f} label={flagLabels[f] ?? f} tone={f === 'manual' || f === 'offline_sync' ? 'muted' : 'danger'} />)}
+          {rec.flags.map((f) => <Badge key={f} label={flagLabels[f] ?? f} tone={f === 'manual' || f === 'offline_sync' ? 'muted' : f === 'late' ? 'warning' : 'danger'} />)}
         </View>
       )}
       {rec.justification && <T variant="small">Justificativa: “{rec.justification}”</T>}
@@ -72,7 +72,7 @@ export default function EventRosterScreen() {
   const rows = roster.data ?? [];
   const present = rows.filter((r) => r.checkIn && r.checkIn.status === 'valid').length;
   const pending = rows.filter((r) => r.checkIn?.status === 'pending' || r.checkOut?.status === 'pending').length;
-  const suspicious = rows.filter((r) => [r.checkIn, r.checkOut].some((x) => x?.flags.some((f) => !['manual', 'offline_sync'].includes(f)))).length;
+  const suspicious = rows.filter((r) => [r.checkIn, r.checkOut].some((x) => x?.flags.some((f) => !['manual', 'offline_sync', 'late'].includes(f)))).length;
 
   const openPhoto = async (path: string) => {
     const url = await signedPhotoUrl(path);

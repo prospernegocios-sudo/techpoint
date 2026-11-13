@@ -8,7 +8,7 @@ import { palettes, useTheme, type ModePref, type PaletteId } from '@/lib/theme';
 export default function Perfil() {
   const { signOut, biometricAvailable, biometricEnabled, setBiometricEnabled } = useAuth();
   const me = useMe();
-  const { colors, palette, setPalette, mode, setMode } = useTheme();
+  const { colors, palette, setPalette, mode, setMode, clubColors } = useTheme();
   const modes: { id: ModePref; label: string }[] = [
     { id: 'system', label: 'Automático' }, { id: 'light', label: 'Claro' }, { id: 'dark', label: 'Escuro' },
   ];
@@ -25,7 +25,8 @@ export default function Perfil() {
         <T variant="subtitle">Aparência</T>
         <T variant="small">Paleta de cores</T>
         <View style={styles.wrap}>
-          {(Object.keys(palettes) as PaletteId[]).map((p) => (
+          {clubColors && <Chip label="Cores do clube" selected={palette === 'clube'} onPress={() => setPalette('clube')} />}
+          {(Object.keys(palettes) as Exclude<PaletteId, 'clube'>[]).map((p) => (
             <Chip key={p} label={palettes[p].name} selected={palette === p} onPress={() => setPalette(p)} />
           ))}
         </View>

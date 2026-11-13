@@ -1,10 +1,12 @@
-// Tema do app: duas paletas ("Quadra" e "Areia & Mar"), cada uma com modo claro e escuro.
-// A escolha do usuário fica salva no aparelho.
+// Tema do app: "Cores do clube" (lidas do logo da entidade), "Quadra" e "Areia & Mar",
+// cada uma com modo claro e escuro. A escolha do usuário fica salva no aparelho.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
+import { clubPalette } from './colors';
 
-export type PaletteId = 'quadra' | 'areia';
+export type PaletteId = 'clube' | 'quadra' | 'areia';
+type FixedPalette = Exclude<PaletteId, 'clube'>;
 export type ModePref = 'system' | 'light' | 'dark';
 
 export type Colors = {
@@ -24,7 +26,7 @@ export type Colors = {
 
 const status = { success: '#16A34A', warning: '#F59E0B', danger: '#DC2626' };
 
-export const palettes: Record<PaletteId, { name: string; light: Colors; dark: Colors }> = {
+export const palettes: Record<FixedPalette, { name: string; light: Colors; dark: Colors }> = {
   quadra: {
     name: 'Quadra',
     light: {
@@ -60,6 +62,9 @@ type ThemeCtx = {
   mode: ModePref;
   setPalette: (p: PaletteId) => void;
   setMode: (m: ModePref) => void;
+  /** Cores do clube atual (vêm do cadastro da entidade); null = clube sem cores. */
+  clubColors: { primary: string; accent: string } | null;
+  setClubColors: (c: { primary: string; accent: string } | null) => void;
 };
 
 const Ctx = createContext<ThemeCtx | null>(null);
@@ -67,7 +72,8 @@ const KEY = 'techpoint.theme';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const system = useColorScheme();
-  const [palette, setPalette] = useState<PaletteId>('quadra');
+  const [palette, setPalette] = useState<PaletteId>('clube');
+  const [clubColors, setClubColors] = useState<{ primary: string; accent: string } | null>(null);
   const [mode, setMode] = useState<ModePref>('system');
 
   useEffect(() => {
@@ -75,7 +81,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       .then((raw) => {
         if (!raw) return;
         const saved = JSON.parse(raw);
-        if (saved.palette in palettes) setPalette(saved.palette);
+        if (saved.palette === 'clube' || saved.palette in palettes) setPalette(saved.palette);
         if (['system', 'light', 'dark'].includes(saved.mode)) setMode(saved.mode);
       })
       .catch(() => {});
@@ -87,8 +93,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => {
     const isDark = mode === 'dark' || (mode === 'system' && system === 'dark');
-    return { colors: palettes[palette][isDark ? 'dark' : 'light'], isDark, palette, mode, setPalette, setMode };
-  }, [palette, mode, system]);
+    const club = palette === 'clube' && clubColors ? clubPalette(clubColors.primary, clubColors.accent) : null;
+    const base = club ?? palettes[palette === 'clube' ? 'quadra' : palette];
+    return { colors: base[isDark ? 'dark' : 'light'], isDark, palette, mode, setPalette, setMode, clubColors, setClubColors };
+  }, [palette, mode, system, clubColors]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

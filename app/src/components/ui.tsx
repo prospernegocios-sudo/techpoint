@@ -137,12 +137,28 @@ export function Notice({ text, tone = 'warning' }: { text: string; tone?: 'warni
   );
 }
 
-export function Loading({ text = 'Carregando...' }: { text?: string }) {
+/** Carregando: com texto (ex.: "Buscando sua localização...") mostra o indicador;
+ * sem texto mostra blocos no formato do conteúdo (achado de UX nº 12). */
+export function Loading({ text }: { text?: string }) {
   const { colors } = useTheme();
+  if (text) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24, backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <T variant="muted">{text}</T>
+      </View>
+    );
+  }
+  const bar = (w: number | `${number}%`, h = 14) => <View style={{ width: w, height: h, borderRadius: 7, backgroundColor: colors.border, opacity: 0.7 }} />;
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24, backgroundColor: colors.background }}>
-      <ActivityIndicator size="large" color={colors.primary} />
-      <T variant="muted">{text}</T>
+    <View accessibilityLabel="Carregando" accessibilityRole="progressbar" style={{ gap: 14, padding: 16, backgroundColor: colors.background }}>
+      {[0, 1, 2].map((i) => (
+        <View key={i} style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, gap: 10 }]}>
+          {bar('55%', 18)}
+          {bar('85%')}
+          {bar('40%')}
+        </View>
+      ))}
     </View>
   );
 }

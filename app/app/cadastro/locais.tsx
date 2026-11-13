@@ -85,6 +85,7 @@ export default function Locais() {
         <>
           <Button title="+ Novo local" onPress={() => start('new')} />
           {venues.error && <Notice tone="danger" text="Não foi possível carregar os locais." />}
+          {venues.data?.length === 0 && <Notice tone="info" text="Nenhum local ainda. Vá até o ginásio, toque em Novo local e use Estou no local agora." />}
           {(venues.data ?? []).map((v) => (
             <Card key={v.id} onPress={() => start(v)}>
               <T variant="subtitle">{v.name}</T>

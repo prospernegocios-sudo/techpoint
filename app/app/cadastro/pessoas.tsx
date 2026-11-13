@@ -41,7 +41,7 @@ export default function Pessoas() {
   const remove = (r: Row) => {
     if (r.profile_id === profile?.id && r.role !== 'admin') return Alert.alert('Atenção', 'Você não pode remover o seu próprio acesso.');
     if (r.role === 'admin' && !isAdmin) return Alert.alert('Atenção', 'Só um administrador remove outro administrador.');
-    Alert.alert('Remover acesso?', 'A pessoa deixa de ver os dados deste clube.', [
+    Alert.alert('Remover acesso?', 'A pessoa deixa de ver os dados desta entidade.', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Remover', style: 'destructive', onPress: async () => {
         const { error: e } = await supabase.from('memberships').update({ active: false }).eq('id', r.id);

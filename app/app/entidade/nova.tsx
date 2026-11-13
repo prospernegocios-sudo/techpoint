@@ -72,7 +72,7 @@ export default function NovaEntidade() {
     }
     await qc.invalidateQueries({ queryKey: ['me'] });
     me.setOrgId(newOrg);
-    me.setRole('admin');
+    me.setMode('team');
     router.replace('/(tabs)');
   };
 

@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { Switch, View } from 'react-native';
 import { Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/lib/auth';
+import { RELOCK_OPTIONS, useAuth } from '@/lib/auth';
 import { roleLabels, useMe } from '@/lib/me';
 import { palettes, useTheme, type ModePref, type PaletteId } from '@/lib/theme';
 
 export default function Perfil() {
-  const { signOut, biometricAvailable, biometricEnabled, setBiometricEnabled, session } = useAuth();
+  const { signOut, biometricAvailable, biometricEnabled, setBiometricEnabled, session, relockMinutes, setRelockMinutes } = useAuth();
   // Conta com e-mail e senha: permite trocar a senha (inclusive depois do "Esqueci a senha").
   const isEmailAccount = session?.user.app_metadata?.provider === 'email';
   const [newPw, setNewPw] = useState('');
@@ -62,6 +62,14 @@ export default function Perfil() {
             onValueChange={(v) => setBiometricEnabled(v)}
           />
         </View>
+        {biometricAvailable && biometricEnabled && (
+          <View style={{ gap: 6 }}>
+            <T variant="small">Pedir de novo depois de ficar fora do app por:</T>
+            <View style={styles.wrap}>
+              {RELOCK_OPTIONS.map((m) => <Chip key={m} label={`${m} min`} selected={relockMinutes === m} onPress={() => setRelockMinutes(m)} />)}
+            </View>
+          </View>
+        )}
       </Card>
 
       {isEmailAccount && (

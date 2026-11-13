@@ -1,10 +1,10 @@
 // Lista de presença de um treino (gestor/treinador): quem chegou e saiu, fotos,
 // sinais de suspeita, aprovação de pendências e presença manual.
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Image, Modal, Pressable, View } from 'react-native';
-import { Badge, Button, Card, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
+import { Badge, Button, Card, Chip, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { flagLabels, toFriendlyError } from '@/lib/errors';
 import { formatDay, formatTime } from '@/lib/format';
 import { formatDistance } from '@/lib/geo';
@@ -13,8 +13,8 @@ import { signedPhotoUrl, useEvent, useEventRoster, type AttendanceRow } from '@/
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme';
 
-function RecordLine({ rec, title, onPhoto, onReview }: {
-  rec?: AttendanceRow; title: string; onPhoto: (p: string) => void; onReview: (r: AttendanceRow, ok: boolean) => void;
+function RecordLine({ rec, title, onPhoto, onReview, allowReject }: {
+  rec?: AttendanceRow; title: string; onPhoto: (p: string) => void; onReview: (r: AttendanceRow, ok: boolean) => void; allowReject?: boolean;
 }) {
   const { colors } = useTheme();
   if (!rec) return <T variant="small">{title}: —</T>;
@@ -41,6 +41,7 @@ function RecordLine({ rec, title, onPhoto, onReview }: {
           </Pressable>
         )}
       </View>
+      {rec.status === 'valid' && allowReject && <Button title={`Recusar ${title.toLowerCase()}`} kind="danger" onPress={() => onReview(rec, false)} />}
       {rec.status === 'pending' && (
         <View style={[styles.row]}>
           <Button title="Aprovar" style={{ flex: 1 }} onPress={() => onReview(rec, true)} />
@@ -62,6 +63,21 @@ export default function EventRosterScreen() {
   const [manual, setManual] = useState<{ athleteId: string; name: string; kind: 'check_in' | 'check_out' } | null>(null);
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
+  const corrections = useQuery({
+    queryKey: ['corrections', id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const { data } = await supabase.from('attendance_correction_requests')
+        .select('id, athlete_id, record_id, reason, created_at, attendance_records!inner(event_id)')
+        .eq('status', 'open').eq('attendance_records.event_id', id!);
+      return (data ?? []) as unknown as { id: string; athlete_id: string; reason: string }[];
+    },
+  });
+  const resolveCorrection = async (cid: string) => {
+    await supabase.from('attendance_correction_requests').update({ status: 'resolved', resolved_by: me.profile?.id, resolved_at: new Date().toISOString() }).eq('id', cid);
+    corrections.refetch();
+  };
+  const [filter, setFilter] = useState<'all' | 'pending' | 'alert' | 'absent'>('all');
   const [error, setError] = useState<string | null>(null);
 
   if (!me.isStaff) return <Screen><Notice tone="danger" text="Apenas gestor ou treinador podem ver a lista de presença." /></Screen>;
@@ -72,7 +88,15 @@ export default function EventRosterScreen() {
   const rows = roster.data ?? [];
   const present = rows.filter((r) => r.checkIn && r.checkIn.status === 'valid').length;
   const pending = rows.filter((r) => r.checkIn?.status === 'pending' || r.checkOut?.status === 'pending').length;
-  const suspicious = rows.filter((r) => [r.checkIn, r.checkOut].some((x) => x?.flags.some((f) => !['manual', 'offline_sync', 'late'].includes(f)))).length;
+  const isPending = (r: (typeof rows)[number]) => r.checkIn?.status === 'pending' || r.checkOut?.status === 'pending';
+  const hasAlert = (r: (typeof rows)[number]) => [r.checkIn, r.checkOut].some((x) => x?.flags.some((f) => !['manual', 'offline_sync', 'late'].includes(f)));
+  const isAbsent = (r: (typeof rows)[number]) => !r.checkIn || r.checkIn.status === 'rejected';
+  const suspicious = rows.filter(hasAlert).length;
+  const absent = rows.filter(isAbsent).length;
+  // Pendências primeiro, depois alertas, depois o resto (achado de UX nº 7).
+  const shown = rows
+    .filter((r) => filter === 'all' || (filter === 'pending' && isPending(r)) || (filter === 'alert' && hasAlert(r)) || (filter === 'absent' && isAbsent(r)))
+    .sort((a, b) => Number(isPending(b)) - Number(isPending(a)) || Number(hasAlert(b)) - Number(hasAlert(a)));
 
   const openPhoto = async (path: string) => {
     const url = await signedPhotoUrl(path);
@@ -122,15 +146,29 @@ export default function EventRosterScreen() {
         </View>
       </Card>
       {roster.error && <Notice tone="danger" text="Não foi possível atualizar a lista. Verifique a internet." />}
+      <View style={styles.wrap}>
+        <Chip label={`Todos (${rows.length})`} selected={filter === 'all'} onPress={() => setFilter('all')} />
+        <Chip label={`Pendentes (${pending})`} selected={filter === 'pending'} onPress={() => setFilter('pending')} />
+        <Chip label={`Com alerta (${suspicious})`} selected={filter === 'alert'} onPress={() => setFilter('alert')} />
+        <Chip label={`Ausentes (${absent})`} selected={filter === 'absent'} onPress={() => setFilter('absent')} />
+      </View>
+      {shown.length === 0 && <T variant="muted">Ninguém nesta situação.</T>}
 
-      {rows.map((r) => (
-        <Card key={r.athlete.id}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
+      {shown.map((r) => (
+        <Card key={r.athlete.id} style={{ flexGrow: 1, flexBasis: 320 }}>
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
             <T variant="subtitle" style={{ flex: 1 }}>{r.jersey != null ? `#${r.jersey} ` : ''}{r.athlete.full_name}</T>
             {!r.athlete.profile_id && <Badge label="Sem conta" />}
           </View>
-          <RecordLine rec={r.checkIn} title="Chegada" onPhoto={openPhoto} onReview={review} />
-          <RecordLine rec={r.checkOut} title="Saída" onPhoto={openPhoto} onReview={review} />
+          {(corrections.data ?? []).filter((c) => c.athlete_id === r.athlete.id).map((c) => (
+            <View key={c.id} style={{ gap: 6 }}>
+              <Notice tone="warning" text={`Correção pedida pelo atleta: “${c.reason}”. Se for o caso, recuse o registro abaixo ou lance a presença manual.`} />
+              <Button title="Marcar pedido como resolvido" kind="outline" onPress={() => resolveCorrection(c.id)} />
+            </View>
+          ))}
+          <RecordLine rec={r.checkIn} title="Chegada" onPhoto={openPhoto} onReview={review} allowReject={(corrections.data ?? []).some((c) => c.athlete_id === r.athlete.id)} />
+          <RecordLine rec={r.checkOut} title="Saída" onPhoto={openPhoto} onReview={review} allowReject={(corrections.data ?? []).some((c) => c.athlete_id === r.athlete.id)} />
           <View style={styles.wrap}>
             {(!r.checkIn || r.checkIn.status === 'rejected') && (
               <Button title="Presença manual" kind="outline" onPress={() => setManual({ athleteId: r.athlete.id, name: r.athlete.full_name, kind: 'check_in' })} />
@@ -141,6 +179,7 @@ export default function EventRosterScreen() {
           </View>
         </Card>
       ))}
+      </View>
 
       <Modal visible={Boolean(photo)} transparent animationType="fade" onRequestClose={() => setPhoto(null)}>
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', padding: 16 }} onPress={() => setPhoto(null)}>

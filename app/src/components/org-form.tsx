@@ -53,12 +53,32 @@ export function validateOrg(f: OrgFields): string | null {
   return null;
 }
 
+/** Erro de um campo, para mostrar ao lado dele assim que perde o foco (achado de UX nº 6). */
+export function orgFieldError(f: OrgFields, k: keyof OrgFields): string | undefined {
+  switch (k) {
+    case 'cnpj': return validCnpj(f.cnpj) ? undefined : 'CNPJ inválido: confira os números.';
+    case 'legal_name': return f.legal_name.trim().length >= 3 ? undefined : 'Informe a razão social.';
+    case 'state_registration': return f.ie_exempt || f.state_registration.trim() ? undefined : 'Informe a IE ou marque "Isento".';
+    case 'cep': return digits(f.cep).length === 8 ? undefined : 'CEP com 8 números.';
+    case 'street': return f.street.trim() ? undefined : 'Informe a rua.';
+    case 'street_number': return f.street_number.trim() ? undefined : 'Informe o número.';
+    case 'city': return f.city.trim() ? undefined : 'Informe a cidade.';
+    case 'uf': return UFS.includes(f.uf.toUpperCase()) ? undefined : 'UF inválida.';
+    case 'phone': return validPhone(f.phone) ? undefined : 'Telefone com DDD.';
+    case 'email': return validEmail(f.email) ? undefined : 'E-mail inválido.';
+    default: return undefined;
+  }
+}
+
 export function OrgForm({ value, onChange, cnpjLocked, onPartners }: {
   value: OrgFields; onChange: (v: OrgFields) => void; cnpjLocked?: boolean;
   onPartners?: (p: { name: string; role: string }[]) => void;
 }) {
   const [info, setInfo] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
+  const [touched, setTouched] = useState<Partial<Record<keyof OrgFields, boolean>>>({});
+  const touch = (k: keyof OrgFields) => () => setTouched((t) => ({ ...t, [k]: true }));
+  const err = (k: keyof OrgFields) => (touched[k] ? orgFieldError(value, k) : undefined);
   const set = (k: keyof OrgFields) => (v: string) => onChange({ ...value, [k]: v });
 
   const searchCnpj = async () => {
@@ -93,15 +113,15 @@ export function OrgForm({ value, onChange, cnpjLocked, onPartners }: {
         <T variant="subtitle">Entidade</T>
         <Field label="CNPJ" keyboardType="number-pad" value={value.cnpj} editable={!cnpjLocked}
           onChangeText={(v) => onChange({ ...value, cnpj: maskCnpj(v) })} placeholder="00.000.000/0000-00"
-          error={value.cnpj.length === 18 && !validCnpj(value.cnpj) ? 'CNPJ inválido' : undefined} />
+          onBlur={touch('cnpj')} error={(value.cnpj.length === 18 && !validCnpj(value.cnpj)) ? 'CNPJ inválido' : err('cnpj')} />
         {!cnpjLocked && <Button title="Buscar dados na Receita" kind="outline" loading={searching} onPress={searchCnpj} />}
         {info && <Notice tone="info" text={info} />}
         {value.receita_status !== '' && cnpjLocked && <T variant="small">Situação na Receita (último cadastro): {value.receita_status}</T>}
-        <Field label="Razão social" value={value.legal_name} onChangeText={set('legal_name')} maxLength={200} />
+        <Field label="Razão social" onBlur={touch('legal_name')} error={err('legal_name')} value={value.legal_name} onChangeText={set('legal_name')} maxLength={200} />
         <Field label="Nome fantasia" value={value.trade_name} onChangeText={set('trade_name')} maxLength={200} />
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <View style={{ flex: 1, minWidth: 180 }}>
-            <Field label="Inscrição Estadual" value={value.ie_exempt ? 'ISENTO' : value.state_registration} editable={!value.ie_exempt}
+            <Field label="Inscrição Estadual" onBlur={touch('state_registration')} error={err('state_registration')} value={value.ie_exempt ? 'ISENTO' : value.state_registration} editable={!value.ie_exempt}
               onChangeText={set('state_registration')} maxLength={30} />
           </View>
           <Chip label="Isento" selected={value.ie_exempt} onPress={() => onChange({ ...value, ie_exempt: !value.ie_exempt })} />
@@ -110,22 +130,22 @@ export function OrgForm({ value, onChange, cnpjLocked, onPartners }: {
       </Card>
       <Card>
         <T variant="subtitle">Endereço</T>
-        <Field label="CEP" keyboardType="number-pad" value={value.cep} onChangeText={onCep} placeholder="00000-000" />
-        <Field label="Rua / avenida" value={value.street} onChangeText={set('street')} maxLength={200} />
+        <Field label="CEP" onBlur={touch('cep')} error={err('cep')} keyboardType="number-pad" value={value.cep} onChangeText={onCep} placeholder="00000-000" />
+        <Field label="Rua / avenida" onBlur={touch('street')} error={err('street')} value={value.street} onChangeText={set('street')} maxLength={200} />
         <View style={styles.row}>
-          <View style={{ flex: 1 }}><Field label="Número" value={value.street_number} onChangeText={set('street_number')} maxLength={20} /></View>
+          <View style={{ flex: 1 }}><Field label="Número" onBlur={touch('street_number')} error={err('street_number')} value={value.street_number} onChangeText={set('street_number')} maxLength={20} /></View>
           <View style={{ flex: 2 }}><Field label="Complemento" value={value.complement} onChangeText={set('complement')} maxLength={100} /></View>
         </View>
         <Field label="Bairro" value={value.district} onChangeText={set('district')} maxLength={100} />
         <View style={styles.row}>
-          <View style={{ flex: 3 }}><Field label="Cidade" value={value.city} onChangeText={set('city')} maxLength={100} /></View>
-          <View style={{ flex: 1 }}><Field label="UF" value={value.uf} autoCapitalize="characters" onChangeText={(v) => set('uf')(v.toUpperCase().slice(0, 2))} /></View>
+          <View style={{ flex: 3 }}><Field label="Cidade" onBlur={touch('city')} error={err('city')} value={value.city} onChangeText={set('city')} maxLength={100} /></View>
+          <View style={{ flex: 1 }}><Field label="UF" onBlur={touch('uf')} error={err('uf')} value={value.uf} autoCapitalize="characters" onChangeText={(v) => set('uf')(v.toUpperCase().slice(0, 2))} /></View>
         </View>
       </Card>
       <Card>
         <T variant="subtitle">Contato</T>
-        <Field label="Telefone" keyboardType="phone-pad" value={value.phone} onChangeText={(v) => onChange({ ...value, phone: maskPhone(v) })} placeholder="(61) 99999-0000" />
-        <Field label="E-mail da entidade" keyboardType="email-address" autoCapitalize="none" value={value.email} onChangeText={set('email')}
+        <Field label="Telefone" onBlur={touch('phone')} error={err('phone')} keyboardType="phone-pad" value={value.phone} onChangeText={(v) => onChange({ ...value, phone: maskPhone(v) })} placeholder="(61) 99999-0000" />
+        <Field label="E-mail da entidade" onBlur={touch('email')} error={err('email')} keyboardType="email-address" autoCapitalize="none" value={value.email} onChangeText={set('email')}
           hint="A confirmação do e-mail por código será ligada antes do lançamento." />
         <Field label="Site (opcional)" autoCapitalize="none" value={value.website} onChangeText={set('website')} maxLength={200} />
       </Card>

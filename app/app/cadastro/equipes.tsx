@@ -47,6 +47,7 @@ export default function Equipes() {
         {error && <Notice tone="danger" text={error} />}
         <Button title="Criar equipe" loading={saving} onPress={save} />
       </Card>
+      {teams.data?.length === 0 && <Notice tone="info" text="Nenhuma equipe ainda. Crie a primeira acima (ex.: Sub 15 Masculino)." />}
       {(teams.data ?? []).map((t) => (
         <Card key={t.id}>
           <T variant="subtitle">{t.name}</T>

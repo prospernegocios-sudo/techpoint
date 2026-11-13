@@ -27,6 +27,15 @@ do $t$ declare v jsonb; begin
   v := public.record_attendance('${OVER}','check_in',-15.79,-47.88,5,'${ATH}/${OVER}/a.jpg','h2','d1',false,null,false,null);
   insert into results values ('over', v);
 exception when others then insert into results values ('over', jsonb_build_object('error', sqlerrm)); end $t$;
+do $t$ begin
+  insert into public.attendance_correction_requests (org_id, record_id, athlete_id, reason)
+  select '${ORG}', id, '${ATH}', 'Fiz check-in no treino errado' from public.attendance_records where event_id = '${LATE}';
+  insert into results values ('corr', '{"ok":true}');
+exception when others then insert into results values ('corr', jsonb_build_object('error', sqlerrm)); end $t$;
+do $t$ begin
+  update public.attendance_correction_requests set status = 'resolved';
+  insert into results values ('corr_self_resolve', (select to_jsonb(count(*)) from public.attendance_correction_requests where status = 'resolved'));
+exception when others then insert into results values ('corr_self_resolve', jsonb_build_object('error', sqlerrm)); end $t$;
 reset role;
 select name, value from results;`;
 let R = {};
@@ -37,4 +46,8 @@ test('check-in 1 hora depois do início é aceito, válido e marcado como atrasa
 });
 test('check-in depois que o treino acabou é recusado', () => {
   assert.match(R.over.error, /TP_OUTSIDE_WINDOW/);
+});
+test('atleta pede correção do próprio registro, mas não resolve o pedido', () => {
+  assert.deepEqual(R.corr, { ok: true });
+  assert.equal(R.corr_self_resolve, 0);
 });

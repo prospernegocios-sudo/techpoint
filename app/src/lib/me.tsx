@@ -16,6 +16,11 @@ export const roleLabels: Record<Role, string> = {
   guardian: 'Responsável',
 };
 
+/** Modo de uso: "Equipe" junta administrador, gestor e treinador (vê tudo a que tem direito); "Atleta" e "Responsável" à parte. */
+export type Mode = 'team' | 'athlete' | 'guardian';
+export const modeLabels: Record<Mode, string> = { team: 'Equipe', athlete: 'Atleta', guardian: 'Responsável' };
+const STAFF: Role[] = ['admin', 'manager', 'coach'];
+
 export type Org = {
   id: string; name: string; review_status?: 'pending' | 'approved' | 'suspended';
   logo_path?: string | null; theme_primary?: string | null; theme_accent?: string | null;
@@ -50,9 +55,12 @@ type MeCtx = {
   orgs: Org[];
   org: Org | null;
   setOrgId: (id: string) => void;
-  roles: Role[];            // papéis na organização atual
-  role: Role | null;        // modo atual
+  roles: Role[];            // papéis na entidade atual
+  role: Role | null;        // papel efetivo no modo atual (maior papel da equipe, ou atleta)
   setRole: (r: Role) => void;
+  modes: Mode[];            // modos disponíveis na entidade atual
+  mode: Mode | null;
+  setMode: (m: Mode) => void;
   athlete: MyAthlete | null; // meu cadastro de atleta na organização atual
   isStaff: boolean;
   isManager: boolean;
@@ -89,7 +97,19 @@ export function MeProvider({ children }: { children: ReactNode }) {
     const org = orgs.find((o) => o.id === orgId) ?? orgs[0] ?? null;
     const order: Role[] = ['admin', 'manager', 'coach', 'athlete', 'guardian'];
     const roles = order.filter((r) => data?.memberships.some((m) => m.org_id === org?.id && m.role === r));
-    const current = role && roles.includes(role) ? role : roles[0] ?? null;
+    const staffRole = roles.find((r) => STAFF.includes(r)) ?? null; // maior papel da equipe
+    const modes: Mode[] = [
+      ...(staffRole ? (['team'] as Mode[]) : []),
+      ...(roles.includes('athlete') ? (['athlete'] as Mode[]) : []),
+      ...(roles.includes('guardian') ? (['guardian'] as Mode[]) : []),
+    ];
+    const wanted: Mode | null = role === 'athlete' ? 'athlete' : role === 'guardian' ? 'guardian' : role ? 'team' : null;
+    const mode: Mode | null = wanted && modes.includes(wanted) ? wanted : modes[0] ?? null;
+    const current: Role | null = mode === 'team' ? staffRole : mode;
+    const saveRole = (r: Role) => {
+      setRole(r);
+      AsyncStorage.setItem(KEY, JSON.stringify({ orgId: org?.id, role: r })).catch(() => {});
+    };
     const athlete = data?.athletes.find((a) => a.org_id === org?.id) ?? null;
     const isPlatformAdmin = Boolean(data?.profile?.is_platform_admin);
     return {
@@ -105,15 +125,15 @@ export function MeProvider({ children }: { children: ReactNode }) {
       },
       roles,
       role: current,
-      setRole: (r) => {
-        setRole(r);
-        AsyncStorage.setItem(KEY, JSON.stringify({ orgId: org?.id, role: r })).catch(() => {});
-      },
+      setRole: saveRole,
+      modes,
+      mode,
+      setMode: (m) => saveRole(m === 'team' ? (staffRole ?? 'coach') : m),
       athlete,
       // Administrador faz tudo que o gestor faz (e mais).
-      isStaff: current === 'admin' || current === 'manager' || current === 'coach',
-      isManager: current === 'admin' || current === 'manager',
-      isAdmin: current === 'admin',
+      isStaff: mode === 'team',
+      isManager: mode === 'team' && (staffRole === 'admin' || staffRole === 'manager'),
+      isAdmin: mode === 'team' && staffRole === 'admin',
       isPlatformAdmin,
     };
   }, [q.data, q.isLoading, q.error, orgId, role]);

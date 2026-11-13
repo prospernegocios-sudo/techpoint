@@ -3,7 +3,7 @@ import { DateField } from '@/components/date-field';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Badge, Button, Card, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
 import { parseBrDate, toIsoDate } from '@/lib/format';
@@ -77,6 +77,7 @@ export default function Relatorios() {
       <Stack.Screen options={{ title: 'Relatórios do projeto' }} />
       <T variant="muted">Ao emitir, os dados do período ficam congelados, com número e impressão digital. Uma correção posterior gera uma retificação, sem apagar o original.</T>
       {teamIds.length === 0 && <Notice text="Ligue as equipes do projeto antes de emitir relatórios." />}
+      {Platform.OS === 'web' && <Notice tone="info" text='No site, o PDF abre na janela de impressão do navegador: em "Destino", escolha "Salvar como PDF". Assim o PDF sai com texto pesquisável, como pede o Ministério.' />}
       <Notice tone="info" text="O PDF tem nomes e fotos de atletas menores de idade. Envie apenas ao órgão da prestação de contas ou ao patrocinador do projeto. Cada emissão fica registrada." />
       {error && <Notice tone="danger" text={error} />}
       {done && <Notice tone="success" text={done} />}

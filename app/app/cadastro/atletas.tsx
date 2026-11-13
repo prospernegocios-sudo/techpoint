@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Badge, Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
+import { Badge, Loading, Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
 import { ageOn, maskDate, parseBrDate, toIsoDate } from '@/lib/format';
 import { useMe } from '@/lib/me';
@@ -25,6 +25,7 @@ export default function Atletas() {
   const [teamId, setTeamId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<string | null>(null);
 
   const birthDate = parseBrDate(birth);
@@ -56,7 +57,8 @@ export default function Atletas() {
 
   if (!isStaff) return <Screen><Notice tone="danger" text="Apenas gestor ou treinador gerenciam atletas." /></Screen>;
 
-  const list = (athletes.data ?? []).filter((a) => !filter || a.team_members.some((t) => t.team_id === filter));
+  const q = search.trim().toLowerCase();
+  const list = (athletes.data ?? []).filter((a) => (!filter || a.team_members.some((t) => t.team_id === filter)) && (!q || a.full_name.toLowerCase().includes(q)));
   const teamName = (id: string) => teams.data?.find((t) => t.id === id)?.name ?? '';
 
   return (
@@ -66,8 +68,8 @@ export default function Atletas() {
         <Card>
           <T variant="subtitle">Novo atleta</T>
           <Field label="Nome completo" value={name} onChangeText={setName} />
-          <Field label="Data de nascimento" value={birth} onChangeText={(t) => setBirth(maskDate(t))} placeholder="dd/mm/aaaa" keyboardType="number-pad"
-            hint={age !== null ? `${age} anos` : undefined} />
+          <Field label="Data de nascimento" value={birth} onChangeText={(t) => setBirth(maskDate(t))} placeholder="Ex.: 15/03/2011" keyboardType="number-pad"
+            hint={age !== null ? `${age} anos` : 'Digite só os números: dia, mês e ano.'} />
           <Field label="E-mail Google do atleta (opcional)" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address"
             hint={`Só para ${MIN_ACCOUNT_AGE} anos ou mais. Com ele, o atleta entra no app e faz o próprio check-in.`} />
           <T variant="small">Equipe</T>
@@ -85,9 +87,15 @@ export default function Atletas() {
         <Chip label="Todos" selected={!filter} onPress={() => setFilter(null)} />
         {(teams.data ?? []).map((t) => <Chip key={t.id} label={t.name} selected={filter === t.id} onPress={() => setFilter(t.id)} />)}
       </View>
+      <Field label="Buscar atleta" value={search} onChangeText={setSearch} placeholder="Digite um nome" />
       {athletes.error && <Notice tone="danger" text="Não foi possível carregar os atletas." />}
+      {athletes.isLoading && <Loading />}
+      {!athletes.isLoading && list.length === 0 && (
+        <Notice tone="info" text={q || filter ? 'Nenhum atleta encontrado com esse filtro.' : 'Nenhum atleta cadastrado ainda. Toque em "+ Novo atleta" para começar.'} />
+      )}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
       {list.map((a) => (
-        <Card key={a.id}>
+        <Card key={a.id} style={{ flexGrow: 1, flexBasis: 280 }}>
           <T variant="subtitle">{a.full_name}</T>
           <T variant="muted">{ageOn(new Date(a.birth_date + 'T12:00:00'))} anos · {a.team_members.map((t) => teamName(t.team_id)).join(', ') || 'Sem equipe'}</T>
           <View style={styles.wrap}>
@@ -95,6 +103,7 @@ export default function Atletas() {
           </View>
         </Card>
       ))}
+      </View>
     </Screen>
   );
 }

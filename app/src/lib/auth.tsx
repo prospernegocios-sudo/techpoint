@@ -11,8 +11,9 @@ import { supabase } from './supabase';
 WebBrowser.maybeCompleteAuthSession();
 
 const BIOMETRIC_KEY = 'techpoint.biometric';
-// Volta a pedir a biometria se o app ficou em segundo plano por mais que isso.
-const RELOCK_AFTER_MS = 2 * 60 * 1000;
+// Volta a pedir a biometria se o app ficou em segundo plano por mais que isso (ajustável no Perfil).
+const RELOCK_KEY = 'techpoint.relock-min';
+export const RELOCK_OPTIONS = [2, 10, 30];
 
 type AuthCtx = {
   session: Session | null;
@@ -27,6 +28,8 @@ type AuthCtx = {
   signOut: () => Promise<void>;
   unlock: () => Promise<boolean>;
   setBiometricEnabled: (on: boolean) => Promise<void>;
+  relockMinutes: number;
+  setRelockMinutes: (m: number) => void;
 };
 
 const Ctx = createContext<AuthCtx | null>(null);
@@ -52,6 +55,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [biometricEnabled, setBioEnabled] = useState(true);
   const [biometricAvailable, setBioAvailable] = useState(false);
   const backgroundAt = useRef<number | null>(null);
+  const [relockMinutes, setRelockState] = useState(2);
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    SecureStore.getItemAsync(RELOCK_KEY).then((v) => { if (v && RELOCK_OPTIONS.includes(Number(v))) setRelockState(Number(v)); }).catch(() => {});
+  }, []);
+  const setRelockMinutes = useCallback((m: number) => {
+    setRelockState(m);
+    SecureStore.setItemAsync(RELOCK_KEY, String(m)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -81,11 +93,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (state === 'active' && backgroundAt.current) {
         const away = Date.now() - backgroundAt.current;
         backgroundAt.current = null;
-        if (away > RELOCK_AFTER_MS && session && biometricAvailable && biometricEnabled) setLocked(true);
+        if (away > relockMinutes * 60_000 && session && biometricAvailable && biometricEnabled) setLocked(true);
       }
     });
     return () => sub.remove();
-  }, [session, biometricAvailable, biometricEnabled]);
+  }, [session, biometricAvailable, biometricEnabled, relockMinutes]);
 
   const unlock = useCallback(async () => {
     const result = await LocalAuthentication.authenticateAsync({
@@ -187,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <Ctx.Provider
-      value={{ session, loading, locked, biometricEnabled, biometricAvailable, signInWithGoogle, signInWithPassword, signUpWithPassword, resetPassword, signOut, unlock, setBiometricEnabled }}
+      value={{ session, loading, locked, biometricEnabled, biometricAvailable, signInWithGoogle, signInWithPassword, signUpWithPassword, resetPassword, signOut, unlock, setBiometricEnabled, relockMinutes, setRelockMinutes }}
     >
       {children}
     </Ctx.Provider>

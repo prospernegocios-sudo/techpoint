@@ -29,21 +29,21 @@ export default function NovaOrganizacao() {
       if (e2) setError(toFriendlyError(e2).message);
     }
     setSaving(false);
-    if (e) return setError(/duplicate|unique/i.test(e.message) ? 'Já existe uma organização com esse nome.' : toFriendlyError(e).message);
+    if (e) return setError(/duplicate|unique/i.test(e.message) ? 'Já existe uma entidade com esse nome.' : toFriendlyError(e).message);
     refetch();
-    Alert.alert('Organização criada', `O gestor (${mail}) já pode entrar no app.`);
+    Alert.alert('Entidade criada', `O gestor (${mail}) já pode entrar no app.`);
     router.back();
   };
 
   if (!isPlatformAdmin) return <Screen><Notice tone="danger" text="Apenas o administrador da plataforma cria organizações." /></Screen>;
   return (
     <Screen>
-      <Stack.Screen options={{ title: 'Nova organização' }} />
-      <T variant="muted">Cada organização (clube, escola, federação) só enxerga os próprios dados.</T>
+      <Stack.Screen options={{ title: 'Nova entidade' }} />
+      <T variant="muted">Cada entidade (clube, escola, associação) só enxerga os próprios dados.</T>
       <Field label="Nome" value={name} onChangeText={setName} placeholder="Ex.: Clube Esportivo Brasília" />
       <Field label="E-mail Google do gestor" value={managerEmail} onChangeText={setManagerEmail} autoCapitalize="none" keyboardType="email-address" />
       {error && <Notice tone="danger" text={error} />}
-      <Button title="Criar organização" loading={saving} onPress={save} />
+      <Button title="Criar entidade" loading={saving} onPress={save} />
     </Screen>
   );
 }

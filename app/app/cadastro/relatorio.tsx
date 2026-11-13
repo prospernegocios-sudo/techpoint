@@ -2,7 +2,7 @@
 import { DateField } from '@/components/date-field';
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
 import { parseBrDate, toIsoDate } from '@/lib/format';
@@ -101,6 +101,7 @@ export default function Relatorio() {
         </View>
       </Card>
 
+      {Platform.OS === 'web' && <Notice tone="info" text='No site, o PDF abre na janela de impressão do navegador: em "Destino", escolha "Salvar como PDF". Assim o PDF sai com texto pesquisável, como pede o Ministério.' />}
       <Notice tone="info" text="O relatório tem nomes e fotos de atletas menores de idade. Envie apenas ao órgão ou patrocinador da prestação de contas. Cada relatório gerado fica registrado." />
       {error && <Notice tone="danger" text={error} />}
       {last && <Notice tone="success" text={`Relatório gerado: ${last}`} />}

@@ -1,10 +1,11 @@
 // Relatório de frequência para prestação de contas (gestor e treinador).
+import { DateField } from '@/components/date-field';
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
-import { maskDate, parseBrDate, toIsoDate } from '@/lib/format';
+import { parseBrDate, toIsoDate } from '@/lib/format';
 import { useMe } from '@/lib/me';
 import { useTeams } from '@/lib/queries';
 import { buildRows, summarize, type ReportData } from '@/lib/report';
@@ -87,8 +88,8 @@ export default function Relatorio() {
       <Card>
         <T variant="subtitle">Período</T>
         <View style={styles.row}>
-          <View style={{ flex: 1 }}><Field label="De" keyboardType="number-pad" value={from} onChangeText={(v) => setFrom(maskDate(v))} placeholder="dd/mm/aaaa" /></View>
-          <View style={{ flex: 1 }}><Field label="Até" keyboardType="number-pad" value={to} onChangeText={(v) => setTo(maskDate(v))} placeholder="dd/mm/aaaa" /></View>
+          <View style={{ flex: 1 }}><DateField mode="date" label="De" value={from} onChange={(v) => setFrom(v)} /></View>
+          <View style={{ flex: 1 }}><DateField mode="date" label="Até" value={to} onChange={(v) => setTo(v)} /></View>
         </View>
         <T variant="small">Entram só treinos já encerrados.</T>
       </Card>

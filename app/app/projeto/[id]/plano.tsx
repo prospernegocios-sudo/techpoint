@@ -1,4 +1,5 @@
 // Plano de trabalho aprovado: versões com o PDF anexado. Versões não são alteradas nem apagadas.
+import { DateField } from '@/components/date-field';
 import { useQueryClient } from '@tanstack/react-query';
 import * as DocumentPicker from 'expo-document-picker';
 import { Stack, useLocalSearchParams } from 'expo-router';
@@ -6,7 +7,7 @@ import { useState } from 'react';
 import { Linking } from 'react-native';
 import { Button, Card, Field, Loading, Notice, Screen, T } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
-import { maskDate, parseBrDate, toIsoDate } from '@/lib/format';
+import { parseBrDate, toIsoDate } from '@/lib/format';
 import { useMe } from '@/lib/me';
 import { signedProjectFileUrl, uploadPlanFile, useProject } from '@/lib/projects';
 import { isoDayToBr } from '@/lib/report';
@@ -80,7 +81,7 @@ export default function Plano() {
       {isManager && (
         <Card>
           <T variant="subtitle">Cadastrar versão {next}</T>
-          <Field label="Data de aprovação" keyboardType="number-pad" placeholder="dd/mm/aaaa" value={approved} onChangeText={(v) => setApproved(maskDate(v))} />
+          <DateField mode="date" label="Data de aprovação" value={approved} onChange={(v) => setApproved(v)} />
           <Field label="O que mudou / observações" value={description} onChangeText={setDescription} multiline maxLength={1000} />
           <Button title={file ? `PDF: ${file.name}` : 'Escolher PDF do plano'} kind="outline" onPress={pick} />
           <Button title={`Salvar versão ${next}`} loading={busy} onPress={save} />

@@ -1,11 +1,12 @@
 // Formulário dos dados da entidade (usado no cadastro inicial e na edição) e dos responsáveis legais.
+import { DateField } from '@/components/date-field';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Button, Card, Chip, Field, Notice, T, styles } from '@/components/ui';
 import {
   UFS, digits, lookupCep, lookupCnpj, maskCep, maskCnpj, maskCpf, maskPhone, validCnpj, validCpf, validEmail, validPhone,
 } from '@/lib/br';
-import { maskDate, parseBrDate, toIsoDate } from '@/lib/format';
+import { parseBrDate, toIsoDate } from '@/lib/format';
 import { isoDayToBr } from '@/lib/report';
 
 export type OrgFields = {
@@ -180,8 +181,8 @@ export function RepCard({ value, onChange, onRemove }: { value: Rep; onChange: (
         <View style={{ flex: 1, minWidth: 160 }}><Field label="Telefone" keyboardType="phone-pad" value={value.phone} onChangeText={(v) => onChange({ ...value, phone: maskPhone(v) })} /></View>
       </View>
       <View style={styles.row}>
-        <View style={{ flex: 1 }}><Field label="Início do mandato" keyboardType="number-pad" value={value.term_start} onChangeText={(v) => set('term_start')(maskDate(v))} placeholder="dd/mm/aaaa" /></View>
-        <View style={{ flex: 1 }}><Field label="Fim do mandato" keyboardType="number-pad" value={value.term_end} onChangeText={(v) => set('term_end')(maskDate(v))} placeholder="dd/mm/aaaa" /></View>
+        <View style={{ flex: 1 }}><DateField mode="date" label="Início do mandato" value={value.term_start} onChange={(v) => set('term_start')(v)} /></View>
+        <View style={{ flex: 1 }}><DateField mode="date" label="Fim do mandato" value={value.term_end} onChange={(v) => set('term_end')(v)} /></View>
       </View>
       {onRemove && <Button title="Remover responsável" kind="ghost" onPress={onRemove} />}
     </Card>

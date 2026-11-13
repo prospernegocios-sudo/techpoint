@@ -1,11 +1,12 @@
 // Criar ou editar os dados do projeto (gestor).
+import { DateField } from '@/components/date-field';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Switch, View } from 'react-native';
 import { Button, Card, Chip, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
-import { maskDate, parseBrDate, toIsoDate } from '@/lib/format';
+import { parseBrDate, toIsoDate } from '@/lib/format';
 import { useMe } from '@/lib/me';
 import { sphereLabels, statusLabels, useProject, type Project } from '@/lib/projects';
 import { isoDayToBr } from '@/lib/report';
@@ -88,8 +89,8 @@ export default function EditarProjeto() {
       <Card>
         <T variant="subtitle">Vigência</T>
         <View style={styles.row}>
-          <View style={{ flex: 1 }}><Field label="Início" keyboardType="number-pad" value={f.starts} onChangeText={(v) => set('starts')(maskDate(v))} placeholder="dd/mm/aaaa" /></View>
-          <View style={{ flex: 1 }}><Field label="Fim" keyboardType="number-pad" value={f.ends} onChangeText={(v) => set('ends')(maskDate(v))} placeholder="dd/mm/aaaa" /></View>
+          <View style={{ flex: 1 }}><DateField mode="date" label="Início" value={f.starts} onChange={(v) => set('starts')(v)} /></View>
+          <View style={{ flex: 1 }}><DateField mode="date" label="Fim" value={f.ends} onChange={(v) => set('ends')(v)} /></View>
         </View>
         <T variant="subtitle">Situação</T>
         <View style={styles.wrap}>

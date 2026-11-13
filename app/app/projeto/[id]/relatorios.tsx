@@ -1,11 +1,12 @@
 // Relatórios emitidos do projeto: emitir (congela os dados), abrir o PDF e retificar.
+import { DateField } from '@/components/date-field';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Badge, Button, Card, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
-import { maskDate, parseBrDate, toIsoDate } from '@/lib/format';
+import { parseBrDate, toIsoDate } from '@/lib/format';
 import { issueReport, loadIssuedReport, useProject, type IssuedReport } from '@/lib/projects';
 import { brDateTime, isoDayToBr, type ProjectSnapshot } from '@/lib/report';
 import { exportProjectPdf } from '@/lib/report-export';
@@ -90,8 +91,8 @@ export default function Relatorios() {
           </>
         ) : (
           <View style={styles.row}>
-            <View style={{ flex: 1 }}><Field label="De" keyboardType="number-pad" value={from} onChangeText={(v) => setFrom(maskDate(v))} /></View>
-            <View style={{ flex: 1 }}><Field label="Até" keyboardType="number-pad" value={to} onChangeText={(v) => setTo(maskDate(v))} /></View>
+            <View style={{ flex: 1 }}><DateField mode="date" label="De" value={from} onChange={(v) => setFrom(v)} /></View>
+            <View style={{ flex: 1 }}><DateField mode="date" label="Até" value={to} onChange={(v) => setTo(v)} /></View>
           </View>
         )}
         <Button title={rectify ? 'Emitir retificação' : 'Emitir relatório'} kind="accent" loading={Boolean(busy)} onPress={issue} />

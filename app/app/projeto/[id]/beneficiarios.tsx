@@ -1,11 +1,12 @@
 // Equipes do projeto e beneficiários (entrada, saída com motivo e tipo de escola).
+import { DateField } from '@/components/date-field';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
-import { maskDate, parseBrDate, toIsoDate } from '@/lib/format';
+import { parseBrDate, toIsoDate } from '@/lib/format';
 import { useMe } from '@/lib/me';
 import { endReasonLabels, schoolLabels, useProject, type Beneficiary } from '@/lib/projects';
 import { useAthletes, useTeams } from '@/lib/queries';
@@ -98,7 +99,7 @@ export default function Beneficiarios() {
           {isManager && b.ends_on && <Button title="Desfazer saída" kind="ghost" onPress={() => reopen(b)} />}
           {exit?.athleteId === b.athlete_id && (
             <View style={{ gap: 8 }}>
-              <Field label="Data de saída" keyboardType="number-pad" placeholder="dd/mm/aaaa" value={exit.date} onChangeText={(v) => setExit({ ...exit, date: maskDate(v) })} />
+              <DateField mode="date" label="Data de saída" value={exit.date} onChange={(v) => setExit({ ...exit, date: v })} />
               <View style={styles.wrap}>{reasons.map((r) => <Chip key={r} label={endReasonLabels[r]} selected={exit.reason === r} onPress={() => setExit({ ...exit, reason: r })} />)}</View>
               <Button title="Salvar saída" onPress={saveExit} />
               <Button title="Cancelar" kind="ghost" onPress={() => setExit(null)} />
@@ -111,7 +112,7 @@ export default function Beneficiarios() {
         <Card>
           <T variant="subtitle">Adicionar beneficiários</T>
           <T variant="small">Aparecem os atletas das equipes do projeto que ainda não são beneficiários.</T>
-          <Field label="Data de entrada" keyboardType="number-pad" placeholder="dd/mm/aaaa" value={defaultStart} onChangeText={(v) => setStartDate(maskDate(v))} />
+          <DateField mode="date" label="Data de entrada" value={defaultStart} onChange={(v) => setStartDate(v)} />
           {teamIds.length === 0 && <Notice text="Escolha primeiro as equipes do projeto." />}
           {candidates.length === 0 && teamIds.length > 0 && <T variant="muted">Todos os atletas das equipes já são beneficiários.</T>}
           <View style={styles.wrap}>

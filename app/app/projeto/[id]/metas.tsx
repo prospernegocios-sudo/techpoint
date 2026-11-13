@@ -1,11 +1,12 @@
 // Metas do plano: cadastro (gestor) e lançamento de resultado das metas manuais.
+import { DateField } from '@/components/date-field';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
-import { maskDate, parseBrDate, toIsoDate } from '@/lib/format';
+import { parseBrDate, toIsoDate } from '@/lib/format';
 import { useMe } from '@/lib/me';
 import { goalKindLabels, num, pct, useIndicators, useProject, type GoalKind } from '@/lib/projects';
 import { supabase } from '@/lib/supabase';
@@ -95,7 +96,7 @@ export default function Metas() {
             {entry?.goalId === g.id && (
               <View style={{ gap: 8 }}>
                 <Field label="Resultado" keyboardType="decimal-pad" value={entry.value} onChangeText={(v) => setEntry({ ...entry, value: v })} />
-                <Field label="Data de referência" keyboardType="number-pad" placeholder="dd/mm/aaaa" value={entry.date} onChangeText={(v) => setEntry({ ...entry, date: maskDate(v) })} />
+                <DateField mode="date" label="Data de referência" value={entry.date} onChange={(v) => setEntry({ ...entry, date: v })} />
                 <Field label="Observação / evidência" value={entry.note} onChangeText={(v) => setEntry({ ...entry, note: v })} multiline maxLength={1000} />
                 <Button title="Salvar resultado" loading={busy} onPress={saveEntry} />
                 <Button title="Cancelar" kind="ghost" onPress={() => setEntry(null)} />

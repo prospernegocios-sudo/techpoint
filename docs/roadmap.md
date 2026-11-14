@@ -1,6 +1,6 @@
 # TechPoint — Concorrentes e cronograma (proposta)
 
-> Versão 3 — 13/11/2026. Módulo de projetos na Fase 1 e painel web antecipado (D46); patrocinadores com acesso individual (D47); fotos guardadas por 24 meses (D48). Datas são estimativas e dependem dos testes no celular e da fila de builds do Expo.
+> Versão 4 — 14/11/2026. Reorganizado pelos módulos (D69–D72): Plano Base = Núcleo + Atletas e Presença + Competições; adicionais: M2 Gestão de Investimentos e M4 Reservas (por último). Versão 3 (13/11): projetos na Fase 1, painel web antecipado (D46), patrocinadores (D47), fotos 24 meses (D48). Datas são estimativas e dependem dos testes no celular e da fila de builds do Expo.
 > Fontes: planilha "TechPoint Clientes e Concorrentes" + buscas na web. Os sites dos concorrentes não puderam ser abertos diretamente; os recursos **não foram testados**.
 
 ## 1. O que os concorrentes oferecem
@@ -45,21 +45,30 @@
 | Baixa | Campeonatos, loja, multi-unidade/federação | Clupik, Fitofan, AG | Futuro |
 | Fora do foco | Catraca, biometria de porta, reconhecimento facial | Academias | Não fazer (decisão: foto é só prova) |
 
-## 4. Cronograma proposto
+## 4. Cronograma (versão 4)
 
-| Fase | Conteúdo | Duração estimada | Previsão |
+| Fase | Conteúdo | Duração | Previsão |
 |---|---|---|---|
-| **1 — Base, check-in e projetos** | Validação no celular; relatório de frequência (PDF com fotos e planilha); **módulo de projetos incentivados**: projeto, versões do plano aprovado, metas e indicadores, núcleos/equipes, beneficiários (entrada/saída, tipo de escola), painel de indicadores no app, relatório emitido numerado e congelado, retificação; cadastro de patrocinadores no projeto | +1,5 a 2 semanas | 04/12/2026 |
-| **2 — Responsáveis e LGPD** | Convite do atleta por link + aprovação; vínculo responsável–atleta; consentimento e termos com data (incluindo compartilhamento com patrocinadores do projeto); ativação por QR (10–12 anos); **push de chegada/saída**; área do responsável; exclusão de dados; **exclusão automática das fotos após 24 meses** | 3 semanas | 23/12/2026 |
-| **Play Store** | Conta de desenvolvedor (empresa, D-U-N-S), teste fechado, ficha da loja, política de privacidade, **publicação** | em paralelo | meados a fim de jan/2027 |
-| **3 — Painel web e relatórios** (antiga 5) | Painel web (Next.js) do gestor; **acesso individual do patrocinador** (só os projetos que patrocina, fotos com marca d'água, auditado); relatórios para órgãos e patrocinadores; verificação pública do código do registro | 4 semanas | 22/01/2027 |
-| **4 — Agenda e comunicação** (antiga 3) | Treinos recorrentes; "vou / não vou" com lembrete; convocações; comunicados com push; enquetes do time; check-in por QR em tablet | 4 semanas | 19/02/2027 |
-| **5 — Desempenho** (antiga 4) | Avaliação técnica e evolução; faltas, atrasos, lesões; atestados e documentos | 3 semanas | 12/03/2027 |
-| **6 — App Store e financeiro** | Publicação para iPhone; mensalidades Pix/cartão sem custo fixo, com bloqueio de cobrança em projetos que exigem gratuidade | 4 semanas | abril/2027 |
+| **1 · Base, check-in e projetos** | Validação no celular; relatório de frequência; projetos incentivados (plano, metas, beneficiários, relatório congelado); patrocinadores | em andamento | 04/12/2026 |
+| **2 · Responsáveis, LGPD e documentos** | Convite + aprovação; responsáveis e consentimento; push de chegada/saída; ativação por QR (10–12 anos); **envio de documentos do atleta** (atestado, RG; PDF/PNG/JPG); **exclusão de conta e de dados**; exclusão das fotos após 24 meses; itens exigidos pela loja (política de privacidade, conta de demonstração, pacote de produção, atualização rápida) | 3,5 semanas | 23/12/2026 |
+| **Google Play** | Teste interno (Thiago e Carla) → teste fechado (piloto DF Vôlei) → produção. Depende da conta da Prosper (D-U-N-S) | em paralelo | interno ~06/01 · produção ~22/01/2027 |
+| **Domínio** | techpoint.app.br no ar (Cloudflare Pages, gratuito), links do app atualizados | 2 dias | junto com a produção |
+| **2.5 · Estrutura de módulos** | `org_modules`, regras de acesso por módulo, menus conforme o contrato | 1 semana | 13/01/2027 |
+| **3 · Painel web e patrocinador** | Painel web do gestor; acesso individual do patrocinador; relatórios para órgãos e patrocinadores; verificação pública do registro | 4 semanas | 10/02/2027 |
+| **4 · Competições, agenda e comunicação** (Plano Base) | Treinos recorrentes; vou/não vou com lembrete; comunicados e enquetes; check-in por QR em tablet; **competições** (cadastro, convocação, logística de ônibus/voo e hotel, inscritos, jogos e resultados); **autorização de viagem e hospedagem pronta para o cartório** (fica desligada até a validação do advogado) | 5 semanas | 17/03/2027 |
+| **5 · M2 Gestão de Investimentos** (adicional pago) | Orçamento por rubrica; despesas com comprovante; saldo em tempo real; prestação de contas física + financeira | 4 semanas | 14/04/2027 |
+| **6 · Desempenho e App Store** | Avaliação técnica e evolução; estatísticas de faltas, atrasos e lesões; publicação para iPhone | 4 semanas | 12/05/2027 |
+| **7 · M4 Reservas** (por último) | Agenda de quadras, reserva pelo aluno, bloqueio automático, base de alunos, pagamento online | 6 semanas | jul/2027 (após validar com 3–5 arenas) |
+
+**O que depende do dono do produto (para não atrasar):**
+- Teste completo do APK atual (agora).
+- Conta Prosper no Google Play com D-U-N-S (até o início de janeiro).
+- Advogado validar os modelos de autorização de viagem e hospedagem (até março).
+- Conversar com 3–5 arenas antes da Fase 7.
 
 ## 5. Decisões pendentes do dono do produto
 
-1. Aprovar o cronograma e as prioridades.
-2. Financeiro: entra na Fase 7 ou fica fora? (tem custo de taxa do intermediador de pagamento)
-3. WhatsApp: botão "Compartilhar no WhatsApp" (grátis) ou API oficial do WhatsApp (paga por mensagem)?
-4. Contas das lojas: Google Play (US$ 25, uma vez) e Apple (US$ 99 por ano), necessárias na Fase 6.
+1. Revisão do racional de preço (preço atual mantido por enquanto: Plano Base a partir de R$ 349).
+2. Mensalidades de atletas por Pix/cartão: entram junto com o pagamento do M4 ou ficam fora? (tem custo de taxa do intermediador)
+3. WhatsApp: botão "Compartilhar no WhatsApp" (grátis) ou API oficial (paga por mensagem)?
+4. Conta Apple (US$ 99 por ano), necessária na Fase 6.

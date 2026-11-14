@@ -63,3 +63,14 @@ Para cada competição fora da cidade, a plataforma gera o documento já preench
 - **Atleta até 15 anos:** viagem + hospedagem.
 - **Atleta com 16 ou 17 anos:** só hospedagem.
 - A equipe acompanha o status de cada convocado: **pendente / entregue**, com foto ou PDF do documento já reconhecido. O arquivo fica no repositório de documentos do núcleo.
+
+**Logística da viagem (cadastrada uma vez por competição, sai em todos os documentos e avisos):**
+- **Transporte:** ônibus, avião, van ou carro.
+  - Empresa ou companhia, nº do voo ou placa do veículo.
+  - **Local, data e horário de saída** e **de retorno**.
+- **Hospedagem:** nome do hotel ou alojamento, endereço, telefone, datas de entrada e saída.
+- **Responsáveis pela delegação:** nome, documento e telefone do treinador e do chefe de delegação.
+- **Uso desses dados:**
+  - Preenchem automaticamente a autorização de viagem e o termo de hospedagem.
+  - Aparecem para o atleta e o responsável no app, junto com a convocação.
+  - Se algo mudar (horário, hotel), todos recebem aviso no celular, e os documentos ainda não entregues são regerados.

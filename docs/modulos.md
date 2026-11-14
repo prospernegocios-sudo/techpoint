@@ -9,7 +9,7 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 |---|---|---|---|
 | **Núcleo** (sempre incluso) | Entidade, pessoas e papéis, equipes, locais, login, LGPD e consentimento, avisos (push), arquivos e documentos | Todos | Pronto, exceto o envio de documentos |
 | **M1 Atletas e Presença** | Check-in com prova, treinos, responsáveis, correções, relatório de assiduidade | Clubes, escolas, projetos | Em desenvolvimento (Fases 1 e 2) |
-| **M2 Gestão de Investimentos** | Projetos incentivados, plano de trabalho, metas, patrocinadores, prestação de contas física e financeira | Quem capta recurso (LIE, emendas, patrocínio) | Base já feita (projetos); a parte financeira está prevista |
+| **M2 Gestão de Investimentos** | Gestão do dinheiro captado pelos projetos (LIE, emendas, editais, patrocínio): orçamento por rubrica, despesas com comprovantes, saldo, metas, patrocinadores e prestação de contas física e financeira | Quem capta recurso (LIE, emendas, patrocínio) | Base já feita (projetos); a parte financeira está prevista |
 | **M3 Competições** | A entidade cadastra a competição (própria ou de fora, ex.: Copa Goiânia), convoca os atletas pela plataforma, o atleta/responsável confirma, gera a lista de inscritos com documentos, e registra jogos e resultados | Clubes, escolas, projetos | Escopo definido (14/11) |
 | **M4 Reservas (arenas)** | Agenda de quadras, disponibilidade, reserva pelo aluno, bloqueio automático, base de alunos, pagamento | Arenas, beach tennis, escolinhas | A validar no mercado |
 | Futuro | Desempenho e avaliação técnica | Clubes | Roteiro da Fase 5 |

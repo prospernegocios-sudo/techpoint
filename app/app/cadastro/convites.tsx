@@ -28,9 +28,10 @@ export default function Convites() {
     queryKey: ['join-requests', org?.id],
     enabled: Boolean(org),
     queryFn: async () => {
-      const { data } = await supabase.from('athlete_join_requests')
-        .select('id, team_id, full_name, birth_date, status, created_at, guardian_name, guardian_phone, guardian_email, guardian_relationship, profiles(email)')
+      const { data, error } = await supabase.from('athlete_join_requests')
+        .select('id, team_id, full_name, birth_date, status, created_at, guardian_name, guardian_phone, guardian_email, guardian_relationship, profiles!athlete_join_requests_profile_id_fkey(email)')
         .eq('org_id', org!.id).eq('status', 'pending').order('created_at');
+      if (error) throw error; // nunca mostrar "0 pedidos" quando a consulta falhou
       return (data ?? []) as unknown as Req[];
     },
   });
@@ -104,6 +105,7 @@ export default function Convites() {
 
       <T variant="subtitle">Pedidos para aprovar ({reqs.data?.length ?? 0})</T>
       {reqs.isLoading && <Loading />}
+      {reqs.error && <Notice tone="danger" text="Não foi possível carregar os pedidos. Puxe a tela para atualizar ou tente de novo." />}
       {reqs.data?.length === 0 && <T variant="muted">Nenhum pedido pendente.</T>}
       {(reqs.data ?? []).map((r) => {
         const age = ageOn(new Date(r.birth_date + 'T12:00:00'));

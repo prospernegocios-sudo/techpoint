@@ -7,8 +7,7 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 ## Mapa
 | Módulo | O que tem | Quem compra | Situação |
 |---|---|---|---|
-| **Núcleo** (sempre incluso) | Entidade, pessoas e papéis, equipes, locais, login, LGPD e consentimento, avisos (push), arquivos e documentos | Todos | Pronto, exceto o envio de documentos |
-| **M1 Atletas e Presença** | Check-in com prova, treinos, responsáveis, correções, relatório de assiduidade | Clubes, escolas, projetos | Em desenvolvimento (Fases 1 e 2) |
+| **Plano Base: Núcleo + Atletas e Presença** (sempre incluso, vendido junto) | Entidade, pessoas e papéis, equipes, locais, login, LGPD e consentimento, avisos (push), documentos; check-in com prova, treinos, responsáveis, correções, relatório de assiduidade | Clubes, escolas, projetos | Em desenvolvimento (Fases 1 e 2) |
 | **M2 Gestão de Investimentos** | Gestão do dinheiro captado pelos projetos (LIE, emendas, editais, patrocínio): orçamento por rubrica, despesas com comprovantes, saldo, metas, patrocinadores e prestação de contas física e financeira | Quem capta recurso (LIE, emendas, patrocínio) | Base já feita (projetos); a parte financeira está prevista |
 | **M3 Competições** | A entidade cadastra a competição (própria ou de fora, ex.: Copa Goiânia), convoca os atletas pela plataforma, o atleta/responsável confirma, gera a lista de inscritos com documentos, e registra jogos e resultados | Clubes, escolas, projetos | Escopo definido (14/11) |
 | **M4 Reservas (arenas)** | Agenda de quadras, disponibilidade, reserva pelo aluno, bloqueio automático, base de alunos, pagamento | Arenas, beach tennis, escolinhas | A validar no mercado |
@@ -19,7 +18,7 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 - Uma função `org_has_module()` protege as regras de acesso (RLS) e as funções do banco. O módulo desligado fica fechado no servidor, não só escondido na tela.
 - No app, os menus e as telas aparecem conforme os módulos ativos.
 - No código, cada módulo tem sua pasta (`src/modules/<nome>`) e suas migrações próprias.
-- Cobrança: um preço base (Núcleo + M1) e os demais módulos como adicionais. Os valores entram na revisão de preço já combinada.
+- Cobrança: o Plano Base (Núcleo + Atletas e Presença, sempre juntos) e os demais módulos como adicionais. Os valores entram na revisão de preço já combinada.
 
 ## Ponto crítico: M4 Reservas
 - **É outro comprador e outra dor.** O dono da arena quer encher a agenda e receber, não prestar contas. O pitch e o marketing serão outros (Linha B).
@@ -30,7 +29,7 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 
 ## Ordem sugerida
 1. Terminar a Fase 2 (LGPD) e publicar na Google Play, como já planejado.
-2. Fazer a "Fase 2.5 Módulos": criar `org_modules`, ligar M1 e M2 em todas as entidades atuais e ajustar os menus. É pequena e evita retrabalho.
+2. Fazer a "Fase 2.5 Módulos": criar `org_modules`, ligar o Plano Base e o M2 em todas as entidades atuais e ajustar os menus. É pequena e evita retrabalho.
 3. M2 completo (parte financeira), vendido como adicional.
 4. M3 Competições.
 5. M4 Reservas: **por último** (decisão do dono do produto, 14/11), depois da validação com as arenas.

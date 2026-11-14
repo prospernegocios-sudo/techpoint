@@ -7,3 +7,4 @@ app/.expo/
 app/dist/
 app/android/
 app/ios/
+app/google-services.json

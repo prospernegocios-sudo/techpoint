@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAuth } from './auth';
+import { registerForPush } from './push';
 import { useTheme } from './theme';
 import { supabase } from './supabase';
 
@@ -137,6 +138,12 @@ export function MeProvider({ children }: { children: ReactNode }) {
       isPlatformAdmin,
     };
   }, [q.data, q.isLoading, q.error, orgId, role]);
+
+  // Responsável: registra o celular para receber os avisos de chegada e saída.
+  const isGuardian = Boolean(q.data?.memberships.some((m) => m.role === 'guardian'));
+  useEffect(() => {
+    if (isGuardian && userId) registerForPush(userId);
+  }, [isGuardian, userId]);
 
   // Aplica as cores do clube atual no tema de todos que usam esta entidade.
   const { setClubColors } = useTheme();

@@ -81,10 +81,14 @@ const scenario = [
   `create temp table kid as select id from public.athletes where profile_id = '${U.kid}'; grant select on kid to authenticated;`,
   as(U.mom),
   keep('mom_sees', `select (select count(*) from public.athletes)::int athletes, (select count(*) from public.events)::int events`),
+  tryRun('mom_token', `insert into public.push_tokens (token, profile_id, platform) values ('ExponentPushToken[teste-mae]', '${U.mom}', 'android')`),
+  tryRun('mom_token_other', `insert into public.push_tokens (token, profile_id, platform) values ('ExponentPushToken[teste-outro]', '${U.kid}', 'android')`),
   tryRun('mom_consent', `select public.grant_consent((select id from kid), 'v1', '{"photos":true,"sponsors":true,"notifications":true}'::jsonb)`),
   `reset role;`,
   keep('after_consent', `select status from public.athletes where profile_id = '${U.kid}'`),
+  `create temp table q0 as select count(*) n from net.http_request_queue;`,
   checkin('checkin_with_consent'),
+  keep('push_queued', `select (select count(*) from net.http_request_queue where url like '%exp.host%')::int - (select n from q0)::int + (select count(*) from net.http_request_queue where url like '%exp.host%' and false)::int n, (select convert_from(body, 'UTF8') like '%chegou ao treino%' from net.http_request_queue order by id desc limit 1) body_ok`),
   as(U.mom),
   tryRun('mom_revokes', `select public.revoke_consent((select id from public.guardian_consents where guardian_profile_id = '${U.mom}'))`),
   `reset role;`,
@@ -148,4 +152,10 @@ test('consentimento em papel: só gestor ou administrador registra, com motivo; 
   assert.match(err('coach_paper'), /TP_FORBIDDEN/);
   assert.equal(ok('mgr_paper'), true, err('mgr_paper'));
   assert.ok(R.audit.n >= 3);
+});
+test('responsável que autorizou avisos recebe o push de chegada; ninguém registra aparelho em nome de outro', () => {
+  assert.equal(ok('mom_token'), true, err('mom_token'));
+  assert.equal(ok('mom_token_other'), false);
+  assert.ok(R.push_queued.n >= 1, JSON.stringify(R.push_queued));
+  assert.equal(R.push_queued.body_ok, true);
 });

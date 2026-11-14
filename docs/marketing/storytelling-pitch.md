@@ -1,7 +1,7 @@
 # TechPoint — Storytelling do pitch (Linha A: entidades)
 
 Público: gestores e treinadores de clubes, escolas e projetos que recebem verba (emendas, Lei de Incentivo, governo, patrocinador).
-Deck: https://claude.ai/artifact/U3dKhj9it53UQcFeZcx1B7 (12 slides, notas do apresentador em cada um).
+Deck: https://claude.ai/artifact/U3dKhj9it53UQcFeZcx1B7 (13 slides, notas do apresentador em cada um).
 Duração-alvo: 8 a 10 minutos.
 
 ## A história em uma frase
@@ -9,6 +9,7 @@ Quem recebe dinheiro para o esporte precisa provar que o atleta estava no treino
 
 ## Roteiro slide a slide
 
+0. **Abertura (TechPoint · Presença com prova):** conte a origem em primeira pessoa. O TechPoint nasceu na beira da quadra, vendo treinadores e gestores perderem noites juntando listas, planilhas e fotos para provar a patrocinadores e financiadores que o atleta estava lá. Criamos para que essa prova seja simples, segura e verdadeira, e para o treinador voltar a treinar.
 1. **Gancho:** “Quem prova que o atleta estava no treino?” Faça uma pausa. Todo gestor já ouviu essa pergunta de um financiador.
 2. **A dor:** a verba exige um relatório de assiduidade. A ferramenta é papel, planilha e WhatsApp. O atleta dá um “bypass” no treinador, e a falta vira presença. “Não existe projeto sem dor.”
 3. **Quem sofre:**

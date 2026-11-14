@@ -24,7 +24,7 @@ Clube piloto: **DF Vôlei**.
 
 ## Versões
 
-Veja o [CHANGELOG.md](CHANGELOG.md). Para publicar uma versão: subir o número em `app/app.json`, registrar no CHANGELOG, gerar APK e site, e criar a etiqueta `vX.Y.Z` no Git.
+Veja o [CHANGELOG.md](CHANGELOG.md). Para publicar uma versão: subir o número em `app/app.json`, registrar no CHANGELOG, gerar APK e site, e guardar o código no ramo `versao/X.Y.Z` do GitHub.
 
 ## Documentos
 

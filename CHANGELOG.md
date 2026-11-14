@@ -1,7 +1,7 @@
 # Versões do TechPoint
 
 Numeração `MAIOR.MENOR.CORREÇÃO`: a mesma versão vale para o app e para o site (mesmo código).
-Cada versão publicada tem uma etiqueta (tag) no GitHub com o código-fonte completo daquele momento.
+Cada versão publicada fica guardada no GitHub num ramo próprio `versao/X.Y.Z`, com o código-fonte completo daquele momento (o ambiente atual não permite enviar etiquetas/tags).
 
 | Versão | Data | O que entrou |
 |---|---|---|

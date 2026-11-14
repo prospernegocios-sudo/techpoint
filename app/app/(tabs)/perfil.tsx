@@ -1,4 +1,5 @@
 // Perfil: dados da conta, aparência (paleta e modo) e biometria.
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Switch, View } from 'react-native';
@@ -85,6 +86,7 @@ export default function Perfil() {
         <Button title="Meus responsáveis e autorização" kind="outline" onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: me.athlete!.id } })} />
       )}
       <Button title="Sair da conta" kind="outline" onPress={signOut} />
+      <T variant="small" style={{ textAlign: 'center' }}>TechPoint versão {Constants.expoConfig?.version}</T>
       <T variant="small" style={{ textAlign: 'center' }}>TechPoint · versão de teste</T>
     </Screen>
   );

@@ -22,6 +22,10 @@ Clube piloto: **DF Vôlei**.
 - Localização lida só no instante do registro; nada em segundo plano.
 - Até a Fase 2 (consentimento dos responsáveis), o app usa **apenas dados fictícios**.
 
+## Versões
+
+Veja o [CHANGELOG.md](CHANGELOG.md). Para publicar uma versão: subir o número em `app/app.json`, registrar no CHANGELOG, gerar APK e site, e criar a etiqueta `vX.Y.Z` no Git.
+
 ## Documentos
 
 - [Concorrentes e cronograma](docs/roadmap.md)

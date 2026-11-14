@@ -1,0 +1,36 @@
+# TechPoint em módulos (proposta, aguardando aprovação)
+
+## Ideia
+Um **núcleo** comum e **módulos** que cada cliente liga ou desliga e paga à parte.
+Tudo continua sendo um único app, um único site e um único banco: o cliente vê apenas os módulos que contratou.
+
+## Mapa
+| Módulo | O que tem | Quem compra | Situação |
+|---|---|---|---|
+| **Núcleo** (sempre incluso) | Entidade, pessoas e papéis, equipes, locais, login, LGPD e consentimento, avisos (push), arquivos e documentos | Todos | Pronto, exceto o envio de documentos |
+| **M1 Atletas e Presença** | Check-in com prova, treinos, responsáveis, correções, relatório de assiduidade | Clubes, escolas, projetos | Em desenvolvimento (Fases 1 e 2) |
+| **M2 Gestão de Investimentos** | Projetos incentivados, plano de trabalho, metas, patrocinadores, prestação de contas física e financeira | Quem capta recurso (LIE, emendas, patrocínio) | Base já feita (projetos); a parte financeira está prevista |
+| **M3 Competições** | Campeonatos, inscrições, convocações, tabelas e resultados | Clubes, federações, ligas | A desenhar |
+| **M4 Reservas (arenas)** | Agenda de quadras, disponibilidade, reserva pelo aluno, bloqueio automático, base de alunos, pagamento | Arenas, beach tennis, escolinhas | A validar no mercado |
+| Futuro | Desempenho e avaliação técnica | Clubes | Roteiro da Fase 5 |
+
+## Como fica por dentro
+- No banco: uma tabela `org_modules` registra a entidade, o módulo e se ele está ativo, em teste ou suspenso.
+- Uma função `org_has_module()` protege as regras de acesso (RLS) e as funções do banco. O módulo desligado fica fechado no servidor, não só escondido na tela.
+- No app, os menus e as telas aparecem conforme os módulos ativos.
+- No código, cada módulo tem sua pasta (`src/modules/<nome>`) e suas migrações próprias.
+- Cobrança: um preço base (Núcleo + M1) e os demais módulos como adicionais. Os valores entram na revisão de preço já combinada.
+
+## Ponto crítico: M4 Reservas
+- **É outro comprador e outra dor.** O dono da arena quer encher a agenda e receber, não prestar contas. O pitch e o marketing serão outros (Linha B).
+- **O mercado já tem aplicativos de reserva estabelecidos.** O diferencial precisa ser claro, por exemplo arena + escolinha + projeto social num lugar só.
+- **Pagamento online (Pix ou cartão)** traz taxas, estorno e política de cancelamento. São decisões de custo e segurança.
+- **Sinergia:** usa o mesmo núcleo (pessoas, locais, agenda), e muitas arenas também têm escolinha ou projeto.
+- **Sugestão:** conversar com 3 a 5 arenas de Brasília antes de programar.
+
+## Ordem sugerida
+1. Terminar a Fase 2 (LGPD) e publicar na Google Play, como já planejado.
+2. Fazer a "Fase 2.5 Módulos": criar `org_modules`, ligar M1 e M2 em todas as entidades atuais e ajustar os menus. É pequena e evita retrabalho.
+3. M2 completo (parte financeira), vendido como adicional.
+4. M3 Competições.
+5. M4 Reservas, depois da validação com as arenas.

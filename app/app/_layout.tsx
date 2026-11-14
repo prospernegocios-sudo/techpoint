@@ -1,12 +1,13 @@
 // Raiz do app: provedores (tema, login, dados) e a trava de biometria.
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Button, T } from '@/components/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { takeNext } from '@/lib/links';
 import { MeProvider } from '@/lib/me';
 import { configMissing } from '@/lib/supabase';
 import { ThemeProvider, useTheme } from '@/lib/theme';
@@ -35,6 +36,12 @@ function LockScreen() {
 function Shell() {
   const { colors, isDark } = useTheme();
   const { locked, session } = useAuth();
+  // Depois de entrar, volta para o link que a pessoa tinha aberto (convite, responsável).
+  const uid = session?.user.id;
+  useEffect(() => {
+    if (!uid) return;
+    takeNext().then((next) => { if (next) setTimeout(() => router.replace(next as never), 50); });
+  }, [uid]);
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />

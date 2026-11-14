@@ -1,4 +1,5 @@
 // Perfil: dados da conta, aparência (paleta e modo) e biometria.
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Switch, View } from 'react-native';
 import { Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
@@ -79,6 +80,9 @@ export default function Perfil() {
           {pwMsg && <Notice tone={pwMsg.tone} text={pwMsg.text} />}
           <Button title="Trocar senha" kind="outline" onPress={changePassword} />
         </Card>
+      )}
+      {me.athlete && (
+        <Button title="Meus responsáveis e autorização" kind="outline" onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: me.athlete!.id } })} />
       )}
       <Button title="Sair da conta" kind="outline" onPress={signOut} />
       <T variant="small" style={{ textAlign: 'center' }}>TechPoint · versão de teste</T>

@@ -10,6 +10,7 @@ import { getQueue, syncQueue } from '@/lib/attendance';
 import { formatDay, formatTime } from '@/lib/format';
 import { orgLogoUrl, modeLabels, useMe } from '@/lib/me';
 import { useSetupSteps, useTeamDashboard } from '@/lib/dashboard';
+import { GuardianHome } from '@/components/guardian-home';
 import { useEvents, useMyAttendance, type EventRow } from '@/lib/queries';
 import { nextAction } from '@/lib/next-action';
 import { useTheme } from '@/lib/theme';
@@ -87,7 +88,8 @@ export default function Home() {
     );
   }
 
-  const list = events.data ?? [];
+  // Responsável acompanha pelos cartões dos filhos; a agenda é da equipe e dos atletas.
+  const list = me.mode === 'guardian' ? [] : events.data ?? [];
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
@@ -139,6 +141,12 @@ export default function Home() {
               <T variant="small">Pendências para aprovar (7 dias)</T>
               <T variant="title" color={dash.data.pendingWeek ? colors.warning : colors.text}>{dash.data.pendingWeek}</T>
             </Card>
+            {dash.data.joinPending > 0 && (
+              <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={() => router.push('/cadastro/convites')}>
+                <T variant="small">Novos atletas para aprovar</T>
+                <T variant="title" color={colors.warning}>{dash.data.joinPending}</T>
+              </Card>
+            )}
             <Card style={{ flexGrow: 1, flexBasis: 150 }}>
               <T variant="small">Treinos hoje</T>
               <T variant="title">{dash.data.today.length}</T>
@@ -169,12 +177,14 @@ export default function Home() {
         </View>
       )}
 
+      {me.mode === 'guardian' && <GuardianHome />}
+
       {queueInfo.pending > 0 && <Notice tone="warning" text={`${queueInfo.pending} registro(s) guardado(s) no celular. Vamos enviar assim que a internet voltar.`} />}
       {queueInfo.msg && <Notice tone="info" text={queueInfo.msg} />}
 
       {events.isLoading && <Loading />}
       {events.error && <Notice tone="danger" text="Não foi possível carregar a agenda. Verifique a internet." />}
-      {!events.isLoading && list.length === 0 && <T variant="muted">Nenhum treino nos próximos 7 dias.</T>}
+      {!events.isLoading && list.length === 0 && me.mode !== 'guardian' && <T variant="muted">Nenhum treino nos próximos 7 dias.</T>}
 
       {/* Atleta: cartão fixo do treino de agora, com o botão grande no topo */}
       {isAthlete && me.athlete && (() => {

@@ -1,7 +1,7 @@
 // Atletas: lista e cadastro. Com o e-mail Google do atleta (10 anos ou mais),
 // a conta dele é ligada automaticamente ao cadastro no primeiro login.
 import { useQueryClient } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Badge, Loading, Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
@@ -95,11 +95,12 @@ export default function Atletas() {
       )}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
       {list.map((a) => (
-        <Card key={a.id} style={{ flexGrow: 1, flexBasis: 280 }}>
+        <Card key={a.id} style={{ flexGrow: 1, flexBasis: 280 }} onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: a.id } })}>
           <T variant="subtitle">{a.full_name}</T>
           <T variant="muted">{ageOn(new Date(a.birth_date + 'T12:00:00'))} anos · {a.team_members.map((t) => teamName(t.team_id)).join(', ') || 'Sem equipe'}</T>
           <View style={styles.wrap}>
             {a.profile_id ? <Badge label="Com conta no app" tone="success" /> : a.email ? <Badge label="Aguardando 1º login" tone="warning" /> : <Badge label="Sem conta" />}
+            {a.status === 'pending_consent' && <Badge label="Aguardando autorização" tone="warning" />}
           </View>
         </Card>
       ))}

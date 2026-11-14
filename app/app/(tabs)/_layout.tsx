@@ -11,7 +11,7 @@ import { useTheme } from '@/lib/theme';
 
 export default function TabsLayout() {
   const { session } = useAuth();
-  const { isStaff, isPlatformAdmin } = useMe();
+  const { isStaff, isPlatformAdmin, mode } = useMe();
   const team = isStaff || isPlatformAdmin;
   const { colors } = useTheme();
   // Deixa a barra de abas acima dos botões de navegação do Android.
@@ -48,7 +48,8 @@ export default function TabsLayout() {
         name="acao"
         options={{
           title: team ? 'Presença' : 'Check-in',
-          tabBarButton: () => <CenterButton wide={wide} />,
+          // Responsável não tem botão central (acompanha pela tela inicial).
+          tabBarButton: mode === 'guardian' ? () => null : () => <CenterButton wide={wide} />,
         }}
       />
       <Tabs.Screen

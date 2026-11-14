@@ -101,6 +101,14 @@ const scenario = [
   tryRun('mgr_paper', `select public.record_paper_consent('${OTHER_ATH}', 'papel-v1', 'Termo assinado na secretaria')`),
   `reset role;`,
   keep('audit', `select count(*)::int n from public.audit_log where org_id = '${ORG}' and table_name = 'guardian_consents'`),
+  // Atleta que já tem cadastro pede para entrar em outro time: reaproveita o cadastro.
+  `reset role; insert into public.teams (id, org_id, name) values ('${id(301)}','${ORG}','G Sub 17'); insert into public.team_invites (org_id, team_id, token) values ('${ORG}','${id(301)}','tk-sub17');`,
+  as(U.kid),
+  tryRun('join_second_team', `select public.request_to_join('tk-sub17', 'Atleta G', '2012-05-05', '{"phone":"61988887777"}'::jsonb)`),
+  as(U.coach),
+  tryRun('approve_second', `select public.decide_join_request((select id from public.athlete_join_requests where team_id = '${id(301)}'), true)`),
+  `reset role;`,
+  keep('kid_records', `select (select count(*) from public.athletes where profile_id = '${U.kid}')::int athletes, (select count(*) from public.team_members tm join public.athletes a on a.id = tm.athlete_id where a.profile_id = '${U.kid}')::int teams`),
   `select name, value from results;`,
 ].join('\n');
 
@@ -158,4 +166,9 @@ test('responsável que autorizou avisos recebe o push de chegada; ninguém regis
   assert.equal(ok('mom_token_other'), false);
   assert.ok(R.push_queued.n >= 1, JSON.stringify(R.push_queued));
   assert.equal(R.push_queued.body_ok, true);
+});
+test('quem já é atleta da entidade entra em outro time sem duplicar o cadastro', () => {
+  assert.equal(ok('join_second_team'), true, err('join_second_team'));
+  assert.equal(ok('approve_second'), true, err('approve_second'));
+  assert.deepEqual(R.kid_records, { athletes: 1, teams: 2 });
 });

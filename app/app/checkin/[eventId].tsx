@@ -1,6 +1,7 @@
 // Check-in / check-out do atleta:
-// 1) lê a localização uma vez  2) tira a foto na hora (só câmera, nunca galeria)
-// 3) envia ao servidor, que confere hora, raio e antifraude.
+// Fluxo em 2 toques (D62): a câmera abre na hora e a localização é lida ao mesmo tempo;
+// ao tirar a foto (só câmera, nunca galeria) o registro já é enviado ao servidor,
+// que confere hora, raio e antifraude.
 import { useQueryClient } from '@tanstack/react-query';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
@@ -18,7 +19,7 @@ import { useMe } from '@/lib/me';
 import { useEvent } from '@/lib/queries';
 import { useTheme } from '@/lib/theme';
 
-type Step = 'locating' | 'location_problem' | 'camera' | 'review' | 'sending' | 'justify' | 'result';
+type Step = 'location_problem' | 'camera' | 'waiting_fix' | 'sending' | 'justify' | 'result';
 
 const locationMessages: Record<LocationProblem, string> = {
   permission_denied: 'Precisamos da sua localização no momento do registro. Toque em "Abrir configurações", vá em Permissões > Localização e escolha "Permitir durante o uso do app".',
@@ -34,7 +35,8 @@ export default function CheckinScreen() {
   const me = useMe();
   const qc = useQueryClient();
   const event = useEvent(eventId);
-  const [step, setStep] = useState<Step>('locating');
+  const [step, setStep] = useState<Step>('camera');
+  const [locating, setLocating] = useState(true);
   const [problem, setProblem] = useState<LocationProblem | null>(null);
   const [fix, setFix] = useState<Fix | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -47,15 +49,16 @@ export default function CheckinScreen() {
   const [taking, setTaking] = useState(false);
 
   const locate = useCallback(async () => {
-    setStep('locating');
+    setLocating(true);
+    setProblem(null);
     const r = await readLocationOnce();
+    setLocating(false);
     if (r.problem) {
       setProblem(r.problem);
       setStep('location_problem');
       return;
     }
     setFix(r.fix!);
-    setStep('camera');
   }, []);
 
   useEffect(() => {
@@ -68,7 +71,8 @@ export default function CheckinScreen() {
     try {
       const pic = await cameraRef.current.takePictureAsync({ quality: 0.7, skipProcessing: false });
       setPhotoUri(pic.uri);
-      setStep('review');
+      // Envia na hora; se o GPS ainda estiver lendo, espera por ele.
+      setStep(fix ? 'sending' : 'waiting_fix');
     } catch {
       setCameraError('Não foi possível tirar a foto. Feche outros apps que usam a câmera e tente de novo.');
     } finally {
@@ -88,6 +92,16 @@ export default function CheckinScreen() {
     setStep('result');
     qc.invalidateQueries({ queryKey: ['my-attendance'] });
   };
+
+  // Foto tirada + localização lida = envia automaticamente.
+  const started = useRef(false); // garante um único envio
+  useEffect(() => {
+    if (photoUri && fix && (step === 'sending' || step === 'waiting_fix') && !started.current) {
+      started.current = true;
+      confirm();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photoUri, fix, step]);
 
   const confirm = async () => {
     if (!photoUri || !fix || !me.athlete || !eventId) return;
@@ -132,13 +146,13 @@ export default function CheckinScreen() {
       )}
       {!me.athlete && <Notice tone="danger" text="Seu cadastro de atleta não está ligado a esta conta. Fale com o gestor." />}
 
-      {step === 'locating' && <Loading text="Buscando sua localização..." />}
+      {locating && step === 'camera' && <Notice tone="info" text="Lendo sua localização..." />}
 
       {step === 'location_problem' && problem && (
         <View style={{ gap: 12 }}>
           <Notice tone="danger" text={locationMessages[problem]} />
           {problem === 'permission_denied' && <Button title="Abrir configurações" onPress={() => Linking.openSettings()} />}
-          <Button title="Tentar de novo" kind="outline" onPress={locate} />
+          <Button title="Tentar de novo" kind="outline" onPress={() => { setStep(photoUri ? 'waiting_fix' : 'camera'); locate(); }} />
         </View>
       )}
 
@@ -174,7 +188,7 @@ export default function CheckinScreen() {
             </View>
           ) : (
             <>
-              <T variant="muted">Enquadre o seu rosto e toque em "Tirar foto".</T>
+              <T variant="muted">Enquadre o seu rosto. Ao tocar em "{kind === 'check_in' ? 'Fazer check-in' : 'Fazer check-out'}", a foto é tirada e o registro já é enviado.</T>
               <View style={{ borderRadius: 20, overflow: 'hidden', aspectRatio: 3 / 4, backgroundColor: '#000' }}>
                 <CameraView
                   ref={cameraRef}
@@ -183,17 +197,16 @@ export default function CheckinScreen() {
                   onMountError={() => setCameraError('A câmera não está disponível agora. Feche outros apps que usam a câmera e tente de novo.')}
                 />
               </View>
-              <Button title="Tirar foto" kind="accent" big loading={taking} onPress={takePhoto} />
+              <Button title={kind === 'check_in' ? 'Fazer check-in' : 'Fazer check-out'} kind="accent" big loading={taking} onPress={takePhoto} />
             </>
           )}
         </View>
       )}
 
-      {step === 'review' && photoUri && (
-        <View style={{ gap: 12 }}>
-          <Image source={{ uri: photoUri }} style={{ width: '100%', aspectRatio: 3 / 4, borderRadius: 20 }} accessibilityLabel="Foto tirada agora" />
-          <Button title={`Confirmar ${label}`} kind="accent" big onPress={confirm} />
-          <Button title="Tirar outra foto" kind="outline" onPress={() => { setPhotoUri(null); setStep('camera'); }} />
+      {step === 'waiting_fix' && photoUri && (
+        <View style={{ gap: 12, alignItems: 'center' }}>
+          <Image source={{ uri: photoUri }} style={{ width: 160, aspectRatio: 3 / 4, borderRadius: 16 }} accessibilityLabel="Foto tirada agora" />
+          <Loading text="Foto pronta. Aguardando a localização para enviar..." />
         </View>
       )}
 

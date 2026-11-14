@@ -16,7 +16,6 @@ export default function Gestao() {
   const groups: { title: string; items: Item[] }[] = [
     { title: 'Treinos e presença', items: [
       { title: 'Novo treino', desc: 'Marcar um treino ou um treino de teste agora', href: '/cadastro/treino', icon: 'calendar-outline', show: isStaff },
-      { title: 'Relatórios', desc: 'Frequência avulsa ou relatório emitido de projeto', href: '/cadastro/relatorios', icon: 'document-text-outline', show: isStaff },
     ] },
     { title: 'Projetos', items: [
       { title: 'Projetos incentivados', desc: 'Plano aprovado, metas, beneficiários e indicadores', href: '/projeto', icon: 'ribbon-outline', show: isStaff },

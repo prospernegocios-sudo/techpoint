@@ -10,7 +10,8 @@ import { getQueue, syncQueue } from '@/lib/attendance';
 import { formatDay, formatTime } from '@/lib/format';
 import { orgLogoUrl, modeLabels, useMe } from '@/lib/me';
 import { useSetupSteps, useTeamDashboard } from '@/lib/dashboard';
-import { useEvents, useMyAttendance, type AttendanceRow, type EventRow } from '@/lib/queries';
+import { useEvents, useMyAttendance, type EventRow } from '@/lib/queries';
+import { nextAction } from '@/lib/next-action';
 import { useTheme } from '@/lib/theme';
 
 function isToday(iso: string) {
@@ -23,27 +24,6 @@ function eventPhase(ev: EventRow): 'upcoming' | 'live' | 'ended' {
   if (now < new Date(ev.starts_at).getTime()) return 'upcoming';
   if (now <= new Date(ev.ends_at).getTime()) return 'live';
   return 'ended';
-}
-
-type Action = { kind: 'check_in' | 'check_out'; label: string } | null;
-
-function nextAction(ev: EventRow, recs: AttendanceRow[]): { action: Action; status: string } {
-  const now = Date.now();
-  const start = new Date(ev.starts_at).getTime();
-  const end = new Date(ev.ends_at).getTime();
-  const ci = recs.find((r) => r.event_id === ev.id && r.kind === 'check_in' && r.status !== 'rejected');
-  const co = recs.find((r) => r.event_id === ev.id && r.kind === 'check_out' && r.status !== 'rejected');
-  if (co) return { action: null, status: `Saída às ${formatTime(co.server_at)}${co.status === 'pending' ? ' (aguardando treinador)' : ''}` };
-  if (ci) {
-    const label = `Chegada às ${formatTime(ci.server_at)}${ci.status === 'pending' ? ' (aguardando treinador)' : ''}`;
-    if (now >= start && now <= end + 60 * 60_000) return { action: { kind: 'check_out', label: 'Fazer check-out' }, status: label };
-    return { action: null, status: label };
-  }
-  if (now >= start - 30 * 60_000 && now <= start + 30 * 60_000) return { action: { kind: 'check_in', label: 'Fazer check-in' }, status: 'Check-in aberto' };
-  // Depois da tolerância continua liberado até o fim do treino, marcado como atrasado (D58).
-  if (now > start + 30 * 60_000 && now <= end) return { action: { kind: 'check_in', label: 'Fazer check-in (atrasado)' }, status: 'Treino em andamento: o check-in fica marcado como atrasado' };
-  if (now < start - 30 * 60_000) return { action: null, status: `Check-in abre às ${formatTime(new Date(start - 30 * 60_000))}` };
-  return { action: null, status: 'Check-in encerrado' };
 }
 
 export default function Home() {

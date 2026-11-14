@@ -10,7 +10,7 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 | **Núcleo** (sempre incluso) | Entidade, pessoas e papéis, equipes, locais, login, LGPD e consentimento, avisos (push), arquivos e documentos | Todos | Pronto, exceto o envio de documentos |
 | **M1 Atletas e Presença** | Check-in com prova, treinos, responsáveis, correções, relatório de assiduidade | Clubes, escolas, projetos | Em desenvolvimento (Fases 1 e 2) |
 | **M2 Gestão de Investimentos** | Projetos incentivados, plano de trabalho, metas, patrocinadores, prestação de contas física e financeira | Quem capta recurso (LIE, emendas, patrocínio) | Base já feita (projetos); a parte financeira está prevista |
-| **M3 Competições** | Campeonatos, inscrições, convocações, tabelas e resultados | Clubes, federações, ligas | A desenhar |
+| **M3 Competições** | A entidade cadastra a competição (própria ou de fora, ex.: Copa Goiânia), convoca os atletas pela plataforma, o atleta/responsável confirma, gera a lista de inscritos com documentos, e registra jogos e resultados | Clubes, escolas, projetos | Escopo definido (14/11) |
 | **M4 Reservas (arenas)** | Agenda de quadras, disponibilidade, reserva pelo aluno, bloqueio automático, base de alunos, pagamento | Arenas, beach tennis, escolinhas | A validar no mercado |
 | Futuro | Desempenho e avaliação técnica | Clubes | Roteiro da Fase 5 |
 
@@ -33,4 +33,12 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 2. Fazer a "Fase 2.5 Módulos": criar `org_modules`, ligar M1 e M2 em todas as entidades atuais e ajustar os menus. É pequena e evita retrabalho.
 3. M2 completo (parte financeira), vendido como adicional.
 4. M3 Competições.
-5. M4 Reservas, depois da validação com as arenas.
+5. M4 Reservas: **por último** (decisão do dono do produto, 14/11), depois da validação com as arenas.
+
+## M3 Competições: fluxo combinado
+1. O gestor ou treinador cadastra a competição: nome, cidade, datas, categoria e local (ex.: Copa Goiânia).
+2. Escala o time escolhendo os atletas da equipe (convocação).
+3. Cada convocado recebe aviso no celular (o responsável também, se for menor) e responde **vou / não vou**.
+4. Para menor de idade, o responsável **autoriza a participação e a viagem** pelo app (a validar com advogado: regras do ECA para viagem de menor).
+5. A plataforma gera a **lista de inscritos** com os dados e documentos exigidos (RG, atestado), aproveitando o envio de documentos do núcleo.
+6. Durante e depois: jogos, placares, presença e relatório da competição (entra também na prestação de contas do M2).

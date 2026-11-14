@@ -23,9 +23,8 @@ Quem recebe dinheiro para o esporte precisa provar que o atleta estava no treino
 9. **Modelo:** assinatura mensal por faixa de atletas, a partir de R$ 149, com usuários ilimitados. O custo cabe na rubrica de gestão do projeto.
 10. **Tração:** o piloto é o DF Vôlei, e o app e o site estão no ar (v0.2.0). 100 atletas, 4 equipes (Sub 15, Sub 17, Sub 19, Feminino Sub 15), 3 treinos por semana: até 300 check-ins por semana.
 11. **Cronograma:** dez/26 é a base e a LGPD. Jan/27 é a Google Play e o acesso do patrocinador. Depois vêm comunicação, desempenho e iPhone.
-12. **Convite:** “Faça o piloto com a gente.” Piloto de 60 dias. Contato: WhatsApp da Prosper Negócios.
+12. **Convite:** “Faça o piloto com a gente.” Piloto gratuito de 60 dias. Contato: WhatsApp da Prosper Negócios, (61) 98340-0404.
 
 ## Pendências antes de apresentar
-- Número de WhatsApp da Prosper no último slide.
 - Revisão do racional de preço (combinado para depois).
 - O vídeo ilustrativo virá na próxima etapa, usando este roteiro.

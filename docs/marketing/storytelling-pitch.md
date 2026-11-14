@@ -20,7 +20,7 @@ Quem recebe dinheiro para o esporte precisa provar que o atleta estava no treino
 6. **Prestação de contas:** o relatório sai em um clique e fica congelado. As fotos são guardadas por 24 meses, e cada patrocinador vê só as suas.
 7. **Diferencial:** o TechPoint tem 7,5 dos 9 recursos do benchmark. O melhor concorrente tem até 4. Os concorrentes resolvem outra dor.
 8. **Mercado:** a Lei de Incentivo captou R$ 1,38 bi em 2025, com 2.583 projetos aprovados em 2024, e o CBC tem 1.434 clubes. A meta é chegar a cerca de R$ 51 mil de receita mensal em 3 anos.
-9. **Modelo:** assinatura mensal por faixa de atletas, a partir de R$ 349 (plano Clube), com usuários ilimitados. O custo cabe na rubrica de gestão do projeto.
+9. **Modelo:** assinatura mensal por faixa de atletas, a partir de R$ 349 (plano Clube), com usuários ilimitados. Por atleta: Clube R$ 2,33, Projeto R$ 1,75, Rede R$ 1,50 por mês (plano cheio); com 3 treinos por semana, menos de R$ 0,20 por atleta por treino. O custo cabe na rubrica de gestão do projeto.
 10. **Tração:** o piloto é o DF Vôlei, e o app e o site estão no ar (v0.2.0). 100 atletas, 4 equipes (Sub 15, Sub 17, Sub 19, Feminino Sub 15), 3 treinos por semana: até 300 check-ins por semana.
 11. **Cronograma:** dez/26 é a base e a LGPD. Jan/27 é a Google Play e o acesso do patrocinador. Depois vêm comunicação, desempenho e iPhone.
 12. **Convite:** “Faça o piloto com a gente.” Piloto gratuito de 60 dias. Contato: WhatsApp da Prosper Negócios, (61) 98340-0404.

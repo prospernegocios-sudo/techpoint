@@ -1,6 +1,6 @@
 // Equipes e categorias.
 import { useQueryClient } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
@@ -49,7 +49,7 @@ export default function Equipes() {
       </Card>
       {teams.data?.length === 0 && <Notice tone="info" text="Nenhuma equipe ainda. Crie a primeira acima (ex.: Sub 15 Masculino)." />}
       {(teams.data ?? []).map((t) => (
-        <Card key={t.id}>
+        <Card key={t.id} onPress={() => router.push({ pathname: '/equipe/[id]', params: { id: t.id } })}>
           <T variant="subtitle">{t.name}</T>
           {t.category && <T variant="muted">{t.category}</T>}
         </Card>

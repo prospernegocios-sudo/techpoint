@@ -1,8 +1,8 @@
 // Convidar atletas (link por time) e aprovar os pedidos de entrada (D37).
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Badge, Button, Card, Chip, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { maskPhone } from '@/lib/br';
 import { toFriendlyError } from '@/lib/errors';
@@ -11,6 +11,7 @@ import { guardianUrl, inviteUrl, openWhatsApp, shareText } from '@/lib/links';
 import { useMe } from '@/lib/me';
 import { useAthletes, useTeams } from '@/lib/queries';
 import { isoDayToBr } from '@/lib/report';
+import { openInNewTab } from '@/lib/open';
 import { supabase } from '@/lib/supabase';
 
 type Req = {
@@ -35,7 +36,8 @@ export default function Convites() {
       return (data ?? []) as unknown as Req[];
     },
   });
-  const [teamId, setTeamId] = useState<string | null>(null);
+  const params = useLocalSearchParams<{ team?: string }>();
+  const [teamId, setTeamId] = useState<string | null>(params.team ?? null);
   const [link, setLink] = useState<string | null>(null);
   const [linkFor, setLinkFor] = useState<Record<string, string | null>>({});
   const [done, setDone] = useState<{ name: string; guardianToken: string | null; phone: string | null } | null>(null);
@@ -114,7 +116,9 @@ export default function Convites() {
           <Card key={r.id}>
             <View style={[styles.row, { justifyContent: 'space-between' }]}>
               <T variant="subtitle" style={{ flex: 1 }}>{r.full_name}</T>
-              <Badge label={teamName(r.team_id)} tone="primary" />
+              <Pressable accessibilityRole="link" accessibilityLabel={`Abrir o time ${teamName(r.team_id)}`} onPress={() => openInNewTab(`/equipe/${r.team_id}`)}>
+                <Badge label={`${teamName(r.team_id)} ↗`} tone="primary" />
+              </Pressable>
             </View>
             <T variant="small">{age} anos · nascimento {isoDayToBr(r.birth_date)} · {r.profiles?.email}</T>
             {r.guardian_name && <T variant="small">Responsável: {r.guardian_name}{r.guardian_relationship ? ` (${r.guardian_relationship})` : ''}{r.guardian_phone ? ` · ${maskPhone(r.guardian_phone)}` : ''}{r.guardian_email ? ` · ${r.guardian_email}` : ''}</T>}

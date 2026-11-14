@@ -7,9 +7,9 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 ## Mapa
 | Módulo | O que tem | Quem compra | Situação |
 |---|---|---|---|
-| **Plano Base: Núcleo + Atletas e Presença** (sempre incluso, vendido junto) | Entidade, pessoas e papéis, equipes, locais, login, LGPD e consentimento, avisos (push), documentos; check-in com prova, treinos, responsáveis, correções, relatório de assiduidade | Clubes, escolas, projetos | Em desenvolvimento (Fases 1 e 2) |
+| **Plano Base: Núcleo + Atletas e Presença + Competições** (sempre incluso, vendido junto) | Entidade, pessoas e papéis, equipes, locais, login, LGPD e consentimento, avisos (push), documentos; check-in com prova, treinos, responsáveis, correções, relatório de assiduidade; competições, convocação, autorização de viagem e hospedagem, logística e resultados | Clubes, escolas, projetos | Em desenvolvimento (Fases 1 e 2) |
 | **M2 Gestão de Investimentos** | Gestão do dinheiro captado pelos projetos (LIE, emendas, editais, patrocínio): orçamento por rubrica, despesas com comprovantes, saldo, metas, patrocinadores e prestação de contas física e financeira | Quem capta recurso (LIE, emendas, patrocínio) | Base já feita (projetos); a parte financeira está prevista |
-| **M3 Competições** | A entidade cadastra a competição (própria ou de fora, ex.: Copa Goiânia), convoca os atletas pela plataforma, o atleta/responsável confirma, gera a lista de inscritos com documentos, e registra jogos e resultados | Clubes, escolas, projetos | Escopo definido (14/11) |
+| **Competições (dentro do Plano Base, D72)** | A entidade cadastra a competição (própria ou de fora, ex.: Copa Goiânia), convoca os atletas pela plataforma, o atleta/responsável confirma, gera a lista de inscritos com documentos, e registra jogos e resultados | Clubes, escolas, projetos | Escopo definido (14/11) |
 | **M4 Reservas (arenas)** | Agenda de quadras, disponibilidade, reserva pelo aluno, bloqueio automático, base de alunos, pagamento | Arenas, beach tennis, escolinhas | A validar no mercado |
 | Futuro | Desempenho e avaliação técnica | Clubes | Roteiro da Fase 5 |
 
@@ -30,8 +30,8 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 ## Ordem sugerida
 1. Terminar a Fase 2 (LGPD) e publicar na Google Play, como já planejado.
 2. Fazer a "Fase 2.5 Módulos": criar `org_modules`, ligar o Plano Base e o M2 em todas as entidades atuais e ajustar os menus. É pequena e evita retrabalho.
-3. M2 completo (parte financeira), vendido como adicional.
-4. M3 Competições.
+3. Competições, já dentro do Plano Base.
+4. M2 completo (parte financeira), vendido como adicional.
 5. M4 Reservas: **por último** (decisão do dono do produto, 14/11), depois da validação com as arenas.
 
 ## M3 Competições: fluxo combinado

@@ -42,3 +42,24 @@ Tudo continua sendo um único app, um único site e um único banco: o cliente v
 4. Para menor de idade, o responsável **autoriza a participação e a viagem** pelo app (a validar com advogado: regras do ECA para viagem de menor).
 5. A plataforma gera a **lista de inscritos** com os dados e documentos exigidos (RG, atestado), aproveitando o envio de documentos do núcleo.
 6. Durante e depois: jogos, placares, presença e relatório da competição (entra também na prestação de contas do M2).
+
+## M3: autorização de viagem e hospedagem pronta para o cartório (pedido de 14/11)
+Para cada competição fora da cidade, a plataforma gera o documento já preenchido. O responsável **clica, imprime e reconhece firma no cartório**. A assinatura gov.br não é aceita (TJDFT/CNJ).
+
+**Base legal (a validar com advogado antes de lançar):**
+- **Viagem nacional:** ECA art. 83 e Resolução CNJ 295/2019. Menor de **16 anos** viajando sem os pais precisa de autorização com **firma reconhecida** (por semelhança ou autenticidade), no modelo do anexo da resolução. Sem data no documento, a validade é de 2 anos.
+- **Hospedagem:** ECA art. 82 proíbe hospedar criança ou adolescente (**menor de 18**) em hotel ou similar sem autorização ou acompanhamento dos pais. Não há modelo oficial: a plataforma usa um termo próprio com firma reconhecida.
+- **Viagem internacional:** Resolução CNJ 131/2011. Fica fora por enquanto.
+
+**O documento sai preenchido com:**
+- **Atleta:** nome, data de nascimento, documento.
+- **Responsável:** nome, RG, CPF e endereço.
+- **Adulto acompanhante:** o treinador ou o chefe de delegação, com nome e documento.
+- **Viagem:** destino, datas de ida e volta, competição.
+- **Hospedagem:** hotel ou alojamento.
+- **Validade:** campo com a data.
+
+**Regras de geração:**
+- **Atleta até 15 anos:** viagem + hospedagem.
+- **Atleta com 16 ou 17 anos:** só hospedagem.
+- A equipe acompanha o status de cada convocado: **pendente / entregue**, com foto ou PDF do documento já reconhecido. O arquivo fica no repositório de documentos do núcleo.

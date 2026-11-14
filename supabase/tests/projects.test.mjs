@@ -31,6 +31,7 @@ insert into public.athletes (id, org_id, full_name, birth_date, email) values
  ('${A.d}','${ORG}','Davi','2011-01-01',null);
 insert into public.athletes (id, org_id, full_name, birth_date) values ('${A.x}','${ORG_B}','Xavier','2011-01-01');
 insert into public.team_members (team_id, athlete_id) values ('${T1}','${A.a}'), ('${T1}','${A.b}'), ('${T1}','${A.c}'), ('${T2}','${A.d}');
+insert into public.guardian_consents (org_id, athlete_id, source, terms_version, note) select org_id, id, 'paper', 'teste', 'consentimento de teste' from public.athletes a where not exists (select 1 from public.guardian_consents c where c.athlete_id = a.id);
 insert into public.events (id, org_id, team_id, venue_id, starts_at, ends_at, status) values
  ('${E.e1}','${ORG}','${T1}','${VEN}', now() - interval '3 days', now() - interval '3 days' + interval '90 minutes', 'scheduled'),
  ('${E.e2}','${ORG}','${T1}','${VEN}', now() - interval '1 day',  now() - interval '1 day' + interval '90 minutes', 'scheduled'),

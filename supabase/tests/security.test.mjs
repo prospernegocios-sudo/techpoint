@@ -46,6 +46,7 @@ insert into public.athletes (id, org_id, full_name, birth_date, email) values
  ('${ATH.noacc}','${ORG_A}','Sem Conta','2012-01-01',null);
 insert into public.team_members (team_id, athlete_id) values
  ('${TEAM_A1}','${ATH.a}'), ('${TEAM_A1}','${ATH.a2}'), ('${TEAM_A1}','${ATH.noacc}'), ('${TEAM_B}','${ATH.b}');
+insert into public.guardian_consents (org_id, athlete_id, source, terms_version, note) select org_id, id, 'paper', 'teste', 'consentimento de teste' from public.athletes a where not exists (select 1 from public.guardian_consents c where c.athlete_id = a.id);
 
 -- Criança de 8 anos cria conta depois: NÃO deve ser vinculada (mínimo 10 anos).
 insert into auth.users (id, email, aud, role) values ('${U.kid}','crianca@teste.local','authenticated','authenticated');
@@ -178,7 +179,7 @@ const scenario = [
   tryRun('anon_read_athletes', `select count(*)::int from public.athletes`),
 
   `reset role;`,
-  keep('audit_entries', `select count(*)::int n from public.audit_log where org_id = '${ORG_A}'`),
+  keep('audit_entries', `select count(*)::int n from public.audit_log where org_id = '${ORG_A}' and coalesce(table_name, '') <> 'guardian_consents'`),
 
   // Relatório de frequência (prestação de contas)
   as(U.coachA),

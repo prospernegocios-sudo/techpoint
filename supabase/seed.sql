@@ -102,3 +102,11 @@ begin
   perform app_private.link_profile_by_email(p.id, v_email) from public.profiles p where p.email = v_email;
 end;
 $$;
+
+-- Ambiente de teste: atletas fictícios menores recebem um "consentimento em papel" de teste
+-- (decisão D34/D63). Nunca usar isto com dados reais.
+insert into public.guardian_consents (org_id, athlete_id, source, terms_version, note)
+select a.org_id, a.id, 'paper', 'teste', 'Dados fictícios do ambiente de teste (sem responsável real)'
+from public.athletes a
+where a.org_id = '00000000-0000-4000-8000-000000000001'
+  and app_private.athlete_is_minor(a.id) and not app_private.athlete_has_consent(a.id);

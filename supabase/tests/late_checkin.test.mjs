@@ -12,6 +12,7 @@ insert into public.venues (id, org_id, name, latitude, longitude) values ('${VEN
 insert into public.teams (id, org_id, name) values ('${TEAM}','${ORG}','L Sub 15');
 insert into public.athletes (id, org_id, full_name, birth_date, email) values ('${ATH}','${ORG}','Atleta L','2011-01-01','l.atleta@teste.local');
 insert into public.team_members (team_id, athlete_id) values ('${TEAM}','${ATH}');
+insert into public.guardian_consents (org_id, athlete_id, source, terms_version, note) select org_id, id, 'paper', 'teste', 'consentimento de teste' from public.athletes a where not exists (select 1 from public.guardian_consents c where c.athlete_id = a.id);
 insert into public.events (id, org_id, team_id, venue_id, starts_at, ends_at) values
  ('${LATE}','${ORG}','${TEAM}','${VEN}', now() - interval '60 minutes', now() + interval '30 minutes'),
  ('${OVER}','${ORG}','${TEAM}','${VEN}', now() - interval '3 hours', now() - interval '90 minutes');

@@ -2,11 +2,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from './supabase';
 
-export type CvKind = 'clube' | 'competicao' | 'titulo' | 'selecao' | 'curso' | 'outro';
+export type CvKind = 'clube' | 'competicao' | 'titulo' | 'premio' | 'selecao' | 'curso' | 'outro';
 export const CV_KINDS: { key: CvKind; label: string; icon: string }[] = [
   { key: 'clube', label: 'Clube ou equipe', icon: '🏐' },
   { key: 'competicao', label: 'Competição', icon: '🏟️' },
   { key: 'titulo', label: 'Título ou prêmio', icon: '🏆' },
+  { key: 'premio', label: 'Prêmio individual', icon: '🥇' },
   { key: 'selecao', label: 'Seleção', icon: '⭐' },
   { key: 'curso', label: 'Curso ou camp', icon: '📘' },
   { key: 'outro', label: 'Outro', icon: '•' },
@@ -17,6 +18,7 @@ export const cvKindIcon = (k: string) => CV_KINDS.find((c) => c.key === k)?.icon
 export type CvEntry = {
   id: string; kind: CvKind; title: string; institution: string | null; category: string | null; location: string | null;
   started_on: string; ended_on: string | null; description: string | null; verified: boolean; verified_by_org: string | null;
+  result?: string | null;
 };
 export type Cv = {
   athlete_id: string; full_name: string; age: number; org: string | null;
@@ -26,7 +28,24 @@ export type Cv = {
   attendance_12m: { events: number; present: number; pct: number | null };
   trainings_total?: number; first_training?: string | null;
   entries: CvEntry[];
+  profile?: CvProfile | null;
 };
+export type CvReference = { name: string; role?: string | null; phone?: string | null };
+export type CvProfile = {
+  headline: string | null; about: string | null; goals: string[]; photo_path: string | null; gallery: string[];
+  city: string | null; show_contacts: boolean; contact_phone: string | null; contact_email: string | null; instagram: string | null;
+  references: CvReference[];
+};
+export type CvImages = { photo: string | null; gallery: string[] };
+
+/** Links temporários das fotos do currículo (funcionam também na página pública do link). */
+export async function cvImageUrls(cv: Cv): Promise<CvImages> {
+  const paths = [cv.profile?.photo_path, ...(cv.profile?.gallery ?? [])].filter((x): x is string => Boolean(x));
+  if (!paths.length) return { photo: null, gallery: [] };
+  const { data } = await supabase.storage.from('athlete-cv').createSignedUrls(paths, 3600);
+  const map = new Map((data ?? []).map((d) => [d.path, d.signedUrl]));
+  return { photo: cv.profile?.photo_path ? map.get(cv.profile.photo_path) ?? null : null, gallery: (cv.profile?.gallery ?? []).map((g) => map.get(g)).filter((x): x is string => Boolean(x)) };
+}
 
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 /** "2019-03-01" → "mar/2019" */
@@ -74,32 +93,66 @@ export function useAthleteCv(athleteId: string | undefined) {
 
 const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-/** HTML do currículo para PDF (A4 retrato). */
-export function cvHtml(cv: Cv): string {
+/** Currículo em PDF (A4 retrato), no estilo do modelo do dono do produto: coluna lateral com foto,
+ *  contatos, sobre mim, metas e prêmios; à direita nome, experiência, competições, fotos e referências.
+ *  É do atleta (white label do atleta): sem a marca da entidade, só "atualmente em ...". */
+export function cvHtml(cv: Cv, img: CvImages = { photo: null, gallery: [] }): string {
+  const p = cv.profile;
   const period = (e: CvEntry) => `${monthLabel(e.started_on)}${e.ended_on ? ` – ${monthLabel(e.ended_on)}` : e.kind === 'clube' ? ' – atual' : ''}`;
+  const clubs = cv.entries.filter((e) => e.kind === 'clube');
+  const comps = cv.entries.filter((e) => ['competicao', 'titulo', 'selecao', 'curso', 'outro'].includes(e.kind));
+  const awards = cv.entries.filter((e) => e.kind === 'premio');
+  const headline = p?.headline || [cv.modality, cv.position].filter(Boolean).join(' · ');
   const body = cv.body && (cv.body.height_cm || cv.body.weight_kg || cv.body.dominant_hand)
-    ? `<div class="chips">${cv.body.height_cm ? `<span>${esc(cv.body.height_cm)} cm</span>` : ''}${cv.body.weight_kg ? `<span>${esc(String(cv.body.weight_kg).replace('.', ','))} kg</span>` : ''}${cv.body.dominant_hand ? `<span>${esc(handLabel(cv.body.dominant_hand))}</span>` : ''}</div>` : '';
-  const att = cv.attendance_12m.pct != null ? `<div class="stat"><b>${String(cv.attendance_12m.pct).replace('.', ',')}%</b><small>assiduidade nos treinos (12 meses, registrada com GPS e foto)</small></div>` : '';
-  const start = cv.sport_started_on ? `<div class="stat"><b>${esc(sportTime(cv.sport_started_on))}</b><small>no esporte, desde ${monthLabel(cv.sport_started_on)}</small></div>` : '';
+    ? [cv.body.height_cm ? `${cv.body.height_cm} cm` : '', cv.body.weight_kg ? `${String(cv.body.weight_kg).replace('.', ',')} kg` : '', handLabel(cv.body.dominant_hand)].filter(Boolean).join(' · ') : '';
+  const contacts = [p?.contact_phone, p?.contact_email, p?.instagram, p?.city].filter(Boolean);
+  const nums = [
+    cv.trainings_total ? `<div><b>${cv.trainings_total}</b><span>treinos com prova</span></div>` : '',
+    cv.attendance_12m.pct != null ? `<div><b>${String(cv.attendance_12m.pct).replace('.', ',')}%</b><span>assiduidade 12 meses</span></div>` : '',
+    cv.sport_started_on ? `<div><b>${esc(sportTime(cv.sport_started_on))}</b><span>no esporte</span></div>` : '',
+  ].join('');
+  const item = (e: CvEntry) => `<div class="it"><div class="t">${esc(e.title)}${e.category ? ` · ${esc(e.category)}` : ''}</div>
+    <div class="d">${esc(period(e))}${e.institution ? ` · ${esc(e.institution)}` : ''}${e.location ? ` · ${esc(e.location)}` : ''}</div>
+    ${e.result ? `<div class="r">Conquista: ${esc(e.result)}</div>` : ''}${e.description ? `<div class="d">${esc(e.description)}</div>` : ''}
+    ${e.verified ? `<div class="ok">✓ Confirmado por ${esc(e.verified_by_org ?? 'entidade')}</div>` : ''}</div>`;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
-  body{font-family:Arial,sans-serif;color:#14213D;margin:0;font-size:11pt}
-  .top{background:#0B2A5C;color:#F5F7F0;padding:22px 26px;border-radius:12px}
-  .top h1{margin:0;font-size:24pt}.top p{margin:4px 0 0;color:#C9D6EA}.brand{float:right;font-weight:bold}.brand span{color:#C6F432}
-  .chips span{display:inline-block;background:#C6F432;color:#14213D;border-radius:10px;padding:2px 10px;margin:8px 6px 0 0;font-weight:bold;font-size:10pt}
-  .stats{display:flex;gap:12px;margin:14px 0}.stat{flex:1;border:1px solid #C9D6EA;border-radius:10px;padding:10px}.stat b{display:block;font-size:16pt;color:#0E7C86}.stat small{color:#4A5568}
-  h2{color:#0B2A5C;border-left:6px solid #C6F432;padding-left:8px;font-size:13pt;margin:18px 0 8px}
-  .item{border-left:3px solid #C9D6EA;padding:4px 0 8px 12px;margin-left:6px;page-break-inside:avoid}
-  .item .when{color:#0E7C86;font-weight:bold;font-size:10pt}.item .t{font-weight:bold;font-size:12pt}.item .s{color:#4A5568}
-  .ok{color:#0E7C86;font-size:9pt;font-weight:bold}.foot{margin-top:20px;font-size:8.5pt;color:#4A5568;border-top:1px solid #C9D6EA;padding-top:6px}
-  </style></head><body>
-  <div class="top"><div class="brand">Tech<span>Point</span></div><h1>${esc(cv.full_name)}</h1>
-  <p>${esc([cv.modality, cv.position, `${cv.age} anos`, cv.org].filter(Boolean).join(' · '))}</p>${body}</div>
-  <div class="stats">${start}${att}${cv.trainings_total ? `<div class="stat"><b>${cv.trainings_total}</b><small>treinos registrados com prova${cv.first_training ? ` desde ${monthLabel(cv.first_training)}` : ''}</small></div>` : ''}<div class="stat"><b>${cv.entries.filter((e) => e.verified).length}</b><small>itens confirmados pela entidade</small></div></div>
-  ${cv.teams.length ? `<h2>Equipes</h2>${cv.teams.map((t) => `<div class="item"><div class="when">desde ${monthLabel(t.since)}</div><div class="t">${esc(t.name)}</div><div class="s">${esc(t.category ?? '')}</div></div>`).join('')}` : ''}
-  <h2>Trajetória</h2>
-  ${cv.entries.length ? cv.entries.map((e) => `<div class="item"><div class="when">${period(e)} · ${esc(cvKindLabel(e.kind))}</div><div class="t">${esc(e.title)}</div>
-    <div class="s">${esc([e.institution, e.category, e.location].filter(Boolean).join(' · '))}</div>${e.description ? `<div>${esc(e.description)}</div>` : ''}
-    ${e.verified ? `<div class="ok">✓ Confirmado por ${esc(e.verified_by_org ?? 'entidade')}</div>` : ''}</div>`).join('') : '<p class="s">Nenhum item cadastrado.</p>'}
-  <div class="foot">Currículo esportivo atualizado em ${new Date().toLocaleDateString('pt-BR')}. Assiduidade calculada a partir de check-ins com GPS, foto e hora do servidor. Itens “confirmados” foram validados pela equipe da entidade.</div>
-  </body></html>`;
+  *{box-sizing:border-box} body{font-family:Arial,Helvetica,sans-serif;color:#1E2433;margin:0;font-size:10.5pt}
+  .page{display:flex;min-height:100%}
+  .side{width:34%;background:#1E2B4A;color:#EEF1F7;padding:26px 20px}
+  .photo{width:100%;aspect-ratio:4/5;object-fit:cover;border:6px solid #fff;display:block;background:#2D3B5E}
+  .side h3{color:#E9C46A;font-size:11pt;letter-spacing:1.5px;text-transform:uppercase;margin:20px 0 8px;border-bottom:1px solid #E9C46A55;padding-bottom:4px}
+  .side p,.side li{font-size:9.5pt;line-height:1.45;margin:0 0 4px} .side ul{padding-left:16px;margin:0}
+  .main{width:66%;padding:0 0 24px}
+  .band{background:#E9C46A;padding:26px 28px;margin-top:46px}
+  .band h1{margin:0;font-size:26pt;letter-spacing:2px;color:#1E2433;text-transform:uppercase}
+  .band .h{letter-spacing:3px;text-transform:uppercase;font-size:10pt;margin-top:4px}
+  .body{padding:8px 28px}
+  h2{font-size:13pt;color:#1E2B4A;border-bottom:2px solid #E9C46A;padding-bottom:3px;margin:18px 0 8px}
+  .it{margin:0 0 8px;page-break-inside:avoid} .it .t{font-weight:bold} .it .d{color:#5A6275;font-size:9.5pt} .it .r{color:#1E2B4A;font-size:9.5pt}
+  .ok{color:#2A7F62;font-size:8.5pt;font-weight:bold}
+  .nums{display:flex;gap:10px;margin-top:12px} .nums div{flex:1;border:1px solid #E3E6EE;border-radius:8px;padding:6px 8px}
+  .nums b{display:block;font-size:13pt;color:#1E2B4A} .nums span{font-size:8.5pt;color:#5A6275}
+  .gal{display:flex;flex-wrap:wrap;gap:6px} .gal img{width:32%;aspect-ratio:4/3;object-fit:cover;border-radius:4px}
+  .refs{display:flex;gap:20px;flex-wrap:wrap} .refs div{min-width:40%} .refs b{display:block}
+  .foot{font-size:7.5pt;color:#8A90A0;padding:10px 28px}
+  </style></head><body><div class="page">
+  <div class="side">
+    ${img.photo ? `<img class="photo" src="${esc(img.photo)}">` : ''}
+    ${contacts.length ? `<h3>Contato</h3>${contacts.map((c) => `<p>${esc(c)}</p>`).join('')}` : ''}
+    ${p?.about ? `<h3>Sobre mim</h3><p>${esc(p.about)}</p>` : ''}
+    ${p?.goals?.length ? `<h3>Metas</h3><ul>${p.goals.map((g) => `<li>${esc(g)}</li>`).join('')}</ul>` : ''}
+    ${awards.length ? `<h3>Prêmios individuais</h3><ul>${awards.map((a) => `<li>${esc(a.title)}${a.institution ? ` – ${esc(a.institution)}` : ''} – ${a.started_on.slice(0, 4)}</li>`).join('')}</ul>` : ''}
+  </div>
+  <div class="main">
+    <div class="band"><h1>${esc(cv.full_name)}</h1><div class="h">${esc(headline || 'Atleta')}</div></div>
+    <div class="body">
+      <div class="d" style="color:#5A6275;margin-top:6px">${esc([`${cv.age} anos`, body, cv.org ? `atualmente em ${cv.org}` : ''].filter(Boolean).join(' · '))}</div>
+      ${nums ? `<div class="nums">${nums}</div>` : ''}
+      ${clubs.length ? `<h2>Experiência</h2>${clubs.map(item).join('')}` : ''}
+      ${comps.length ? `<h2>Competições</h2>${comps.map(item).join('')}` : ''}
+      ${img.gallery.length ? `<h2>Fotos</h2><div class="gal">${img.gallery.map((g) => `<img src="${esc(g)}">`).join('')}</div>` : ''}
+      ${p?.references?.length ? `<h2>Referências</h2><div class="refs">${p.references.map((r) => `<div><b>${esc(r.name)}</b>${esc(r.role ?? '')}<br>${esc(r.phone ?? '')}</div>`).join('')}</div>` : ''}
+    </div>
+    <div class="foot">Atualizado em ${new Date().toLocaleDateString('pt-BR')}. Treinos e assiduidade registrados com GPS, foto e hora do servidor. Feito com TechPoint.</div>
+  </div></div></body></html>`;
 }

@@ -123,3 +123,42 @@ test('link de compartilhamento: só atleta/responsável cria; página pública s
   assert.equal(ok('mom_revoke'), true, err('mom_revoke'));
   assert.equal(res('public_revoked'), null);
 });
+
+// ---- Perfil do currículo e contatos (D84/D85) ----
+const scenario2 = [
+  fixtures,
+  as(U.kid),
+  tryRun('profile', `insert into public.athlete_cv_profile (athlete_id, headline, about, goals, contact_phone, "references") values ('${ATH}','Jogador de vôlei de areia','Sobre mim', array['Ser campeão'], '61900000000', '[{"name":"Treinador X","phone":"61911111111"}]')`),
+  tryRun('entry_result', `insert into public.athlete_cv_entries (athlete_id, org_id, kind, title, result, started_on) values ('${ATH}','${ORG}','premio','Melhor levantador','Destaque','2023-01-01')`),
+  as(U.coach),
+  tryRun('coach_profile_edit', `update public.athlete_cv_profile set about = 'x' where athlete_id = '${ATH}'`),
+  `reset role;`,
+  keep('about_after_coach', `select about from public.athlete_cv_profile where athlete_id = '${ATH}'`),
+  as(U.coach),
+  tryRun('coach_cv', `select public.athlete_cv('${ATH}')`),
+  as(U.mom),
+  tryRun('mom_share', `insert into public.athlete_cv_shares (athlete_id) values ('${ATH}')`),
+  `reset role; create temp table tk as select token t from public.athlete_cv_shares limit 1; grant select on tk to anon, authenticated;`,
+  asAnon,
+  tryRun('public_hidden', `select public.public_cv((select t from tk))`),
+  as(U.kid),
+  tryRun('show', `update public.athlete_cv_profile set show_contacts = true where athlete_id = '${ATH}'`),
+  asAnon,
+  tryRun('public_shown', `select public.public_cv((select t from tk))`),
+  `select name, value from results;`,
+].join('\n');
+
+let R2 = {};
+test('perfil do currículo: atleta edita, equipe só vê; contatos no link só quando liberados', async () => {
+  R2 = Object.fromEntries((await sql(`begin;\n${scenario2}`)).map((r) => [r.name, r.value]));
+  const ok2 = (n) => R2[n]?.ok === true, res2 = (n) => R2[n]?.result;
+  assert.equal(ok2('profile'), true, R2.profile?.error);
+  assert.equal(ok2('entry_result'), true, R2.entry_result?.error);
+  assert.equal(R2.about_after_coach.about, 'Sobre mim');
+  assert.equal(res2('coach_cv').profile.contact_phone, '61900000000');
+  assert.equal(res2('coach_cv').entries[0].result, 'Destaque');
+  assert.equal(res2('public_hidden').profile.contact_phone, null);
+  assert.deepEqual(res2('public_hidden').profile.references, []);
+  assert.equal(res2('public_shown').profile.contact_phone, '61900000000');
+  assert.equal(res2('public_shown').profile.references[0].name, 'Treinador X');
+});

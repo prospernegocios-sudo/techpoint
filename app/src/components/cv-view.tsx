@@ -6,22 +6,25 @@ import { Alert, Platform, View } from 'react-native';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, T, styles } from '@/components/ui';
 import {
   CV_KINDS, CvEntry, CvKind, cvKindIcon, cvKindLabel, handLabel, maskMonthYear, monthLabel, parseMonthYear,
-  sportTime, toMonthYear, useAthleteCv,
+  cvImageUrls, sportTime, toMonthYear, useAthleteCv,
 } from '@/lib/cv';
 import { exportCvPdf } from '@/lib/cv-export';
+import { CvProfileCard } from '@/components/cv-profile';
+import { router } from 'expo-router';
 import { toFriendlyError } from '@/lib/errors';
 import { SITE_URL, openWhatsApp, shareText } from '@/lib/links';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme';
 
 type Props = { athleteId: string; orgId: string; isStaff: boolean; canShare: boolean };
-type Form = { id?: string; kind: CvKind; title: string; institution: string; category: string; location: string; start: string; end: string; description: string };
-const empty: Form = { kind: 'competicao', title: '', institution: '', category: '', location: '', start: '', end: '', description: '' };
+type Form = { id?: string; kind: CvKind; title: string; institution: string; category: string; location: string; start: string; end: string; description: string; result: string };
+const empty: Form = { kind: 'competicao', title: '', institution: '', category: '', location: '', start: '', end: '', description: '', result: '' };
 
 export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
   const { colors } = useTheme();
   const qc = useQueryClient();
   const cv = useAthleteCv(athleteId);
+  const imgs = useQuery({ queryKey: ['cv-imgs', athleteId, cv.data?.profile?.photo_path, cv.data?.profile?.gallery?.join()], enabled: Boolean(cv.data), queryFn: () => cvImageUrls(cv.data!) });
   const [form, setForm] = useState<Form | null>(null);
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -44,7 +47,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
 
   const edit = (e: CvEntry) => setForm({
     id: e.id, kind: e.kind, title: e.title, institution: e.institution ?? '', category: e.category ?? '', location: e.location ?? '',
-    start: toMonthYear(e.started_on), end: toMonthYear(e.ended_on), description: e.description ?? '',
+    start: toMonthYear(e.started_on), end: toMonthYear(e.ended_on), description: e.description ?? '', result: e.result ?? '',
   });
 
   const save = async () => {
@@ -59,7 +62,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
     const row = {
       athlete_id: athleteId, org_id: orgId, kind: form.kind, title: form.title.trim(), institution: form.institution.trim() || null,
       category: form.category.trim() || null, location: form.location.trim() || null, started_on: start, ended_on: end,
-      description: form.description.trim() || null,
+      description: form.description.trim() || null, result: form.result.trim() || null,
     };
     setBusy(true);
     const { error } = form.id ? await supabase.from('athlete_cv_entries').update(row).eq('id', form.id) : await supabase.from('athlete_cv_entries').insert(row);
@@ -81,6 +84,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
   };
 
   const pdf = async () => { try { await exportCvPdf(c); } catch (e) { fail(e); } };
+  void imgs;
 
   const newShare = async () => {
     const { data, error } = await supabase.from('athlete_cv_shares').insert({ athlete_id: athleteId }).select('token').single();
@@ -103,7 +107,8 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
     <View style={{ gap: 12 }}>
       <Card style={{ backgroundColor: colors.primary }}>
         <T variant="title" color={colors.onPrimary}>{c.full_name}</T>
-        <T variant="body" color={colors.onPrimary}>{[c.modality, c.position, `${c.age} anos`, c.org].filter(Boolean).join(' · ')}</T>
+        {c.profile?.headline ? <T variant="body" color={colors.onPrimary} style={{ fontWeight: '700' }}>{c.profile.headline}</T> : null}
+        <T variant="body" color={colors.onPrimary}>{[c.profile?.headline ? null : c.modality, c.profile?.headline ? null : c.position, `${c.age} anos`, c.org].filter(Boolean).join(' · ')}</T>
         {body ? <T variant="small" color={colors.onPrimary}>{body}{c.body?.show_in_cv ? '' : ' (só você e os responsáveis veem)'}</T> : null}
       </Card>
       <View style={styles.wrap}>
@@ -115,6 +120,9 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
         <Card style={{ flexGrow: 1, flexBasis: 150 }}><T variant="subtitle">{c.trainings_total ?? 0}</T><T variant="small">treinos registrados{c.first_training ? ` desde ${monthLabel(c.first_training)}` : ''}</T></Card>
         <Card style={{ flexGrow: 1, flexBasis: 150 }}><T variant="subtitle">{c.entries.filter((e) => e.verified).length}</T><T variant="small">confirmados pela entidade</T></Card>
       </View>
+      {canShare && <CvProfileCard athleteId={athleteId} profile={c.profile} photoUrl={imgs.data?.photo ?? null} galleryUrls={imgs.data?.gallery ?? []} />}
+      {!canShare && c.profile?.about && <Card><T variant="subtitle">Sobre</T><T variant="body">{c.profile.about}</T></Card>}
+      {canShare && <Button title="Importar currículo (PDF ou texto)" kind="outline" onPress={() => router.push({ pathname: '/curriculo/importar/[athleteId]', params: { athleteId } })} />}
       {!c.sport_started_on && <Notice tone="info" text="Informe o início no esporte (mês e ano) em Meus dados → Esporte." />}
 
       {msg && <Notice tone={msg.tone} text={msg.text} />}
@@ -135,6 +143,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
             <T variant="small" color={colors.primary}>{period(e)} · {cvKindIcon(e.kind)} {cvKindLabel(e.kind)}</T>
             <T variant="body" style={{ fontWeight: '700' }}>{e.title}</T>
             {(e.institution || e.category || e.location) && <T variant="small">{[e.institution, e.category, e.location].filter(Boolean).join(' · ')}</T>}
+            {e.result && <T variant="small" style={{ fontWeight: '700' }}>Conquista: {e.result}</T>}
             {e.description && <T variant="small">{e.description}</T>}
             {e.verified && <Badge label={`✓ Confirmado por ${e.verified_by_org ?? 'entidade'}`} tone="success" />}
             <View style={styles.row}>
@@ -157,6 +166,9 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
               <View style={{ flex: 1 }}><Field label="Início (mês/ano)" keyboardType="number-pad" value={form.start} onChangeText={(v) => setForm({ ...form, start: maskMonthYear(v) })} placeholder="03/2024" /></View>
               <View style={{ flex: 1 }}><Field label="Fim (opcional)" keyboardType="number-pad" value={form.end} onChangeText={(v) => setForm({ ...form, end: maskMonthYear(v) })} placeholder="11/2024" /></View>
             </View>
+            {form.kind !== 'clube' && form.kind !== 'curso' && (
+              <Field label="Conquista (opcional)" value={form.result} onChangeText={(v) => setForm({ ...form, result: v })} maxLength={80} placeholder="Campeão, vice, 3º lugar, melhor levantador..." />
+            )}
             <Field label="Detalhes (opcional)" value={form.description} onChangeText={(v) => setForm({ ...form, description: v })} maxLength={600} multiline />
             {form.id && <T variant="small">Ao salvar uma edição, o selo da entidade sai até ser confirmado de novo.</T>}
             <Button title={busy ? 'Salvando...' : 'Salvar'} kind="accent" disabled={busy} onPress={save} />

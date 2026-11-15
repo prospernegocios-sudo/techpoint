@@ -18,7 +18,7 @@ export function MiniCalendar({ value, onPick }: { value: Date | null; onPick: (d
   while (cells.length % 7) cells.push(null);
   const move = (n: number) => setView(new Date(view.getFullYear(), view.getMonth() + n, 1));
   return (
-    <View style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 14, padding: 10, backgroundColor: colors.surface, gap: 6, maxWidth: 340 }}>
+    <View style={{ borderRadius: 24, padding: 14, backgroundColor: colors.surfaceContainerHigh, gap: 6, maxWidth: 340 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Pressable accessibilityRole="button" accessibilityLabel="Mês anterior" onPress={() => move(-1)} hitSlop={8}><Ionicons name="chevron-back" size={20} color={colors.text} /></Pressable>
         <Text style={{ color: colors.text, fontWeight: '800', fontSize: 15 }}>{MESES[view.getMonth()]} {view.getFullYear()}</Text>

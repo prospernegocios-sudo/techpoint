@@ -50,7 +50,7 @@ export default function Gestao() {
       {visible.map((g) => (
         <View key={g.title} style={{ gap: 8 }}>
           <T variant="small" style={{ fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 }}>{g.title}</T>
-          <View style={{ borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, overflow: 'hidden' }}>
+          <View style={{ borderRadius: 24, backgroundColor: colors.surfaceContainer, overflow: 'hidden' }}>
             {g.items.map((i, idx) => (
               <Pressable
                 key={i.title}
@@ -62,8 +62,8 @@ export default function Gestao() {
                   borderTopWidth: idx ? 1 : 0, borderTopColor: colors.border, opacity: pressed ? 0.7 : 1,
                 })}
               >
-                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
-                  <Ionicons name={i.icon} size={22} color={colors.primary} />
+                <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primaryContainer, alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name={i.icon} size={22} color={colors.onPrimaryContainer} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <T variant="body" style={{ fontWeight: '700' }}>{i.title}</T>

@@ -39,7 +39,7 @@ export function DateField({ label, mode, value, onChange, placeholder, hint, err
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${value || 'escolher'}`}
         onPress={() => setOpen(true)}
-        style={[styles.input, { borderColor: error ? colors.danger : colors.border, backgroundColor: colors.surface, justifyContent: 'center' }]}
+        style={[styles.input, { borderColor: error ? colors.danger : colors.outline, backgroundColor: 'transparent', justifyContent: 'center' }]}
       >
         <Text style={{ fontSize: 16, color: value ? colors.text : colors.textMuted }}>
           {value || placeholder || (mode === 'date' ? 'Toque para escolher a data' : 'Toque para escolher a hora')}

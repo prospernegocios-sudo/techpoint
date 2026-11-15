@@ -37,8 +37,8 @@ export function ToastHost() {
       <Animated.View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.18)', opacity }} />
       <Animated.View accessibilityRole="alert" accessibilityLiveRegion="polite"
         style={{ opacity, transform: [{ scale: opacity.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1] }) }],
-          alignItems: 'center', gap: 10, width: 280, maxWidth: '86%', paddingVertical: 24, paddingHorizontal: 20, borderRadius: 20,
-          backgroundColor: colors.surface, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 12 }}>
+          alignItems: 'center', gap: 10, width: 280, maxWidth: '86%', paddingVertical: 24, paddingHorizontal: 20, borderRadius: 28,
+          backgroundColor: colors.surfaceContainerHigh, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 12 }}>
         <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: bg, alignItems: 'center', justifyContent: 'center' }}>
           <Ionicons name={item.tone === 'success' ? 'checkmark' : 'alert'} size={32} color="#FFFFFF" />
         </View>

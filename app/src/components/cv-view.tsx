@@ -55,7 +55,7 @@ function Section({ title, action, onAction, children }: { title: string; action?
           </Pressable>
         )}
       </View>
-      <View style={{ backgroundColor: colors.surface, borderRadius: 14, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 16, paddingVertical: 4 }}>{children}</View>
+      <View style={{ backgroundColor: colors.surfaceContainer, borderRadius: 24, paddingHorizontal: 18, paddingVertical: 6 }}>{children}</View>
     </View>
   );
 }
@@ -246,7 +246,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
           <Pressable accessibilityRole={canShare ? 'button' : undefined} accessibilityLabel={canShare ? 'Trocar foto' : undefined} onPress={canShare ? setPhoto : undefined}>
             {imgs.data?.photo
               ? <Image source={{ uri: imgs.data.photo }} style={{ width: 84, height: 84, borderRadius: 42 }} accessibilityLabel={`Foto de ${c.full_name}`} />
-              : <View style={{ width: 84, height: 84, borderRadius: 42, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }}>
+              : <View style={{ width: 84, height: 84, borderRadius: 28, backgroundColor: colors.primaryContainer, alignItems: 'center', justifyContent: 'center' }}>
                   <Ionicons name={canShare ? 'camera-outline' : 'person-outline'} size={28} color={colors.textMuted} />
                 </View>}
           </Pressable>

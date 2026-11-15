@@ -17,7 +17,7 @@ export function CityField({ label = 'Cidade', value, onChange, hint }: Props) {
       <Field label={label} value={value} hint={hint} placeholder="Digite a cidade" autoCorrect={false}
         onChangeText={(v) => { onChange(v); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 200)} />
       {open && list.length > 0 && (
-        <View style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.surface, maxHeight: 260, overflow: 'hidden' }}>
+        <View style={{ borderRadius: 16, backgroundColor: colors.surfaceContainerHigh, maxHeight: 260, overflow: 'hidden' }}>
           {!value.trim() && <Text style={{ paddingHorizontal: 14, paddingTop: 10, paddingBottom: 4, color: colors.textMuted, fontSize: 12, fontWeight: '800' }}>CAPITAIS</Text>}
           <View style={{ maxHeight: 240, overflow: 'scroll' as never }}>
             {list.map((c) => (

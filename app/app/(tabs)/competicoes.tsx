@@ -23,7 +23,7 @@ export default function Competicoes() {
   const List = ({ title, items, empty }: { title: string; items: CvEntry[]; empty: string }) => (
     <View style={{ gap: 8 }}>
       <Text style={{ fontSize: 13, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase', color: colors.textMuted }}>{title} ({items.length})</Text>
-      <View style={{ backgroundColor: colors.surface, borderRadius: 14, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 16 }}>
+      <View style={{ backgroundColor: colors.surfaceContainer, borderRadius: 24, paddingHorizontal: 16 }}>
         {items.length === 0 && <Text style={{ color: colors.textMuted, paddingVertical: 14 }}>{empty}</Text>}
         {items.map((e, i) => (
           <View key={e.id} style={{ flexDirection: 'row', gap: 12, paddingVertical: 12, borderBottomWidth: i === items.length - 1 ? 0 : 1, borderBottomColor: colors.border }}>
@@ -43,9 +43,9 @@ export default function Competicoes() {
     <Screen>
       <View style={{ gap: 18, maxWidth: 760, width: '100%', alignSelf: 'center' }}>
         <Pressable accessibilityRole="button" onPress={() => router.push('/curriculo')}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }}>
-          <Ionicons name="megaphone-outline" size={22} color={colors.primary} />
-          <Text style={{ flex: 1, color: colors.text }}>Convocações do treinador aparecem aqui em breve, com "vou / não vou" e autorização de viagem.</Text>
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: 20, backgroundColor: colors.tertiaryContainer }}>
+          <Ionicons name="megaphone-outline" size={22} color={colors.onTertiaryContainer} />
+          <Text style={{ flex: 1, color: colors.onTertiaryContainer }}>Convocações do treinador aparecem aqui em breve, com "vou / não vou" e autorização de viagem.</Text>
         </Pressable>
         <List title="Próximas" items={next} empty="Nenhuma competição marcada." />
         <List title="Disputadas" items={past} empty="Nenhuma competição no currículo ainda." />

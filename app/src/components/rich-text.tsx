@@ -64,8 +64,8 @@ export function RichField({ label, value, onChange, align, onAlign, maxLength }:
   const Btn = ({ label: l, a11y, onPress, active, disabled, style }: { label: string; a11y?: string; onPress: () => void; active?: boolean; disabled?: boolean; style?: TextStyle }) => (
     <Pressable accessibilityRole="button" accessibilityLabel={a11y ?? l} onPress={onPress} disabled={disabled}
       style={{ minWidth: 40, height: 36, paddingHorizontal: 10, borderRadius: 8, alignItems: 'center', justifyContent: 'center', opacity: disabled ? 0.4 : 1,
-        backgroundColor: active ? colors.primary : colors.background, borderWidth: 1, borderColor: colors.border }}>
-      <Text style={[{ color: active ? colors.onPrimary : colors.text, fontSize: 15, fontWeight: '700' }, style]}>{l}</Text>
+        backgroundColor: active ? colors.primaryContainer : colors.surfaceContainerHigh }}>
+      <Text style={[{ color: active ? colors.onPrimaryContainer : colors.text, fontSize: 15, fontWeight: '700' }, style]}>{l}</Text>
     </Pressable>
   );
   return (
@@ -88,7 +88,7 @@ export function RichField({ label, value, onChange, align, onAlign, maxLength }:
         style={{ minHeight: 200, height: 200 }}
         hint="Selecione um trecho e toque em N ou I. Toque de novo para tirar. ↶ desfaz." />
       {value.trim() ? (
-        <View style={{ padding: 12, borderRadius: 10, borderWidth: 1, borderColor: colors.border, gap: 4 }}>
+        <View style={{ padding: 14, borderRadius: 16, backgroundColor: colors.surfaceContainer, gap: 4 }}>
           <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: '700' }}>PRÉVIA</Text>
           <RichText text={value} align={align} />
         </View>

@@ -172,7 +172,7 @@ export default function FichaAtleta() {
               <Field label="E-mail (opcional)" keyboardType="email-address" autoCapitalize="none" value={form.email} onChangeText={(v) => setForm({ ...form, email: v })} />
               <T variant="small" style={{ fontWeight: '600' }}>Documento de identificação do responsável (opcional)</T>
               <Pressable accessibilityRole="button" onPress={async () => { const f = await pickIdDocument(); if (!f) return; if (!f.mime || f.size > MAX_DOC_BYTES) return toast('Envie PDF, PNG ou JPG de até 10 MB.', 'danger'); setIdDoc(f); }}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.border }}>
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 16, borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.outline }}>
                 <Ionicons name={idDoc ? 'checkmark-circle' : 'id-card-outline'} size={22} color={idDoc ? colors.success : colors.primary} />
                 <T variant="small" style={{ flex: 1 }}>{idDoc ? idDoc.name : 'RG, CNH ou passaporte (PDF ou foto)'}</T>
               </Pressable>

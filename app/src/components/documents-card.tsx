@@ -145,7 +145,7 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
         <View style={{ gap: 10, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10 }}>
           <T variant="body" style={{ fontWeight: '800' }}>Arquivos para enviar ({queue.length})</T>
           {queue.map((q, i) => (
-            <View key={i} style={{ gap: 8, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: q.kind ? colors.border : colors.warning }}>
+            <View key={i} style={{ gap: 8, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: q.kind ? colors.outline : colors.warning, backgroundColor: colors.surface }}>
               <View style={[styles.row, { alignItems: 'center' }]}>
                 <Ionicons name={q.picked.mime === 'application/pdf' ? 'document-outline' : 'image-outline'} size={20} color={colors.primary} />
                 <T variant="small" style={{ flex: 1, fontWeight: '700' }}>{q.picked.name}</T>

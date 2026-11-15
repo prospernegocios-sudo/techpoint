@@ -53,7 +53,9 @@ function Shell() {
       ) : (
         <Stack
           screenOptions={{
-            headerStyle: { backgroundColor: colors.surface },
+            headerStyle: { backgroundColor: colors.background },
+            headerShadowVisible: false,
+            headerTitleStyle: { fontWeight: '600' },
             headerTintColor: colors.text,
             contentStyle: { backgroundColor: colors.background },
             headerBackTitle: 'Voltar',

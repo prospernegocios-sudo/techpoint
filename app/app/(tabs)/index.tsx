@@ -271,7 +271,7 @@ export default function Home() {
       {corrMsg && <Notice tone="info" text={corrMsg} />}
       <Modal visible={Boolean(corr)} transparent animationType="slide" onRequestClose={() => setCorr(null)}>
         <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}>
-          <View style={{ backgroundColor: colors.surface, padding: 16, gap: 12, borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+          <View style={{ backgroundColor: colors.surface, padding: 20, gap: 12, borderTopLeftRadius: 28, borderTopRightRadius: 28 }}>
             <T variant="subtitle">Pedir correção da {corr?.label}</T>
             <T variant="small">Explique o que aconteceu. O treinador recebe o pedido e decide.</T>
             <Field label="O que está errado?" value={corrReason} onChangeText={setCorrReason} multiline maxLength={500} placeholder="Ex.: fiz check-in no treino da outra equipe" />

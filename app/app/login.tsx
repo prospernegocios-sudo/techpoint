@@ -20,7 +20,7 @@ function Input({ label, value, onChangeText, secure, ...rest }: {
   return (
     <View style={{ gap: 6 }}>
       <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text }}>{label}</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.surface }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.outline, borderRadius: 12, backgroundColor: 'transparent' }}>
         <TextInput
           accessibilityLabel={label}
           value={value}
@@ -132,7 +132,7 @@ export default function Login() {
   };
 
   const card = (
-    <View style={{ width: '100%', maxWidth: 420, alignSelf: 'center', backgroundColor: colors.surface, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 24, gap: 14 }}>
+    <View style={{ width: '100%', maxWidth: 420, alignSelf: 'center', backgroundColor: colors.surfaceContainer, borderRadius: 28, padding: 24, gap: 14 }}>
       <View style={{ gap: 4 }}>
         <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text }}>{titles[mode][0]}</Text>
         <Text style={{ fontSize: 14, color: colors.textMuted }}>{titles[mode][1]}</Text>
@@ -148,7 +148,7 @@ export default function Login() {
             disabled={Boolean(busy)}
             onPress={() => run('google', signInWithGoogle)}
             style={({ pressed }) => ({
-              minHeight: 54, borderRadius: 14, borderWidth: 1.5, borderColor: colors.border, backgroundColor: '#FFFFFF',
+              minHeight: 54, borderRadius: 999, borderWidth: 1, borderColor: colors.outline, backgroundColor: '#FFFFFF',
               flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, opacity: pressed || busy ? 0.7 : 1,
             })}
           >
@@ -212,7 +212,7 @@ export default function Login() {
   if (wide) {
     return (
       <View style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.background }}>
-        <View style={{ flex: 1.1, backgroundColor: colors.primary, padding: 56, justifyContent: 'center' }}>
+        <View style={{ flex: 1.1, backgroundColor: colors.hero, padding: 56, justifyContent: 'center' }}>
           <View style={{ maxWidth: 520 }}><Brand wide /></View>
         </View>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 40, gap: 16 }} keyboardShouldPersistTaps="handled">

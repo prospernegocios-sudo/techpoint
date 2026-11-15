@@ -10,7 +10,7 @@ import { useTheme } from '@/lib/theme';
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   const { colors } = useTheme();
   return (
-    <View style={{ flexBasis: '47%', flexGrow: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 10, backgroundColor: colors.surface }}>
+    <View style={{ flexBasis: '47%', flexGrow: 1, borderRadius: 16, padding: 12, backgroundColor: colors.surfaceContainerHigh }}>
       <T variant="small">{label}</T>
       <T variant="title" style={{ fontSize: 22 }}>{value}</T>
       {hint && <T variant="small">{hint}</T>}

@@ -190,7 +190,7 @@ export default function EventRosterScreen() {
 
       <Modal visible={Boolean(manual)} transparent animationType="slide" onRequestClose={() => setManual(null)}>
         <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}>
-          <View style={{ backgroundColor: colors.surface, padding: 16, gap: 12, borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+          <View style={{ backgroundColor: colors.surface, padding: 20, gap: 12, borderTopLeftRadius: 28, borderTopRightRadius: 28 }}>
             <T variant="subtitle">{manual?.kind === 'check_in' ? 'Presença manual' : 'Saída manual'}: {manual?.name}</T>
             <T variant="small">O registro fica marcado como "manual", com seu nome e o motivo, para auditoria.</T>
             {error && <Notice tone="danger" text={error} />}

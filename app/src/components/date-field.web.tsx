@@ -39,8 +39,8 @@ export function DateField({ label, mode, value, onChange, hint, error }: DateFie
         </View>
         {mode === 'date' && (
           <Pressable accessibilityRole="button" accessibilityLabel="Abrir calendário" onPress={() => setOpen(!open)}
-            style={{ width: 52, height: 52, borderRadius: 12, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', backgroundColor: open ? colors.primary : colors.surface }}>
-            <Ionicons name="calendar-outline" size={22} color={open ? colors.onPrimary : colors.text} />
+            style={{ width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: open ? colors.primary : colors.primaryContainer }}>
+            <Ionicons name="calendar-outline" size={22} color={open ? colors.onPrimary : colors.onPrimaryContainer} />
           </Pressable>
         )}
       </View>

@@ -1,5 +1,6 @@
 // Currículo esportivo do atleta (D78): itens digitados + o que o TechPoint já sabe (equipes e assiduidade).
 import { useQuery } from '@tanstack/react-query';
+import { richToHtml } from './rich';
 import { supabase } from './supabase';
 
 export type CvKind = 'clube' | 'competicao' | 'titulo' | 'premio' | 'selecao' | 'curso' | 'outro';
@@ -32,7 +33,7 @@ export type Cv = {
 };
 export type CvReference = { name: string; role?: string | null; phone?: string | null };
 export type CvProfile = {
-  headline: string | null; about: string | null; goals: string[]; photo_path: string | null; gallery: string[];
+  headline: string | null; about: string | null; about_align?: 'left' | 'justify' | 'center'; goals: string[]; goals_done?: string[]; photo_path: string | null; gallery: string[];
   city: string | null; show_contacts: boolean; contact_phone: string | null; contact_email: string | null; instagram: string | null;
   references: CvReference[];
 };
@@ -139,8 +140,8 @@ export function cvHtml(cv: Cv, img: CvImages = { photo: null, gallery: [] }): st
   <div class="side">
     ${img.photo ? `<img class="photo" src="${esc(img.photo)}">` : ''}
     ${contacts.length ? `<h3>Contato</h3>${contacts.map((c) => `<p>${esc(c)}</p>`).join('')}` : ''}
-    ${p?.about ? `<h3>Sobre mim</h3><p>${esc(p.about)}</p>` : ''}
-    ${p?.goals?.length ? `<h3>Metas</h3><ul>${p.goals.map((g) => `<li>${esc(g)}</li>`).join('')}</ul>` : ''}
+    ${p?.about ? `<h3>Sobre mim</h3><div style="text-align:${p.about_align ?? 'justify'};font-size:9.5pt;line-height:1.45">${richToHtml(p.about, esc)}</div>` : ''}
+    ${p?.goals?.length ? `<h3>Metas</h3><ul style="list-style:none;padding-left:0">${p.goals.map((g) => `<li>${(p.goals_done ?? []).includes(g) ? '<span style="color:#4CC38A;font-weight:bold">✓</span>' : '○'} ${esc(g)}</li>`).join('')}</ul>` : ''}
     ${awards.length ? `<h3>Prêmios individuais</h3><ul>${awards.map((a) => `<li>${esc(a.title)}${a.institution ? ` – ${esc(a.institution)}` : ''} – ${a.started_on.slice(0, 4)}</li>`).join('')}</ul>` : ''}
   </div>
   <div class="main">

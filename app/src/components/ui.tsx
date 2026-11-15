@@ -87,7 +87,7 @@ export function Card({ children, style, onPress }: { children: ReactNode; style?
   return <View style={s}>{children}</View>;
 }
 
-export function Field({ label, hint, error, ...props }: TextInputProps & { label: string; hint?: string; error?: string }) {
+export function Field({ label, hint, error, style, ...props }: TextInputProps & { label: string; hint?: string; error?: string }) {
   const { colors } = useTheme();
   return (
     <View style={{ gap: 6 }}>
@@ -95,7 +95,7 @@ export function Field({ label, hint, error, ...props }: TextInputProps & { label
       <TextInput
         accessibilityLabel={label}
         placeholderTextColor={colors.textMuted}
-        style={[styles.input, { borderColor: error ? colors.danger : colors.border, color: colors.text, backgroundColor: colors.surface }]}
+        style={[styles.input, { borderColor: error ? colors.danger : colors.border, color: colors.text, backgroundColor: colors.surface }, props.multiline ? { minHeight: 120, textAlignVertical: 'top', paddingTop: 12 } : null, style]}
         {...props}
       />
       {error ? <T variant="small" color={colors.danger}>{error}</T> : hint ? <T variant="small">{hint}</T> : null}

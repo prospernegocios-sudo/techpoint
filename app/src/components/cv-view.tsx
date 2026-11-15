@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, Image, Platform, Pressable, Switch, Text, View } from 'react-native';
+import { RichField, RichText, type Align } from '@/components/rich-text';
 import { toast } from '@/components/toast';
 import { Button, Card, Chip, Field, Loading, Notice, T, styles } from '@/components/ui';
 import {
@@ -76,13 +77,14 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
   const [panel, setPanel] = useState<Panel>(null);
   const [form, setForm] = useState<Form>(empty);
   const [open, setOpen] = useState<string | null>(null);
-  const [prof, setProf] = useState({ headline: '', about: '', goals: '', phone: '', email: '', instagram: '', city: '', show: false });
+  const [prof, setProf] = useState({ align: 'justify' as Align, headline: '', about: '', goals: '', phone: '', email: '', instagram: '', city: '', show: false });
   const [refs, setRefs] = useState<CvReference[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [goalsDone, setGoalsDone] = useState<string[] | null>(null); // marcação imediata, antes do servidor responder
   const p = cv.data?.profile;
   useEffect(() => {
-    setProf({ headline: p?.headline ?? '', about: p?.about ?? '', goals: (p?.goals ?? []).join('\n'), phone: p?.contact_phone ?? '', email: p?.contact_email ?? '',
+    setProf({ align: (p?.about_align ?? 'justify') as Align, headline: p?.headline ?? '', about: p?.about ?? '', goals: (p?.goals ?? []).join('\n'), phone: p?.contact_phone ?? '', email: p?.contact_email ?? '',
       instagram: p?.instagram ?? '', city: p?.city ?? '', show: p?.show_contacts ?? false });
     setRefs(p?.references ?? []);
   }, [p]);
@@ -129,13 +131,20 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
     setBusy(true);
     try {
       await upsertProfile(part === 'perfil'
-        ? { headline: prof.headline.trim() || null, about: prof.about.trim() || null,
-            goals: prof.goals.split('\n').map((g) => g.replace(/^[•\-–*]\s*/, '').trim()).filter(Boolean).slice(0, 10) }
+        ? { headline: prof.headline.trim() || null, about: prof.about.trim() || null, about_align: prof.align,
+            goals: prof.goals.split('\n').map((g) => g.replace(/^[•\-–*]\s*/, '').trim()).filter(Boolean).slice(0, 10),
+            goals_done: (p?.goals_done ?? []).filter((d) => prof.goals.split('\n').map((g) => g.replace(/^[•\-–*]\s*/, '').trim()).includes(d)) }
         : { contact_phone: prof.phone.trim() || null, contact_email: prof.email.trim() || null, instagram: prof.instagram.trim() || null,
             city: prof.city.trim() || null, show_contacts: prof.show,
             references: refs.filter((r) => r.name.trim()).slice(0, 4).map((r) => ({ name: r.name.trim(), role: r.role?.trim() || null, phone: r.phone?.trim() || null })) });
       toast('Currículo salvo.'); close(); refresh();
     } catch (e) { fail(e); } finally { setBusy(false); }
+  };
+  const toggleGoal = async (g: string) => {
+    const doneList = goalsDone ?? p?.goals_done ?? [];
+    const now = doneList.includes(g) ? doneList.filter((x) => x !== g) : [...doneList, g];
+    setGoalsDone(now);
+    try { await upsertProfile({ goals_done: now }); toast(now.includes(g) ? 'Meta conquistada!' : 'Meta desmarcada.'); refresh(); } catch (e) { setGoalsDone(null); fail(e); }
   };
   const editItem = (e?: CvEntry, kind: CvKind = 'competicao') => {
     setForm(e ? { id: e.id, kind: e.kind, title: e.title, institution: e.institution ?? '', category: e.category ?? '', location: e.location ?? '',
@@ -264,7 +273,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
         <Card>
           <T variant="subtitle">Sobre mim e metas</T>
           <Field label="Título" value={prof.headline} onChangeText={(v) => setProf({ ...prof, headline: v })} maxLength={80} placeholder="Jogador de vôlei de areia" />
-          <Field label="Sobre mim" value={prof.about} onChangeText={(v) => setProf({ ...prof, about: v })} maxLength={1500} multiline />
+          <RichField label="Sobre mim" value={prof.about} onChange={(v) => setProf({ ...prof, about: v })} align={prof.align} onAlign={(a) => setProf({ ...prof, align: a })} maxLength={1500} />
           <Field label="Metas (uma por linha)" value={prof.goals} onChangeText={(v) => setProf({ ...prof, goals: v })} multiline />
           {error && <Notice tone="danger" text={error} />}
           <View style={styles.row}>
@@ -274,11 +283,20 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
         </Card>
       ) : (
         <Section title="Sobre mim" action={canShare ? 'Editar' : undefined} onAction={() => setPanel('perfil')}>
-          {p?.about ? <Text style={{ color: colors.text, fontSize: 15, lineHeight: 22, paddingVertical: 12 }}>{p.about}</Text> : <Empty text="Conte quem você é, sua rotina e seus objetivos." />}
+          {p?.about ? <View style={{ paddingVertical: 12 }}><RichText text={p.about} align={p.about_align ?? 'justify'} /></View> : <Empty text="Conte quem você é, sua rotina e seus objetivos." />}
           {(p?.goals?.length ?? 0) > 0 && (
             <View style={{ paddingBottom: 12, gap: 4 }}>
               <Text style={{ color: colors.textMuted, fontSize: 13, fontWeight: '700' }}>Metas</Text>
-              {p!.goals.map((g, i) => <Text key={i} style={{ color: colors.text, fontSize: 15 }}>• {g}</Text>)}
+              {p!.goals.map((g, i) => {
+                const done = (goalsDone ?? p!.goals_done ?? []).includes(g);
+                return (
+                  <Pressable key={i} disabled={!canShare} accessibilityRole="checkbox" accessibilityState={{ checked: done }} accessibilityLabel={g}
+                    onPress={() => toggleGoal(g)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}>
+                    <Ionicons name={done ? 'checkmark-circle' : 'ellipse-outline'} size={24} color={done ? colors.success : colors.textMuted} />
+                    <Text style={{ flex: 1, color: colors.text, fontSize: 15, textDecorationLine: done ? 'line-through' : 'none', opacity: done ? 0.75 : 1 }}>{g}</Text>
+                  </Pressable>
+                );
+              })}
             </View>
           )}
         </Section>

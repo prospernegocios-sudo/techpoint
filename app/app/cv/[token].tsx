@@ -5,6 +5,7 @@ import { View } from 'react-native';
 import { Badge, Card, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { cvImageUrls, cvKindIcon, cvKindLabel, handLabel, monthLabel, sportTime, type Cv } from '@/lib/cv';
 import { Image } from 'react-native';
+import { RichText } from '@/components/rich-text';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme';
 
@@ -38,8 +39,8 @@ export default function CvPublico() {
         {c.sport_started_on && <Card style={{ flexGrow: 1, flexBasis: 150 }}><T variant="subtitle">{sportTime(c.sport_started_on)}</T><T variant="small">no esporte, desde {monthLabel(c.sport_started_on)}</T></Card>}
         {c.attendance_12m.pct != null && <Card style={{ flexGrow: 1, flexBasis: 150 }}><T variant="subtitle">{String(c.attendance_12m.pct).replace('.', ',')}%</T><T variant="small">assiduidade nos treinos (12 meses, com GPS e foto)</T></Card>}
       </View>
-      {c.profile?.about && <Card><T variant="subtitle">Sobre mim</T><T variant="body">{c.profile.about}</T></Card>}
-      {(c.profile?.goals?.length ?? 0) > 0 && <Card><T variant="subtitle">Metas</T>{c.profile!.goals.map((g, i) => <T key={i} variant="body">• {g}</T>)}</Card>}
+      {c.profile?.about && <Card><T variant="subtitle">Sobre mim</T><RichText text={c.profile.about} align={c.profile.about_align ?? 'justify'} /></Card>}
+      {(c.profile?.goals?.length ?? 0) > 0 && <Card><T variant="subtitle">Metas</T>{c.profile!.goals.map((g, i) => <T key={i} variant="body">{(c.profile!.goals_done ?? []).includes(g) ? '✅' : '○'} {g}</T>)}</Card>}
       {(c.trainings_total ?? 0) > 0 && <Card><T variant="subtitle">{c.trainings_total} treinos registrados</T><T variant="small">com GPS, foto e hora do servidor</T></Card>}
       {c.teams.length > 0 && <Card><T variant="subtitle">Equipes</T>{c.teams.map((t, i) => <T key={i} variant="body">• {t.name}{t.category ? ` (${t.category})` : ''} · desde {monthLabel(t.since)}</T>)}</Card>}
       <Card>

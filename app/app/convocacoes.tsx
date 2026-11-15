@@ -87,7 +87,7 @@ export default function Convocacoes() {
               style={[styles.row, { minHeight: 56, borderWidth: 1, borderColor: colors.outline, borderRadius: 12, paddingHorizontal: 16, justifyContent: 'space-between' }]}>
               <View style={[styles.row, { gap: 10 }]}>
                 {kind && <Ionicons name={eventKind(kind).icon} size={20} color={colors.primary} />}
-                <Text style={{ color: kind ? colors.text : colors.textMuted, fontSize: 16 }}>{kind ? eventKind(kind).label : 'Escolha: competição, reunião, palestra ou outro'}</Text>
+                <Text style={{ color: kind ? colors.text : colors.textMuted, fontSize: 16 }}>{kind ? eventKind(kind).label : 'Escolha o tipo'}</Text>
               </View>
               <Ionicons name={kindOpen ? 'chevron-up' : 'chevron-down'} size={20} color={colors.textMuted} />
             </Pressable>
@@ -107,9 +107,9 @@ export default function Convocacoes() {
           <Field label="Nome do evento" value={f.title} onChangeText={(v) => setF({ ...f, title: v })} maxLength={120}
             placeholder={kind === 'reuniao' ? 'Ex.: Reunião de pais e atletas' : kind === 'palestra' ? 'Ex.: Palestra sobre nutrição' : 'Ex.: Taça Brasília'} />
           <Field label="Local (opcional)" value={f.location} onChangeText={(v) => setF({ ...f, location: v })} maxLength={160} placeholder="Ex.: Ginásio Nilson Nelson" />
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}><DateField label="Início" mode="date" value={f.from} onChange={(v) => setF({ ...f, from: v })} minimumDate={new Date()} /></View>
-            <View style={{ flex: 1 }}><DateField label="Fim (opcional)" mode="date" value={f.to} onChange={(v) => setF({ ...f, to: v })} minimumDate={new Date()} /></View>
+          <View style={[styles.row, { flexWrap: 'wrap' }]}>
+            <View style={{ flexGrow: 1, flexBasis: 220 }}><DateField label="Início" mode="date" value={f.from} onChange={(v) => setF({ ...f, from: v })} minimumDate={new Date()} /></View>
+            <View style={{ flexGrow: 1, flexBasis: 220 }}><DateField label="Fim (opcional)" mode="date" value={f.to} onChange={(v) => setF({ ...f, to: v })} minimumDate={new Date()} /></View>
           </View>
           <DateField label="Horário (opcional)" mode="time" value={f.time} onChange={(v) => setF({ ...f, time: v })} />
           <Field label="Recado aos atletas (opcional)" value={f.notes} onChangeText={(v) => setF({ ...f, notes: v })} maxLength={1000} multiline placeholder="Horário de concentração, uniforme..." />

@@ -12,6 +12,7 @@ export type Project = {
   sphere: 'federal' | 'estadual' | 'distrital' | 'municipal'; agency: string | null; program: string | null; proponent: string | null;
   starts_on: string; ends_on: string; status: 'draft' | 'active' | 'closed';
   free_of_charge: boolean; public_school_min_pct: number | null; notes: string | null;
+  records_retention_until: string | null;
 };
 export type PlanVersion = { id: string; version: number; approved_on: string | null; description: string | null; file_path: string | null; created_at: string };
 export type GoalKind = 'unique_beneficiaries' | 'attendances' | 'avg_frequency' | 'activities_done' | 'manual';

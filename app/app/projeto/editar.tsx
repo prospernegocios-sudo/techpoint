@@ -19,7 +19,7 @@ export default function EditarProjeto() {
   const qc = useQueryClient();
   const [f, setF] = useState({
     name: '', process_number: '', agency: 'Ministério do Esporte', program: 'Lei de Incentivo ao Esporte', proponent: '',
-    starts: '', ends: '', notes: '', minPct: '',
+    starts: '', ends: '', retention: '', notes: '', minPct: '',
   });
   const [sphere, setSphere] = useState<Project['sphere']>('federal');
   const [status, setStatus] = useState<Project['status']>('draft');
@@ -32,7 +32,7 @@ export default function EditarProjeto() {
     if (!p) return;
     setF({
       name: p.name, process_number: p.process_number ?? '', agency: p.agency ?? '', program: p.program ?? '', proponent: p.proponent ?? '',
-      starts: isoDayToBr(p.starts_on), ends: isoDayToBr(p.ends_on), notes: p.notes ?? '', minPct: p.public_school_min_pct?.toString() ?? '',
+      starts: isoDayToBr(p.starts_on), ends: isoDayToBr(p.ends_on), retention: p.records_retention_until ? isoDayToBr(p.records_retention_until) : '', notes: p.notes ?? '', minPct: p.public_school_min_pct?.toString() ?? '',
     });
     setSphere(p.sphere);
     setStatus(p.status);
@@ -50,11 +50,14 @@ export default function EditarProjeto() {
     if (f.name.trim().length < 3) return setError('Informe o nome do projeto.');
     if (!s || !e) return setError('Confira as datas de vigência (dd/mm/aaaa).');
     if (e < s) return setError('O fim da vigência precisa ser depois do início.');
+    const ret = f.retention.trim() ? parseBrDate(f.retention) : null;
+    if (f.retention.trim() && !ret) return setError('Confira a data de guarda da documentação (dd/mm/aaaa).');
+    if (ret && ret < e) return setError('A guarda da documentação deve ir pelo menos até o fim da vigência.');
     const minPct = f.minPct.trim() ? Number(f.minPct) : null;
     if (minPct != null && (!Number.isInteger(minPct) || minPct < 0 || minPct > 100)) return setError('A cota mínima de escola pública deve ser um número de 0 a 100.');
     const row = {
       org_id: org!.id, name: f.name.trim(), process_number: f.process_number.trim() || null, sphere, agency: f.agency.trim() || null,
-      program: f.program.trim() || null, proponent: f.proponent.trim() || null, starts_on: toIsoDate(s), ends_on: toIsoDate(e),
+      program: f.program.trim() || null, proponent: f.proponent.trim() || null, starts_on: toIsoDate(s), ends_on: toIsoDate(e), records_retention_until: ret ? toIsoDate(ret) : null,
       status, free_of_charge: free, public_school_min_pct: minPct, notes: f.notes.trim() || null,
     };
     setSaving(true);
@@ -92,6 +95,8 @@ export default function EditarProjeto() {
           <View style={{ flex: 1 }}><DateField mode="date" label="Início" value={f.starts} onChange={(v) => set('starts')(v)} /></View>
           <View style={{ flex: 1 }}><DateField mode="date" label="Fim" value={f.ends} onChange={(v) => set('ends')(v)} /></View>
         </View>
+        <DateField mode="date" label="Guardar fotos e registros até (opcional)" value={f.retention} onChange={(v) => set('retention')(v)}
+          hint="Prazo de guarda da prestação de contas exigido pelo financiador ou pela norma. Sem data, as fotos seguem o prazo da entidade (24 meses)." />
         <T variant="subtitle">Situação</T>
         <View style={styles.wrap}>
           {(Object.keys(statusLabels) as Project['status'][]).map((k) => <Chip key={k} label={statusLabels[k]} selected={status === k} onPress={() => setStatus(k)} />)}

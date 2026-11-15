@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TechPoint · Presença com prova</title>
+<meta name="description" content="TechPoint: presença dos atletas com GPS, foto e hora do servidor, eventos com ciência, currículo esportivo e relatórios para prestação de contas. Para clubes, escolas e projetos esportivos.">
+<meta property="og:title" content="TechPoint · Cada treino vira uma prova">
+<meta property="og:description" content="Presença com GPS, foto e hora do servidor. Relatórios para patrocinadores e financiadores em um clique.">
+<meta name="theme-color" content="#1C154B">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231C154B'/%3E%3Cpath d='M14 34l10 10 8-8M30 34l10 10 14-18' fill='none' stroke='%23C6F432' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600;8..144,700;8..144,800&display=swap">
+<style>
+/* Layout: faixa marinho de abertura com as telas do app; blocos em coluna larga; tudo empilha no celular. */
+:root{
+  --bg:#FCF8FF; --surface:#FFFFFF; --soft:#F1ECF8; --line:#DCD7E5;
+  --fg:#1C1B22; --muted:#55535E; --navy:#1C154B; --navy-2:#2C2570; --primary:#3E3A8C;
+  --primary-c:#E2DFFF; --on-primary-c:#14104A; --lime:#C6F432; --on-lime:#1A2600; --teal:#0E7C86;
+  --f:'Roboto Flex',Roboto,system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#131218; --surface:#1B1A21; --soft:#221F2B; --line:#35323D; --fg:#E6E1EA; --muted:#B3AFBC;
+  --navy:#0E0B2A; --navy-2:#1C154B; --primary:#C3C0FF; --primary-c:#3A3580; --on-primary-c:#E2DFFF; --teal:#4FD8E2; color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f);font-size:17px;line-height:1.55}
+img{max-width:100%}
+a{color:var(--primary)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+.in{max-width:1120px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+
+/* topo */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--navy) 94%,transparent);backdrop-filter:blur(8px)}
+.top .in{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;font-size:20px;letter-spacing:-.3px}
+.mark{width:36px;height:36px;border-radius:11px;background:var(--lime);display:grid;place-items:center}
+.top nav{display:flex;gap:6px;flex-wrap:wrap}
+.top nav a{color:#E2DFFF;text-decoration:none;font-weight:600;font-size:15px;padding:8px 12px;border-radius:999px}
+.top nav a:hover{background:rgba(255,255,255,.08)}
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 26px;border-radius:999px;font-weight:700;font-size:16px;text-decoration:none;border:0;cursor:pointer}
+.btn.lime{background:var(--lime);color:var(--on-lime)}
+.btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
+.btn.primary{background:var(--primary);color:#fff}
+@media (prefers-color-scheme:dark){.btn.primary{color:#14104A}}
+@media (max-width:760px){.top nav{display:none}}
+
+/* abertura */
+.hero{background:var(--navy);color:#fff;overflow:hidden}
+.hero .in{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center;padding-block:56px 0}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--lime)}
+.hero h1{font-size:clamp(40px,6vw,68px);line-height:1.02;letter-spacing:-1.5px;margin:14px 0 18px;font-weight:800;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--lime)}
+.hero p.sub{font-size:19px;color:#D9D6F5;max-width:52ch;margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.proofs{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.proofs span{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:600}
+.phones{position:relative;display:flex;justify-content:center;gap:18px;align-items:flex-end;padding-top:10px}
+.phone{width:min(240px,44%);border-radius:30px;border:6px solid #0B0920;box-shadow:0 30px 60px rgba(0,0,0,.45);background:#0B0920;overflow:hidden}
+.phone img{display:block;width:100%;height:auto}
+.phone.b{transform:translateY(40px)}
+@media (max-width:860px){.hero .in{grid-template-columns:minmax(0,1fr);padding-block:40px 0}.phone.b{transform:translateY(24px)}}
+
+section{padding-block:72px}
+.kicker{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--primary)}
+h2{font-size:clamp(30px,4vw,44px);line-height:1.1;letter-spacing:-.8px;margin:10px 0 14px;text-wrap:balance}
+.lead{font-size:19px;color:var(--muted);max-width:60ch;margin:0 0 32px}
+
+/* dor */
+.pain{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.pain div{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:24px}
+.pain b{display:block;font-size:19px;margin-bottom:6px}
+.pain p{margin:0;color:var(--muted)}
+.quote{margin:28px 0 0;font-size:22px;font-weight:700;letter-spacing:-.3px;color:var(--fg)}
+@media (max-width:760px){.pain{grid-template-columns:minmax(0,1fr)}}
+
+/* como funciona */
+.how{background:var(--soft)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;counter-reset:s}
+.steps li{list-style:none;background:var(--surface);border-radius:24px;padding:26px;position:relative}
+.steps li::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--navy);color:var(--lime);font-weight:800;font-size:18px;margin-bottom:14px}
+.steps b{display:block;font-size:19px;margin-bottom:6px}
+.steps p{margin:0;color:var(--muted)}
+.steps{padding:0;margin:0}
+@media (max-width:760px){.steps{grid-template-columns:minmax(0,1fr)}}
+
+/* recursos */
+.feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.feat{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.feat .ic{width:44px;height:44px;border-radius:14px;background:var(--primary-c);color:var(--on-primary-c);display:grid;place-items:center}
+.feat b{font-size:18px}
+.feat p{margin:0;color:var(--muted);font-size:16px}
+.feat.addon{background:var(--navy);color:#fff;border-color:transparent}
+.feat.addon p{color:#D9D6F5}
+.feat.addon .ic{background:var(--lime);color:var(--on-lime)}
+.tag{align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;background:var(--lime);color:var(--on-lime);padding:3px 10px;border-radius:999px}
+@media (max-width:960px){.feats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.feats{grid-template-columns:minmax(0,1fr)}}
+
+/* veja funcionando */
+.demo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.manuals{display:grid;gap:12px}
+.manual{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 20px;text-decoration:none;color:var(--fg)}
+.manual:hover{border-color:var(--primary)}
+.manual .ic{width:48px;height:48px;border-radius:14px;background:var(--primary-c);color:var(--on-primary-c);display:grid;place-items:center;flex:none}
+.manual div{flex:1;min-width:0}
+.manual b{display:block;font-size:17px}
+.manual span{color:var(--muted);font-size:15px}
+.manual.soon{opacity:.6;pointer-events:none}
+.manual em{font-style:normal;font-size:12px;font-weight:700;background:var(--soft);padding:3px 10px;border-radius:999px;color:var(--muted)}
+.demo .phones{padding:0}
+.demo .phone{border-color:#2B2838;background:#2B2838}
+@media (max-width:860px){.demo{grid-template-columns:minmax(0,1fr)}}
+
+/* público */
+.who{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.who div{border-radius:20px;padding:20px;background:var(--soft)}
+.who b{display:block;margin-bottom:4px}
+.who p{margin:0;color:var(--muted);font-size:15px}
+@media (max-width:860px){.who{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:500px){.who{grid-template-columns:minmax(0,1fr)}}
+
+/* convite */
+.invite{background:var(--navy);color:#fff;border-radius:36px;padding:48px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:center}
+.invite h2{color:#fff}
+.invite p{color:#D9D6F5;margin:0 0 8px}
+.contact{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.contact .num{font-size:24px;font-weight:800;letter-spacing:.3px;user-select:all}
+@media (max-width:860px){.invite{grid-template-columns:minmax(0,1fr);padding:32px 24px}}
+
+footer{padding-block:36px 48px;color:var(--muted);font-size:14px}
+footer .in{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="in">
+    <a class="brand" href="#inicio" aria-label="TechPoint, início">
+      <span class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A2600" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l4 4 3-3M9 13l4 4 8-9"/></svg></span>
+      TechPoint
+    </a>
+    <nav aria-label="Seções">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#recursos">Recursos</a>
+      <a href="#veja-funcionando">Veja funcionando</a>
+      <a href="#contato">Contato</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero" aria-labelledby="titulo">
+    <div class="in">
+      <div>
+        <span class="eyebrow">Presença com prova</span>
+        <h1 id="titulo">Cada treino vira <em>uma prova</em>.</h1>
+        <p class="sub">O TechPoint registra a presença dos atletas com GPS, foto e a hora do servidor, organiza eventos e documentos, e gera o relatório para patrocinadores e financiadores em um clique.</p>
+        <div class="cta">
+          <a class="btn lime" href="https://wa.me/5561983400404?text=Ol%C3%A1!%20Quero%20conhecer%20o%20TechPoint%20e%20fazer%20o%20piloto%20gratuito." target="_blank" rel="noopener">Quero fazer o piloto grátis</a>
+          <a class="btn ghost" href="#veja-funcionando">Veja funcionando</a>
+        </div>
+        <div class="proofs" aria-label="Destaques">
+          <span>GPS + foto + hora do servidor</span><span>LGPD desde o início</span><span>App e site</span><span>Com as cores do seu clube</span>
+        </div>
+      </div>
+      <div class="phones" aria-hidden="true">
+        <div class="phone"><img src="img/atleta-inicio.jpg" alt="" width="600" height="1299"></div>
+        <div class="phone b"><img src="img/treinador-inicio.jpg" alt="" width="600" height="1299"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="dor">
+    <div class="in">
+      <span class="kicker">O problema</span>
+      <h2 id="dor">Quem prova que o atleta estava no treino?</h2>
+      <p class="lead">Quem recebe verba para o esporte (Lei de Incentivo, emenda, edital ou patrocínio) precisa comprovar a frequência. Hoje a prova é papel, planilha e grupo de WhatsApp.</p>
+      <div class="pain">
+        <div><b>O gestor</b><p>Responde pelo dinheiro e passa noites juntando listas e fotos para a prestação de contas.</p></div>
+        <div><b>O treinador</b><p>Perde tempo de treino fazendo chamada e conferindo quem chegou.</p></div>
+        <div><b>A família</b><p>Não sabe se o filho chegou ao treino nem quando há reunião ou competição.</p></div>
+      </div>
+      <p class="quote">Com o TechPoint, a presença tem prova e o treinador volta a treinar.</p>
+    </div>
+  </section>
+
+  <section class="how" id="como-funciona" aria-labelledby="como">
+    <div class="in">
+      <span class="kicker">Como funciona</span>
+      <h2 id="como">Dois toques no celular. Prova pronta.</h2>
+      <p class="lead">O check-in abre 30 minutos antes do treino, pelo app ou pelo site.</p>
+      <ol class="steps">
+        <li><b>O atleta faz o check-in</b><p>No local do treino: o sistema confere a localização, tira a selfie e usa a hora do servidor, que não dá para mudar no celular.</p></li>
+        <li><b>O treinador acompanha</b><p>Vê a lista ao vivo, aprova o que precisar de conferência e registra presença manual quando for o caso.</p></li>
+        <li><b>O relatório sai pronto</b><p>Frequência por treino ou período, com gráfico, faltas e justificativas, e exportação em PDF com fotos ou planilha.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="recursos" aria-labelledby="rec">
+    <div class="in">
+      <span class="kicker">Recursos</span>
+      <h2 id="rec">Tudo o que o dia a dia da equipe precisa</h2>
+      <p class="lead">Um só app para atleta, responsável, treinador e gestor. Cada um vê o que é seu.</p>
+      <div class="feats">
+        <div class="feat"><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><b>Presença com prova</b><p>Check-in e check-out com GPS, foto e hora do servidor. Funciona sem internet e envia depois.</p></div>
+        <div class="feat"><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><b>Eventos e convocações</b><p>Competições, reuniões e palestras. O atleta confirma que está ciente e o treinador vê quem confirmou.</p></div>
+        <div class="feat"><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9v9z"/><path d="M12 3a9 9 0 0 1 9 9h-9z"/></svg></span><b>Relatório de frequência</b><p>Gráfico em pizza ou barras: toque em ausentes, veja atestado ou justificativa e fale com o atleta pelo WhatsApp.</p></div>
+        <div class="feat"><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><circle cx="12" cy="9" r="2.5"/><path d="M8 16c1-2 7-2 8 0"/></svg></span><b>Currículo esportivo</b><p>Trajetória, competições, títulos e metas, com assiduidade comprovada. Vira PDF ou link para clubes e olheiros.</p></div>
+        <div class="feat"><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><b>Documentos em pastas</b><p>Atestados com validade e aviso, identidade, comprovante e autorizações, com histórico de versões.</p></div>
+        <div class="feat"><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></span><b>LGPD e responsáveis</b><p>Consentimento do responsável para menores, escolhas por tipo de dado e exclusão de conta conforme a lei.</p></div>
+        <div class="feat"><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18M3 12h18"/></svg></span><b>Com a cara do seu clube</b><p>Logo e cores da entidade no app e um endereço próprio de entrada para os atletas.</p></div>
+        <div class="feat"><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><b>Avisos no celular</b><p>Responsáveis avisados da chegada e da saída do atleta no treino.</p></div>
+        <div class="feat addon"><span class="tag">Módulo adicional</span><span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><b>Gestão de Investimentos</b><p>Para quem capta recurso: plano aprovado, metas, beneficiários, patrocinadores e prestação de contas com relatório numerado.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="veja-funcionando" aria-labelledby="veja">
+    <div class="in demo">
+      <div>
+        <span class="kicker">Veja funcionando</span>
+        <h2 id="veja">Manuais com as telas reais do sistema</h2>
+        <p class="lead">Passo a passo de cada módulo, com as telas do app no celular. As telas mostram o clube de demonstração BT Sport Club: clube, pessoas e eventos fictícios.</p>
+        <div class="manuals">
+          <a class="manual" href="manuais/eventos.html">
+            <span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+            <div><b>Módulo Eventos</b><span>Convocações, ciência do atleta, eventos realizados e currículo</span></div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          </a>
+          <div class="manual soon"><span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 14.5-4 16 0"/></svg></span><div><b>Módulo Atleta</b><span>Check-in, currículo, documentos e perfil</span></div><em>Em breve</em></div>
+          <div class="manual soon"><span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><div><b>Módulo Treinador</b><span>Treinos, atletas, relatórios, convites e pendências</span></div><em>Em breve</em></div>
+        </div>
+      </div>
+      <div class="phones" aria-hidden="true">
+        <div class="phone"><img src="img/atleta-eventos.jpg" alt="" width="600" height="1299" loading="lazy"></div>
+        <div class="phone b"><img src="img/treinador-eventos.jpg" alt="" width="600" height="1299" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quem">
+    <div class="in">
+      <span class="kicker">Para quem é</span>
+      <h2 id="quem">Feito para quem forma atletas</h2>
+      <div class="who">
+        <div><b>Clubes</b><p>Categorias de base com várias equipes e treinadores.</p></div>
+        <div><b>Projetos incentivados</b><p>Lei de Incentivo, emendas e editais que exigem frequência comprovada.</p></div>
+        <div><b>Escolas e escolinhas</b><p>Aulas e treinos com controle de presença e família informada.</p></div>
+        <div><b>Federações e redes</b><p>Várias entidades, cada uma com sua marca, numa só plataforma.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contato" aria-labelledby="convite">
+    <div class="in">
+      <div class="invite">
+        <div>
+          <span class="eyebrow">Piloto gratuito de 60 dias</span>
+          <h2 id="convite">Faça o piloto com a gente</h2>
+          <p>Montamos sua entidade, suas equipes e seus treinos, e você testa com os seus atletas por 60 dias, sem custo.</p>
+          <p>Planos mensais por faixa de atletas, com usuários ilimitados. Fale com a gente para receber a proposta.</p>
+        </div>
+        <div class="contact">
+          <span>WhatsApp da Prosper Negócios</span>
+          <span class="num">(61) 98340-0404</span>
+          <a class="btn lime" href="https://wa.me/5561983400404?text=Ol%C3%A1!%20Quero%20conhecer%20o%20TechPoint%20e%20fazer%20o%20piloto%20gratuito." target="_blank" rel="noopener">Chamar no WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="in">
+    <span>TechPoint · uma solução Prosper Negócios · Brasília, DF</span>
+    <span><a href="https://techpoint.expo.app/privacidade">Política de privacidade</a></span>
+  </div>
+</footer>
+</body>
+</html>

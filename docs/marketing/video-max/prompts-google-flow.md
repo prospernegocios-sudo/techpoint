@@ -51,3 +51,29 @@ Max: um jovem brasileiro simpático, de uns 25 anos, personagem de animação 3D
 - Junto os clipes na ordem, cortando cada um no tempo da voz.
 - Uso a voz do Eleven Labs e tiro o som que o Flow gera.
 - Coloco os textos: "Cada treino vira uma prova", 60 dias grátis, WhatsApp (61) 98340-0404, logo TechPoint e techpoint.app.br.
+
+## Versão em inglês (usada no Flow, a pedido do TG em 15/11)
+Com o Max cadastrado como personagem no Flow, selecione **Max** como ingrediente e cole só o texto da cena. Informações do personagem (campo opcional do Flow):
+`Max is a friendly, playful and confident young Brazilian man, the mascot of Prosper. He talks directly to the camera like a sports commentator full of energy: big smile, expressive eyebrows, lots of hand gestures, thumbs-up, winks and finger snaps. He always wears an olive green bomber jacket over a dark gray T-shirt with a white letter "P". 3D animation, Pixar movie style.`
+
+- 01: Max walks into frame on the sideline of a bright indoor volleyball court, waves enthusiastically at the camera and starts talking with a big friendly smile, as if introducing himself to the viewer. Medium shot, camera slowly pushing in. 3D Pixar style, vertical 9:16, no text.
+- 02A: Max points to his side with a mischievous look, inviting the viewer to look. Cut to a tired club manager in his 40s with glasses and a polo shirt, at a cluttered desk at night surrounded by tall stacks of paper, warm desk lamp light. 3D Pixar style, vertical 9:16, no text.
+- 02B: Close-up of the tired club manager rubbing his eyes while his smartphone on the desk vibrates nonstop with notifications; on the laptop a stern sponsor in a suit appears on a video call, tapping his watch. Exaggerated comedic expressions. 3D Pixar style, vertical 9:16, no text.
+- 03A: Max stands in front of an empty volleyball court, shrugging with a dramatic confused expression and looking around as if searching for someone. A giant glowing lime-green question mark floats above the court. 3D Pixar style, vertical 9:16, no text.
+- 03B: Max leans toward the camera, raises one eyebrow suspiciously and taps his chin like a comedic detective; slow push-in to his face. 3D Pixar style, vertical 9:16, no text.
+- 04A: Comedic chaos: paper attendance sheets, spreadsheets and phone photos fly around a volleyball coach on the sideline; a smartphone shows a messy group chat full of voice messages. Fast, playful camera movement. 3D Pixar style, vertical 9:16, no text.
+- 04B: A teenage volleyball player tiptoes away from practice behind the coach's back, while on a clipboard a red X mark magically flips into a green check mark. Max watches from the side and facepalms. 3D Pixar style, vertical 9:16, no text.
+- 05: Max snaps his fingers confidently; a burst of lime-green light fills the volleyball court and a glowing rounded-square app icon with a double check mark appears floating next to him. Max smiles proudly. Magical, triumphant moment. 3D Pixar style, vertical 9:16, no text.
+- 06A: Close-up of a teenage athlete arriving at the gym and tapping a smartphone: a map pin drops onto the gym location on the screen. Bright, clean lighting. 3D Pixar style, vertical 9:16, no text.
+- 06B: The athlete takes a quick selfie with the smartphone; a green check mark and a digital clock appear on the screen; the athlete gives a thumbs-up. In the background, Max nods approvingly with arms crossed. 3D Pixar style, vertical 9:16, no text.
+- 07: A smiling volleyball coach with a whistle looks at a tablet showing a live attendance list; cut to a mother at home smiling with relief at a notification on her phone. Warm, heartfelt tone. 3D Pixar style, vertical 9:16, no text.
+- 08: Max taps a big glowing button in the air and a neat printed report with colorful bar charts and an approval seal flies out and lands in the hands of a happy sponsor in a suit, who gives a thumbs-up. 3D Pixar style, vertical 9:16, no text.
+- 09A: Max stands in the center of a modern sports club lobby; floating holographic cards appear around him: a trophy, a meeting and a lecture, each with a green check mark. Max presents them excitedly with big gestures. 3D Pixar style, vertical 9:16, no text.
+- 09B: The camera orbits around Max as more floating holographic cards appear with dotted outlines, like coming soon: a megaphone and a scoreboard. Everything connects to a glowing app icon in the center. Futuristic but friendly. 3D Pixar style, vertical 9:16, no text.
+- 10A: A relaxed club manager leans back in his chair breathing with relief; the coach is back on the court coaching happy teenage athletes. Golden-hour light. 3D Pixar style, vertical 9:16, no text.
+- 10B: A teenage athlete smiles while checking an event on his phone; a family on the sofa looks calm and happy at a phone. Max winks at the camera. 3D Pixar style, vertical 9:16, no text.
+- 11A: Max leans in close to the camera with a secretive smile, finger on his lips as if about to tell a secret. 3D Pixar style, vertical 9:16, no text.
+- 11B: Messy piles of receipts, invoices and official documents swirl like a tornado inside a sports club office; floating signs drift by representing public funding, sponsorship and government grants. 3D Pixar style, vertical 9:16, no text.
+- 11C: Max catches the swirling papers and they magically fold into one tidy lime-green folder with a big check mark; he holds it up proudly and winks. 3D Pixar style, vertical 9:16, no text.
+- 12: Max on the volleyball court points enthusiastically to the side of the frame, then gives a big thumbs-up, inviting the viewer. Leave empty space on the side of the frame. 3D Pixar style, vertical 9:16, no text.
+- 13: Max waves goodbye to the camera with a big smile as the camera pulls back above the volleyball court; lime-green light glows in the background. Keep the upper half of the frame clean. 3D Pixar style, vertical 9:16, no text.

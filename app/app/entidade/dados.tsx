@@ -1,4 +1,5 @@
 // Dados da entidade, responsáveis legais e meus dados de administrador (só administradores).
+import { toast } from '@/components/toast';
 import { SITE_URL, shareText } from '@/lib/links';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
@@ -39,6 +40,8 @@ export default function DadosEntidade() {
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [slug, setSlug] = useState<string | null>(null);
+  // Erros também aparecem no aviso rápido, perto de onde a pessoa tocou (D86).
+  useEffect(() => { if (msg?.tone === 'danger') toast(msg.text, 'danger'); }, [msg]);
 
   useEffect(() => {
     if (!q.data) return;
@@ -61,7 +64,7 @@ export default function DadosEntidade() {
     const { error } = await supabase.from('organizations').update(orgToDb(org)).eq('id', orgId!);
     setBusy(false);
     if (error) return setMsg({ tone: 'danger', text: toFriendlyError(error).message });
-    setMsg({ tone: 'success', text: 'Dados da entidade salvos.' });
+    toast('Dados da entidade salvos.');
     qc.invalidateQueries({ queryKey: ['org-data', orgId] });
   };
 
@@ -72,7 +75,7 @@ export default function DadosEntidade() {
       const logo_path = brand.logo ? await uploadLogo(orgId!, brand.logo) : q.data.org.logo_path;
       const { error } = await supabase.from('organizations').update({ logo_path, theme_primary: brand.primary, theme_accent: brand.accent }).eq('id', orgId!);
       if (error) throw error;
-      setMsg({ tone: 'success', text: 'Logo e cores salvos. Todos da entidade já veem as novas cores.' });
+      toast('Logo e cores salvos.');
       qc.invalidateQueries({ queryKey: ['org-data', orgId] });
       me.refetch();
     } catch (e) {
@@ -91,7 +94,7 @@ export default function DadosEntidade() {
       ? await supabase.from('org_legal_representatives').update(row).eq('id', r.id)
       : await supabase.from('org_legal_representatives').insert({ ...row, org_id: orgId! });
     if (error) return setMsg({ tone: 'danger', text: toFriendlyError(error).message });
-    setMsg({ tone: 'success', text: `Responsável ${i + 1} salvo.` });
+    toast(`Responsável ${i + 1} salvo.`);
     qc.invalidateQueries({ queryKey: ['org-data', orgId] });
   };
 
@@ -115,7 +118,7 @@ export default function DadosEntidade() {
     const t = q.data.membership ? await supabase.from('memberships').update({ title: mine.title.trim() || null }).eq('id', q.data.membership.id) : { error: null };
     const err = p.error ?? t.error;
     if (err) return setMsg({ tone: 'danger', text: toFriendlyError(err).message });
-    setMsg({ tone: 'success', text: 'Seus dados foram salvos.' });
+    toast('Seus dados foram salvos.');
     qc.invalidateQueries({ queryKey: ['org-data', orgId] });
   };
 
@@ -138,7 +141,7 @@ export default function DadosEntidade() {
           <Button title="Copiar endereço" kind="outline" style={{ flex: 1 }} onPress={() => shareText(`${SITE_URL}/${slug ?? q.data!.org.slug}`)} />
           {slug != null && slug !== q.data.org.slug && <Button title="Salvar endereço" style={{ flex: 1 }} onPress={async () => {
             const { error } = await supabase.from('organizations').update({ slug }).eq('id', orgId!);
-            setMsg(error ? { tone: 'danger', text: error.code === '23505' ? 'Esse endereço já está em uso. Tente outro.' : 'Endereço inválido: use letras minúsculas, números e hífen (3 a 40).' } : { tone: 'success', text: 'Endereço salvo.' });
+            setMsg(error ? { tone: 'danger', text: error.code === '23505' ? 'Esse endereço já está em uso. Tente outro.' : 'Endereço inválido: use letras minúsculas, números e hífen (3 a 40).' } : null); if (!error) toast('Endereço salvo.');
             if (!error) { setSlug(null); q.refetch(); }
           }} />}
         </View>

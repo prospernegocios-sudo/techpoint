@@ -1,5 +1,5 @@
 // Escolha do logo no celular: galeria com recorte quadrado, versão leve para enviar
-// e uma miniatura 24x24 para ler as cores.
+// e uma miniatura 48x48 para ler as cores.
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { decode } from 'jpeg-js';
@@ -14,7 +14,7 @@ export async function pickLogo(): Promise<PickedLogo | null> {
   if (r.canceled || !r.assets[0]) return null;
   const uri = r.assets[0].uri;
   const big = await ImageManipulator.manipulateAsync(uri, [{ resize: { width: 512 } }], { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG, base64: true });
-  const tiny = await ImageManipulator.manipulateAsync(uri, [{ resize: { width: 24, height: 24 } }], { compress: 1, format: ImageManipulator.SaveFormat.JPEG, base64: true });
+  const tiny = await ImageManipulator.manipulateAsync(uri, [{ resize: { width: 48, height: 48 } }], { compress: 1, format: ImageManipulator.SaveFormat.JPEG, base64: true });
   const raw = decode(base64ToBytes(tiny.base64!), { useTArray: true, formatAsRGBA: true });
   return { previewUri: big.uri, body: base64ToBytes(big.base64!).buffer, contentType: 'image/jpeg', colors: extractColors(raw.data, 4) };
 }

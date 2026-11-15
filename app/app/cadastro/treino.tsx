@@ -1,4 +1,5 @@
 // Novo treino (único). Treinos recorrentes chegam na Fase 3.
+import { toast } from '@/components/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
@@ -41,6 +42,7 @@ export default function NovoTreino() {
     setSaving(false);
     if (e) return setError(toFriendlyError(e).message);
     qc.invalidateQueries({ queryKey: ['events'] });
+    toast('Treino criado.');
     Alert.alert('Treino criado', 'O treino já aparece na agenda dos atletas da equipe.');
     router.back();
   };

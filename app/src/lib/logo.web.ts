@@ -31,10 +31,10 @@ export async function pickLogo(): Promise<PickedLogo | null> {
   canvas.getContext('2d')!.drawImage(img, sx, sy, side, side, 0, 0, 512, 512);
   const blob = await new Promise<Blob>((r) => canvas.toBlob((b) => r(b!), 'image/png'));
   const tiny = document.createElement('canvas');
-  tiny.width = tiny.height = 24;
+  tiny.width = tiny.height = 48;
   const ctx = tiny.getContext('2d')!;
-  ctx.drawImage(img, sx, sy, side, side, 0, 0, 24, 24);
-  const data = ctx.getImageData(0, 0, 24, 24).data;
+  ctx.drawImage(img, sx, sy, side, side, 0, 0, 48, 48);
+  const data = ctx.getImageData(0, 0, 48, 48).data;
   return { previewUri: URL.createObjectURL(blob), body: blob, contentType: 'image/png', colors: extractColors(data, 4) };
 }
 

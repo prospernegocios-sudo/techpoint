@@ -1,4 +1,5 @@
 // Convidar atletas (link por time) e aprovar os pedidos de entrada (D37).
+import { toast } from '@/components/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -69,6 +70,7 @@ export default function Convites() {
     if (e) return setError(toFriendlyError(e).message);
     qc.invalidateQueries({ queryKey: ['join-requests'] });
     qc.invalidateQueries({ queryKey: ['athletes'] });
+    toast(approve ? `${r.full_name.split(' ')[0]} aprovado.` : 'Pedido recusado.');
     if (approve) setDone({ name: r.full_name, guardianToken: (data as { guardian_token: string | null }).guardian_token, phone: r.guardian_phone });
   };
 

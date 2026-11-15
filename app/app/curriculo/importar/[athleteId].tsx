@@ -1,5 +1,6 @@
 // Importar currículo (D85, sem custo): PDF com texto, texto colado ou resposta do assistente externo.
 // O leitor monta os itens; a pessoa revisa, corrige e escolhe o que salvar.
+import { toast } from '@/components/toast';
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -102,7 +103,7 @@ export default function ImportarCurriculo() {
       }
       await supabase.from('cv_import_log').insert({ athlete_id: athleteId, source, items: chosen.length });
       qc.invalidateQueries({ queryKey: ['cv', athleteId] });
-      setMsg({ tone: 'success', text: `${chosen.length} itens salvos no currículo.` });
+      toast(`${chosen.length} itens salvos no currículo.`);
       setTimeout(() => router.back(), 800);
     } catch (e) {
       setMsg({ tone: 'danger', text: toFriendlyError(e).message });

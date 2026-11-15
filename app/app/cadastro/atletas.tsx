@@ -1,5 +1,6 @@
 // Atletas: lista e cadastro. Com o e-mail Google do atleta (10 anos ou mais),
 // a conta dele é ligada automaticamente ao cadastro no primeiro login.
+import { toast } from '@/components/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
@@ -53,6 +54,7 @@ export default function Atletas() {
     if (e) return setError(toFriendlyError(e).message);
     setName(''); setBirth(''); setEmail(''); setAdding(false);
     qc.invalidateQueries({ queryKey: ['athletes'] });
+    toast('Atleta cadastrado.');
   };
 
   if (!isStaff) return <Screen><Notice tone="danger" text="Apenas gestor ou treinador gerenciam atletas." /></Screen>;

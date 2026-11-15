@@ -1,5 +1,6 @@
 // Ficha do atleta: autorização (LGPD), responsáveis (link pelo WhatsApp), consentimento em papel e documentos.
 // Usada pela equipe e pelo próprio atleta (para cadastrar o responsável).
+import { toast } from '@/components/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -83,7 +84,7 @@ export default function FichaAtleta() {
     const { error } = await supabase.rpc('record_paper_consent', { p_athlete_id: a.id, p_terms_version: 'papel', p_note: paper.trim() });
     if (error) return setMsg({ tone: 'danger', text: toFriendlyError(error).message });
     setPaper('');
-    setMsg({ tone: 'success', text: 'Consentimento em papel registrado.' });
+    toast('Consentimento em papel registrado.');
     refresh();
     qc.invalidateQueries({ queryKey: ['athletes'] });
   };

@@ -55,19 +55,20 @@ export function ensureContrast(color: string, bg: string, min = 3): string {
  * e cinzas (fundo do logo), agrupa tons parecidos e devolve do mais presente para o menos.
  */
 export function extractColors(pixels: Uint8Array | Uint8ClampedArray, channels: 3 | 4, max = 6): string[] {
-  const buckets = new Map<string, { n: number; r: number; g: number; b: number }>();
+  const buckets = new Map<string, { n: number; r: number; g: number; b: number; w: number }>();
   for (let i = 0; i + channels - 1 < pixels.length; i += channels) {
     const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
     if (channels === 4 && pixels[i + 3] < 128) continue; // transparente
     const [, s, l] = rgbToHsl([r, g, b]);
     if (l > 0.93 || l < 0.07 || s < 0.15) continue;
     const key = `${r >> 4}-${g >> 4}-${b >> 4}`;
-    const cur = buckets.get(key) ?? { n: 0, r: 0, g: 0, b: 0 };
+    const cur = buckets.get(key) ?? { n: 0, r: 0, g: 0, b: 0, w: 0 };
     cur.n++; cur.r += r; cur.g += g; cur.b += b;
+    cur.w += 0.3 + s * (1 - Math.abs(2 * l - 1)); // cores vivas pesam mais que sombras e brilhos
     buckets.set(key, cur);
   }
   const ranked = [...buckets.values()]
-    .map((v) => ({ n: v.n, hex: rgbToHex([v.r / v.n, v.g / v.n, v.b / v.n]) }))
+    .map((v) => ({ n: v.w, hex: rgbToHex([v.r / v.n, v.g / v.n, v.b / v.n]) }))
     .sort((a, b) => b.n - a.n);
   const out: string[] = [];
   for (const c of ranked) {
@@ -91,10 +92,34 @@ export function suggestTheme(candidates: string[]): { primary: string; accent: s
   return { primary, accent: other ?? mix(candidates[0], '#FFFFFF', 0.55) };
 }
 
+/** Agrupa as cores do logo por matiz; em cada grupo guarda a mais escura (cabeçalho) e a mais viva (destaque). */
+function hueGroups(candidates: string[]) {
+  const groups: { hue: number; members: string[] }[] = [];
+  for (const c of candidates) {
+    const [h, s] = rgbToHsl(hexToRgb(c));
+    if (s < 0.15) continue;
+    const g = groups.find((x) => Math.min(Math.abs(x.hue - h), 360 - Math.abs(x.hue - h)) < 30);
+    if (g) g.members.push(c); else groups.push({ hue: h, members: [c] });
+  }
+  const vivid = (c: string) => { const [, s, l] = rgbToHsl(hexToRgb(c)); return s * (1 - Math.abs(2 * l - 1)); };
+  return groups.map((g) => ({
+    dark: [...g.members].sort((a, b) => luminance(a) - luminance(b))[0],
+    vivid: [...g.members].sort((a, b) => vivid(b) - vivid(a))[0],
+  }));
+}
+
 /** Até 3 temas prontos a partir das cores do logo: clássico, invertido e suave. */
 export function suggestThemes(candidates: string[]): { name: string; primary: string; accent: string }[] {
   const s = suggestTheme(candidates);
   if (!s) return [];
+  const g = hueGroups(candidates);
+  if (g.length >= 2) {
+    return [
+      { name: 'Clássico', primary: ensureContrast(g[1].dark, '#FFFFFF', 4.5), accent: g[0].vivid },
+      { name: 'Invertido', primary: ensureContrast(g[0].dark, '#FFFFFF', 4.5), accent: g[1].vivid },
+      { name: 'Suave', primary: ensureContrast(mix(g[1].dark, '#FFFFFF', 0.15), '#FFFFFF', 4.5), accent: mix(g[0].vivid, '#FFFFFF', 0.3) },
+    ];
+  }
   const out = [{ name: 'Clássico', ...s }];
   const inv = { primary: ensureContrast(s.accent, '#FFFFFF', 3), accent: s.primary };
   if (inv.primary !== s.primary) out.push({ name: 'Invertido', ...inv });

@@ -1,5 +1,6 @@
 // Formulários de "Meus dados": dados pessoais e endereço (com CEP automático), esporte e corpo do atleta.
 // CPF e endereço são opcionais (D78, 1a); altura/peso/mão só atleta e responsáveis veem (3a).
+import { toast } from '@/components/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Switch, View } from 'react-native';
@@ -95,7 +96,7 @@ export function MyDataForm({ profileId, name }: { profileId: string; name: strin
       profile_id: profileId, cpf: digits(f.cpf) || null, phone: digits(f.phone) || null, birth_date: birth, ...addrRow(a), updated_at: new Date().toISOString(),
     });
     if (error) return setMsg({ tone: 'danger', text: toFriendlyError(error).message });
-    setMsg({ tone: 'success', text: 'Dados salvos.' });
+    setMsg(null); toast('Dados salvos.');
     qc.invalidateQueries({ queryKey: ['my-private', profileId] });
     qc.invalidateQueries({ queryKey: ['me'] });
   };
@@ -169,7 +170,7 @@ export function AthleteDataForm({ athleteId, orgId, birthDate, canSeeBody }: { a
       const { error: e2 } = await supabase.from('athlete_body').upsert({ athlete_id: athleteId, height_cm: h, weight_kg: w, dominant_hand: body.hand || null, show_in_cv: body.show, updated_at: new Date().toISOString() });
       if (e2) return setMsg({ tone: 'danger', text: toFriendlyError(e2).message });
     }
-    setMsg({ tone: 'success', text: 'Dados salvos.' });
+    setMsg(null); toast('Dados salvos.');
     qc.invalidateQueries({ queryKey: ['athlete-details', athleteId] });
     qc.invalidateQueries({ queryKey: ['cv', athleteId] });
   };

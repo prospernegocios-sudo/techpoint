@@ -1,4 +1,5 @@
 // Perfil / Meus dados: dados pessoais e do atleta, aparência, biometria, senha, privacidade e conta.
+import { toast } from '@/components/toast';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -21,7 +22,7 @@ export default function Perfil() {
     const { error } = await supabase.auth.updateUser({ password: newPw });
     if (error) return setPwMsg({ tone: 'danger', text: 'Não foi possível trocar a senha. Entre de novo e tente outra vez.' });
     setNewPw('');
-    setPwMsg({ tone: 'success', text: 'Senha alterada.' });
+    setPwMsg(null); toast('Senha alterada.');
   };
   const me = useMe();
   const { colors, palette, setPalette, mode, setMode, clubColors } = useTheme();

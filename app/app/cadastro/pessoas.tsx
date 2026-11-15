@@ -1,5 +1,6 @@
 // Administradores, gestores e treinadores: o acesso é dado pelo e-mail Google da pessoa.
 // Só administrador dá ou tira acesso de administrador (regra também no banco).
+import { toast } from '@/components/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
@@ -36,6 +37,7 @@ export default function Pessoas() {
     if (e) return setError(/duplicate|unique/i.test(e.message) ? 'Essa pessoa já tem esse papel.' : toFriendlyError(e).message);
     setEmail('');
     qc.invalidateQueries({ queryKey: ['memberships'] });
+    toast('Acesso adicionado.');
   };
 
   const remove = (r: Row) => {

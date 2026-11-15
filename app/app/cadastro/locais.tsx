@@ -1,5 +1,6 @@
 // Locais de treino. O ponto no mapa é capturado com "Estou no local agora"
 // (sem mapa pago no MVP). O raio é configurável por local.
+import { toast } from '@/components/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
@@ -61,6 +62,7 @@ export default function Locais() {
     setSaving(false);
     if (error) return setMsg({ tone: 'danger', text: toFriendlyError(error).message });
     qc.invalidateQueries({ queryKey: ['venues'] });
+    toast('Local salvo.');
     setEditing(null);
     Alert.alert('Pronto', 'Local salvo.');
   };

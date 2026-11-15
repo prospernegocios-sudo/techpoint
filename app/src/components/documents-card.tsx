@@ -1,4 +1,5 @@
 // Cartão "Documentos" da ficha do atleta: lista, abre, envia (PDF, PNG, JPG ou foto) e apaga.
+import { toast } from '@/components/toast';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useQueryClient } from '@tanstack/react-query';
@@ -59,7 +60,7 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
     try {
       await uploadAthleteDocument({ orgId, athleteId, uploaderId: meId, kind: form.kind, title: form.title, validUntil, picked: form.picked });
       setForm(null);
-      setMsg({ tone: 'success', text: 'Documento enviado.' });
+      setMsg(null); toast('Documento enviado.');
       refresh();
     } catch (e) {
       setMsg({ tone: 'danger', text: toFriendlyError(e).message });
@@ -74,7 +75,7 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
 
   const remove = (d: AthleteDoc) => {
     const run = async () => {
-      try { await deleteAthleteDocument(d); refresh(); } catch (e) { setMsg({ tone: 'danger', text: toFriendlyError(e).message }); }
+      try { await deleteAthleteDocument(d); toast('Documento apagado.'); refresh(); } catch (e) { setMsg({ tone: 'danger', text: toFriendlyError(e).message }); }
     };
     if (Platform.OS === 'web') { if (window.confirm('Apagar este documento?')) run(); return; }
     Alert.alert('Apagar documento?', kindLabel(d.kind), [{ text: 'Cancelar', style: 'cancel' }, { text: 'Apagar', style: 'destructive', onPress: run }]);

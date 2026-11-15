@@ -1,4 +1,5 @@
 // Equipes e categorias.
+import { toast } from '@/components/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
@@ -31,6 +32,7 @@ export default function Equipes() {
     setName('');
     setCategory(null);
     qc.invalidateQueries({ queryKey: ['teams'] });
+    toast('Equipe criada.');
   };
 
   if (!isManager) return <Screen><Notice tone="danger" text="Apenas o gestor cadastra equipes." /></Screen>;

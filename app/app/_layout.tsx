@@ -1,4 +1,5 @@
 // Raiz do app: provedores (tema, login, dados) e a trava de biometria.
+import { ToastHost } from '@/components/toast';
 import { useSavedBrand } from '@/lib/brand';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack, router } from 'expo-router';
@@ -64,6 +65,7 @@ function Shell() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
       )}
+      <ToastHost />
     </>
   );
 }

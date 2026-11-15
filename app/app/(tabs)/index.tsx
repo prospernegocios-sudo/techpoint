@@ -1,7 +1,7 @@
 // Início: atleta vê seus treinos e o botão de check-in/check-out;
 // gestor/treinador vê os treinos e abre a lista de presença.
 import { useFocusEffect, router } from 'expo-router';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Image, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, T, styles } from '@/components/ui';
@@ -73,6 +73,16 @@ export default function Home() {
     }, [me.org?.id]),
   );
 
+  // Conta ainda sem entidade: confere sozinha a cada 15 s se já foi ligada a uma (item 12 da auditoria).
+  const noOrg = !me.loading && !me.org;
+  const refetchMe = useRef(me.refetch);
+  refetchMe.current = me.refetch;
+  useEffect(() => {
+    if (!noOrg) return;
+    const t = setInterval(() => refetchMe.current(), 15_000);
+    return () => clearInterval(t);
+  }, [noOrg]);
+
   if (me.loading) return <Loading />;
   if (me.error) return <View style={{ padding: 16 }}><Notice tone="danger" text="Não foi possível carregar seus dados. Verifique a internet e puxe a tela para baixo." /></View>;
 
@@ -84,7 +94,6 @@ export default function Home() {
         <Button title="Cadastrar minha entidade" kind="accent" onPress={() => router.push('/entidade/nova')} />
         <T variant="small">Clube, escola ou associação com CNPJ. Você será o administrador e poderá convidar outras pessoas.</T>
         {me.isPlatformAdmin && <Button title="Criar entidade (equipe TechPoint)" kind="outline" onPress={() => router.push('/cadastro/organizacao')} />}
-        <Button title="Atualizar" kind="outline" onPress={me.refetch} />
       </ScrollView>
     );
   }

@@ -178,8 +178,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = useCallback(async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: callbackUrl() });
-    if (error) return { ok: false, message: passwordError(error.message) };
-    return { ok: true, message: 'Se o e-mail tiver conta, enviamos um link para entrar. Depois, defina uma nova senha em Perfil.' };
+    // Item 02 da auditoria: mensagens claras. (Dizer se o e-mail existe ou não depende de decisão do TG — ver D105.)
+    if (error) return { ok: false, message: /rate limit|too many/i.test(error.message) ? 'Muitos pedidos seguidos. Aguarde alguns minutos e tente novamente.' : 'Não foi possível enviar o link de acesso. Tente novamente.' };
+    return { ok: true, message: 'Se este e-mail estiver cadastrado, enviamos um link de acesso. Após entrar, você poderá definir uma nova senha no seu perfil.' };
   }, []);
 
   const signOut = useCallback(async () => {

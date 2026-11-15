@@ -167,9 +167,11 @@ export function MeProvider({ children }: { children: ReactNode }) {
   const tp = value.org?.theme_primary, ta = value.org?.theme_accent;
   useEffect(() => {
     if (tp && ta) { setClubColors({ primary: tp, accent: ta }); return; }
-    // Sem entidade carregada (antes do login): usa a marca do endereço aberto (white label).
+    // Logado: só as cores da entidade da conta (nunca as de outro clube aberto antes).
+    if (userId) { setClubColors(null); return; }
+    // Antes do login: só a marca do link do clube aberto neste acesso (white label).
     loadBrand().then((b) => setClubColors(b?.primary && b?.accent ? { primary: b.primary, accent: b.accent } : null));
-  }, [tp, ta, setClubColors]);
+  }, [tp, ta, userId, setClubColors]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

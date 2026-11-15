@@ -21,7 +21,7 @@ export default function Perfil() {
   const changePassword = async () => {
     if (newPw.length < 8 || !/[A-Za-z]/.test(newPw) || !/\d/.test(newPw)) return setPwMsg({ tone: 'danger', text: 'A senha precisa ter pelo menos 8 caracteres, com letras e números.' });
     const { error } = await supabase.auth.updateUser({ password: newPw });
-    if (error) return setPwMsg({ tone: 'danger', text: 'Não foi possível trocar a senha. Entre de novo e tente outra vez.' });
+    if (error) return setPwMsg({ tone: 'danger', text: /password should|weak/i.test(error.message) ? 'A senha precisa ter pelo menos 8 caracteres, com letras e números.' : /same|different from the old/i.test(error.message) ? 'A nova senha precisa ser diferente da atual.' : 'Não foi possível trocar a senha. Entre de novo e tente outra vez.' });
     setNewPw('');
     setPwMsg(null); toast('Senha alterada.');
   };

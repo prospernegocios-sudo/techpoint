@@ -105,6 +105,7 @@ export default function Home() {
         </View>
       </View>
 
+      {me.asGuest && <Notice tone="info" text={`Você está vendo ${me.org.name} como gestor master (administrador da plataforma). Tudo o que fizer fica registrado na auditoria.`} />}
       {me.orgs.length > 1 && (
         <View style={styles.wrap}>
           {me.orgs.map((o) => <Chip key={o.id} label={o.name} selected={o.id === me.org?.id} onPress={() => me.setOrgId(o.id)} />)}

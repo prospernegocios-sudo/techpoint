@@ -31,14 +31,16 @@ export type Profile = { id: string; full_name: string | null; email: string | nu
 type Membership = { org_id: string; role: Role; organizations: Org | null };
 export type MyAthlete = { id: string; org_id: string; full_name: string; birth_date: string };
 
-type MeData = { profile: Profile | null; memberships: Membership[]; athletes: MyAthlete[]; modules: { org_id: string; module: string; status: string; ends_on: string | null }[] };
+type MeData = { profile: Profile | null; memberships: Membership[]; athletes: MyAthlete[]; allOrgs: Org[]; modules: { org_id: string; module: string; status: string; ends_on: string | null }[] };
 
 async function fetchMe(userId: string): Promise<MeData> {
-  const [p, m, a, mo] = await Promise.all([
+  const [p, m, a, mo, ao] = await Promise.all([
     supabase.from('profiles').select('id, full_name, email, is_platform_admin').eq('id', userId).maybeSingle(),
     supabase.from('memberships').select('org_id, role, organizations(id, name, review_status, logo_path, theme_primary, theme_accent)').eq('profile_id', userId).eq('active', true),
     supabase.from('athletes').select('id, org_id, full_name, birth_date').eq('profile_id', userId),
     supabase.from('org_modules').select('org_id, module, status, ends_on'),
+    // Gestor master (administrador da plataforma) enxerga todas as entidades; os demais, só as suas.
+    supabase.from('organizations').select('id, name, review_status, logo_path, theme_primary, theme_accent').order('name'),
   ]);
   if (p.error) throw p.error;
   if (m.error) throw m.error;
@@ -48,6 +50,7 @@ async function fetchMe(userId: string): Promise<MeData> {
     memberships: (m.data ?? []) as unknown as Membership[],
     athletes: (a.data ?? []) as MyAthlete[],
     modules: (mo.data ?? []) as MeData['modules'],
+    allOrgs: (ao.data ?? []) as Org[],
   };
 }
 
@@ -70,6 +73,8 @@ type MeCtx = {
   isManager: boolean;
   isAdmin: boolean;
   isPlatformAdmin: boolean;
+  /** Gestor master dentro de uma entidade em que não está cadastrado. */
+  asGuest: boolean;
   /** Módulo adicional contratado pela entidade atual (ex.: 'investimentos'). */
   hasModule: (m: 'investimentos' | 'reservas') => boolean;
 };
@@ -99,10 +104,15 @@ export function MeProvider({ children }: { children: ReactNode }) {
     const data = q.data;
     const orgMap = new Map<string, Org>();
     data?.memberships.forEach((m) => m.organizations && orgMap.set(m.org_id, m.organizations));
+    const master = Boolean(data?.profile?.is_platform_admin);
+    if (master) data?.allOrgs.forEach((o) => { if (!orgMap.has(o.id)) orgMap.set(o.id, o); });
     const orgs = [...orgMap.values()].sort((a, b) => a.name.localeCompare(b.name));
     const org = orgs.find((o) => o.id === orgId) ?? orgs[0] ?? null;
     const order: Role[] = ['admin', 'manager', 'coach', 'athlete', 'guardian'];
-    const roles = order.filter((r) => data?.memberships.some((m) => m.org_id === org?.id && m.role === r));
+    const memberRoles = order.filter((r) => data?.memberships.some((m) => m.org_id === org?.id && m.role === r));
+    // Master numa entidade em que não está cadastrado entra como administrador (visitante da plataforma).
+    const asGuest = master && Boolean(org) && memberRoles.length === 0;
+    const roles: Role[] = asGuest ? ['admin'] : memberRoles;
     const staffRole = roles.find((r) => STAFF.includes(r)) ?? null; // maior papel da equipe
     const modes: Mode[] = [
       ...(staffRole ? (['team'] as Mode[]) : []),
@@ -141,6 +151,7 @@ export function MeProvider({ children }: { children: ReactNode }) {
       isManager: mode === 'team' && (staffRole === 'admin' || staffRole === 'manager'),
       isAdmin: mode === 'team' && staffRole === 'admin',
       isPlatformAdmin,
+      asGuest,
       hasModule: (mod) => Boolean(data?.modules.some((x) => x.org_id === org?.id && x.module === mod && x.status !== 'suspended' && (!x.ends_on || x.ends_on >= new Date().toISOString().slice(0, 10)))),
     };
   }, [q.data, q.isLoading, q.error, orgId, role]);

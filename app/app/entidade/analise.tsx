@@ -1,8 +1,9 @@
 // Entidades cadastradas: análise posterior pela equipe TechPoint (D55). Só administradores da plataforma.
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
+import { toast } from '@/components/toast';
 import { Badge, Button, Card, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { maskCnpj, maskCpf, maskPhone } from '@/lib/br';
 import { toFriendlyError } from '@/lib/errors';
@@ -18,7 +19,9 @@ type Item = {
 const statusLabel = { pending: 'Em análise', approved: 'Verificada', suspended: 'Suspensa' } as const;
 
 export default function Analise() {
-  const { isPlatformAdmin } = useMe();
+  const me = useMe();
+  const { isPlatformAdmin } = me;
+  const modules = useQuery({ queryKey: ['all-modules'], enabled: isPlatformAdmin, queryFn: async () => ((await supabase.from('org_modules').select('org_id, module, status')).data ?? []) as { org_id: string; module: string; status: string }[] });
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ['org-review'],
@@ -70,6 +73,22 @@ export default function Analise() {
             ))}
             <Field label="Anotações do contato" value={notes[o.id] ?? o.review_notes ?? ''} onChangeText={(v) => setNotes({ ...notes, [o.id]: v })} multiline maxLength={4000} />
             {o.reviewed_at && <T variant="small">Última análise: {brDateTime(o.reviewed_at)}</T>}
+            <View style={styles.row}>
+              <Button title="Entrar nesta entidade" style={{ flex: 1 }} onPress={() => { me.setOrgId(o.id); me.setMode('team'); router.replace('/(tabs)'); }} />
+            </View>
+            {(() => {
+              const on = (modules.data ?? []).some((m) => m.org_id === o.id && m.module === 'investimentos' && m.status !== 'suspended');
+              return (
+                <View style={[styles.row, { justifyContent: 'space-between' }]}>
+                  <T variant="small" style={{ flex: 1 }}>Módulo Gestão de Investimentos: <T variant="small" style={{ fontWeight: '800' }}>{on ? 'contratado' : 'desligado'}</T></T>
+                  <Button title={on ? 'Desligar' : 'Ligar'} kind="outline" onPress={async () => {
+                    const { error: e } = await supabase.rpc('set_org_module', { p_org_id: o.id, p_module: 'investimentos', p_status: on ? 'suspended' : 'active' });
+                    if (e) return setError(toFriendlyError(e).message);
+                    toast(on ? 'Módulo desligado.' : 'Módulo ligado.'); modules.refetch(); me.refetch();
+                  }} />
+                </View>
+              );
+            })()}
             <View style={styles.wrap}>
               <Button title="Verificar" onPress={() => review(it, 'approved')} />
               <Button title="Manter em análise" kind="outline" onPress={() => review(it, 'pending')} />

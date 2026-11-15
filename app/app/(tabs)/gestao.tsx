@@ -31,7 +31,7 @@ export default function Gestao() {
       { title: 'Pessoas com acesso', desc: 'Administradores, gestores e treinadores', href: '/cadastro/pessoas', icon: 'key-outline', show: isManager },
     ] },
     { title: 'Equipe TechPoint', items: [
-      { title: 'Entidades cadastradas', desc: 'Análise e contato com as entidades', href: '/entidade/analise', icon: 'shield-checkmark-outline', show: isPlatformAdmin },
+      { title: 'Painel do gestor master', desc: 'Todas as entidades: entrar, analisar, módulos', href: '/entidade/analise', icon: 'shield-checkmark-outline', show: isPlatformAdmin },
     ] },
   ];
   const visible = groups.map((g) => ({ ...g, items: g.items.filter((i) => i.show) })).filter((g) => g.items.length > 0);

@@ -1,4 +1,5 @@
 // Formulário dos dados da entidade (usado no cadastro inicial e na edição) e dos responsáveis legais.
+import { CityField } from '@/components/city-field';
 import { DateField } from '@/components/date-field';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -138,7 +139,7 @@ export function OrgForm({ value, onChange, cnpjLocked, onPartners }: {
         </View>
         <Field label="Bairro" value={value.district} onChangeText={set('district')} maxLength={100} />
         <View style={styles.row}>
-          <View style={{ flex: 3 }}><Field label="Cidade" onBlur={touch('city')} error={err('city')} value={value.city} onChangeText={set('city')} maxLength={100} /></View>
+          <View style={{ flex: 3 }}><CityField value={value.city} onChange={(v, c) => onChange({ ...value, city: c ? c.name : v, uf: c ? c.uf : value.uf })} /></View>
           <View style={{ flex: 1 }}><Field label="UF" onBlur={touch('uf')} error={err('uf')} value={value.uf} autoCapitalize="characters" onChangeText={(v) => set('uf')(v.toUpperCase().slice(0, 2))} /></View>
         </View>
       </Card>

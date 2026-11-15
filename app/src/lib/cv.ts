@@ -33,7 +33,7 @@ export type Cv = {
 };
 export type CvReference = { name: string; role?: string | null; phone?: string | null };
 export type CvProfile = {
-  headline: string | null; about: string | null; about_align?: 'left' | 'justify' | 'center'; goals: string[]; goals_done?: string[]; photo_path: string | null; gallery: string[];
+  headline: string | null; about: string | null; about_align?: 'left' | 'justify' | 'center'; goals: string[]; goals_done?: string[]; goals_set_on?: Record<string, string>; photo_path: string | null; gallery: string[];
   city: string | null; show_contacts: boolean; contact_phone: string | null; contact_email: string | null; instagram: string | null;
   references: CvReference[];
 };
@@ -141,7 +141,7 @@ export function cvHtml(cv: Cv, img: CvImages = { photo: null, gallery: [] }): st
     ${img.photo ? `<img class="photo" src="${esc(img.photo)}">` : ''}
     ${contacts.length ? `<h3>Contato</h3>${contacts.map((c) => `<p>${esc(c)}</p>`).join('')}` : ''}
     ${p?.about ? `<h3>Sobre mim</h3><div style="text-align:${p.about_align ?? 'justify'};font-size:9.5pt;line-height:1.45">${richToHtml(p.about, esc)}</div>` : ''}
-    ${p?.goals?.length ? `<h3>Metas</h3><ul style="list-style:none;padding-left:0">${p.goals.map((g) => `<li>${(p.goals_done ?? []).includes(g) ? '<span style="color:#4CC38A;font-weight:bold">✓</span>' : '○'} ${esc(g)}</li>`).join('')}</ul>` : ''}
+    ${p?.goals?.length ? `<h3>Metas</h3><ul style="list-style:none;padding-left:0">${p.goals.map((g) => `<li>${(p.goals_done ?? []).includes(g) ? '<span style="color:#4CC38A;font-weight:bold">✓</span>' : '○'} ${esc(g)}${p.goals_set_on?.[g] ? ` <span style="opacity:.7;font-size:8pt">(${p.goals_set_on[g].slice(8, 10)}/${p.goals_set_on[g].slice(5, 7)}/${p.goals_set_on[g].slice(0, 4)})</span>` : ''}</li>`).join('')}</ul>` : ''}
     ${awards.length ? `<h3>Prêmios individuais</h3><ul>${awards.map((a) => `<li>${esc(a.title)}${a.institution ? ` – ${esc(a.institution)}` : ''} – ${a.started_on.slice(0, 4)}</li>`).join('')}</ul>` : ''}
   </div>
   <div class="main">

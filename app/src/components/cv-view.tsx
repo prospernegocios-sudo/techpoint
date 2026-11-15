@@ -6,6 +6,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, Image, Platform, Pressable, Switch, Text, View } from 'react-native';
+import { CityField } from '@/components/city-field';
+import { DateField } from '@/components/date-field';
 import { RichField, RichText, type Align } from '@/components/rich-text';
 import { toast } from '@/components/toast';
 import { Button, Card, Chip, Field, Loading, Notice, T, styles } from '@/components/ui';
@@ -24,6 +26,21 @@ type Props = { athleteId: string; orgId: string; isStaff: boolean; canShare: boo
 type Form = { id?: string; kind: CvKind; title: string; institution: string; category: string; location: string; start: string; end: string; description: string; result: string };
 const empty: Form = { kind: 'competicao', title: '', institution: '', category: '', location: '', start: '', end: '', description: '', result: '' };
 type Panel = null | 'perfil' | 'contatos' | 'item' | 'compartilhar';
+type GoalRow = { text: string; date: string };
+
+/** Campos do formulário conforme o tipo de item (D93). */
+const KIND_FORM: Record<CvKind, { help: string; name: string; namePh: string; period: boolean; category: boolean; result: string | null; inst: string | null; instPh?: string; city: boolean }> = {
+  clube: { help: 'Clube, equipe ou escolinha onde treinou ou treina.', name: 'Clube ou equipe', namePh: 'Ex.: NCT Vôlei de Praia', period: true, category: true, result: null, inst: null, city: true },
+  competicao: { help: 'Campeonato, circuito, torneio ou copa que disputou.', name: 'Competição', namePh: 'Ex.: Circuito Brasiliense de Vôlei de Praia', period: false, category: true, result: 'Conquista', inst: 'Organizador', instPh: 'Ex.: Federação de Vôlei do DF', city: true },
+  titulo: { help: 'Título conquistado pela equipe ou dupla.', name: 'Título', namePh: 'Ex.: Campeão Brasiliense', period: false, category: true, result: null, inst: 'Competição ou organizador', instPh: 'Ex.: Circuito Brasiliense', city: true },
+  premio: { help: 'Reconhecimento individual: melhor jogador, destaque, revelação.', name: 'Prêmio', namePh: 'Ex.: Melhor levantador', period: false, category: false, result: null, inst: 'Em qual competição', instPh: 'Ex.: Taça Brasília', city: false },
+  selecao: { help: 'Convocação para seleção estadual, regional ou nacional.', name: 'Seleção', namePh: 'Ex.: Seleção do Distrito Federal', period: true, category: true, result: 'Resultado', inst: 'Competição', instPh: 'Ex.: Campeonato Brasileiro de Seleções', city: true },
+  curso: { help: 'Curso, camp, clínica ou intercâmbio esportivo.', name: 'Curso ou camp', namePh: 'Ex.: Intercâmbio de Atletas de Vôlei de Praia', period: true, category: false, result: null, inst: 'Instituição', instPh: 'Ex.: CBV', city: true },
+  outro: { help: 'Qualquer outra experiência esportiva relevante.', name: 'Nome', namePh: '', period: false, category: true, result: 'Resultado', inst: 'Organizador', city: true },
+};
+const todayBr = () => { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; };
+const isoToBr = (iso?: string | null) => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}` : '');
+const brToIso = (br: string) => { const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(br.trim()); return m ? `${m[3]}-${m[2]}-${m[1]}` : null; };
 
 /** Título de seção com uma ação de texto à direita (sempre no mesmo lugar). */
 function Section({ title, action, onAction, children }: { title: string; action?: string; onAction?: () => void; children: ReactNode }) {
@@ -77,16 +94,18 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
   const [panel, setPanel] = useState<Panel>(null);
   const [form, setForm] = useState<Form>(empty);
   const [open, setOpen] = useState<string | null>(null);
-  const [prof, setProf] = useState({ align: 'justify' as Align, headline: '', about: '', goals: '', phone: '', email: '', instagram: '', city: '', show: false });
+  const [prof, setProf] = useState({ align: 'justify' as Align, headline: '', about: '', phone: '', email: '', instagram: '', city: '', show: false });
   const [refs, setRefs] = useState<CvReference[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [goalRows, setGoalRows] = useState<GoalRow[]>([]);
   const [goalsDone, setGoalsDone] = useState<string[] | null>(null); // marcação imediata, antes do servidor responder
   const p = cv.data?.profile;
   useEffect(() => {
-    setProf({ align: (p?.about_align ?? 'justify') as Align, headline: p?.headline ?? '', about: p?.about ?? '', goals: (p?.goals ?? []).join('\n'), phone: p?.contact_phone ?? '', email: p?.contact_email ?? '',
+    setProf({ align: (p?.about_align ?? 'justify') as Align, headline: p?.headline ?? '', about: p?.about ?? '', phone: p?.contact_phone ?? '', email: p?.contact_email ?? '',
       instagram: p?.instagram ?? '', city: p?.city ?? '', show: p?.show_contacts ?? false });
     setRefs(p?.references ?? []);
+    setGoalRows((p?.goals ?? []).map((g) => ({ text: g, date: isoToBr(p?.goals_set_on?.[g]) })));
   }, [p]);
 
   if (cv.isLoading) return <Loading />;
@@ -132,8 +151,9 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
     try {
       await upsertProfile(part === 'perfil'
         ? { headline: prof.headline.trim() || null, about: prof.about.trim() || null, about_align: prof.align,
-            goals: prof.goals.split('\n').map((g) => g.replace(/^[•\-–*]\s*/, '').trim()).filter(Boolean).slice(0, 10),
-            goals_done: (p?.goals_done ?? []).filter((d) => prof.goals.split('\n').map((g) => g.replace(/^[•\-–*]\s*/, '').trim()).includes(d)) }
+            goals: goalRows.map((g) => g.text.trim()).filter(Boolean).slice(0, 10),
+            goals_set_on: Object.fromEntries(goalRows.filter((g) => g.text.trim() && brToIso(g.date)).map((g) => [g.text.trim(), brToIso(g.date)])),
+            goals_done: (p?.goals_done ?? []).filter((d) => goalRows.some((g) => g.text.trim() === d)) }
         : { contact_phone: prof.phone.trim() || null, contact_email: prof.email.trim() || null, instagram: prof.instagram.trim() || null,
             city: prof.city.trim() || null, show_contacts: prof.show,
             references: refs.filter((r) => r.name.trim()).slice(0, 4).map((r) => ({ name: r.name.trim(), role: r.role?.trim() || null, phone: r.phone?.trim() || null })) });
@@ -274,7 +294,21 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
           <T variant="subtitle">Sobre mim e metas</T>
           <Field label="Título" value={prof.headline} onChangeText={(v) => setProf({ ...prof, headline: v })} maxLength={80} placeholder="Jogador de vôlei de areia" />
           <RichField label="Sobre mim" value={prof.about} onChange={(v) => setProf({ ...prof, about: v })} align={prof.align} onAlign={(a) => setProf({ ...prof, align: a })} maxLength={1500} />
-          <Field label="Metas (uma por linha)" value={prof.goals} onChangeText={(v) => setProf({ ...prof, goals: v })} multiline />
+          <T variant="subtitle">Metas</T>
+          {goalRows.map((g, i) => (
+            <View key={i} style={{ gap: 6, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+              <Field label={`Meta ${i + 1}`} value={g.text} onChangeText={(v) => setGoalRows(goalRows.map((x, j) => (j === i ? { ...x, text: v } : x)))} maxLength={120} placeholder="Ex.: Jogar um mundial Sub 19" />
+              <DateField label="Definida em" mode="date" value={g.date} onChange={(v) => setGoalRows(goalRows.map((x, j) => (j === i ? { ...x, date: v } : x)))} />
+              <Pressable accessibilityRole="button" onPress={() => setGoalRows(goalRows.filter((_, j) => j !== i))} style={{ alignSelf: 'flex-end' }}>
+                <Text style={{ color: colors.danger, fontWeight: '700' }}>Remover meta</Text>
+              </Pressable>
+            </View>
+          ))}
+          {goalRows.length < 10 && (
+            <Pressable accessibilityRole="button" onPress={() => setGoalRows([...goalRows, { text: '', date: todayBr() }])}>
+              <Text style={{ color: colors.primary, fontWeight: '700' }}>+ Meta</Text>
+            </Pressable>
+          )}
           {error && <Notice tone="danger" text={error} />}
           <View style={styles.row}>
             <Button title="Salvar" kind="primary" style={{ flex: 1 }} loading={busy} onPress={() => saveProfile('perfil')} />
@@ -293,7 +327,10 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
                   <Pressable key={i} disabled={!canShare} accessibilityRole="checkbox" accessibilityState={{ checked: done }} accessibilityLabel={g}
                     onPress={() => toggleGoal(g)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}>
                     <Ionicons name={done ? 'checkmark-circle' : 'ellipse-outline'} size={24} color={done ? colors.success : colors.textMuted} />
-                    <Text style={{ flex: 1, color: colors.text, fontSize: 15, textDecorationLine: done ? 'line-through' : 'none', opacity: done ? 0.75 : 1 }}>{g}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: colors.text, fontSize: 15, textDecorationLine: done ? 'line-through' : 'none', opacity: done ? 0.75 : 1 }}>{g}</Text>
+                      {p!.goals_set_on?.[g] ? <Text style={{ color: colors.textMuted, fontSize: 12 }}>definida em {isoToBr(p!.goals_set_on[g])}</Text> : null}
+                    </View>
                   </Pressable>
                 );
               })}
@@ -307,19 +344,27 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
         <Card>
           <T variant="subtitle">{form.id ? 'Editar item' : 'Novo item'}</T>
           <View style={styles.wrap}>{CV_KINDS.map((k) => <Chip key={k.key} label={k.label} selected={form.kind === k.key} onPress={() => setForm({ ...form, kind: k.key })} />)}</View>
-          <Field label="Nome" value={form.title} onChangeText={(v) => setForm({ ...form, title: v })} maxLength={120} placeholder="Ex.: Circuito Brasiliense de Vôlei de Praia" />
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}><Field label="Início (mm/aaaa)" keyboardType="number-pad" value={form.start} onChangeText={(v) => setForm({ ...form, start: maskMonthYear(v) })} placeholder="03/2025" /></View>
-            <View style={{ flex: 1 }}><Field label="Fim (opcional)" keyboardType="number-pad" value={form.end} onChangeText={(v) => setForm({ ...form, end: maskMonthYear(v) })} /></View>
-          </View>
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}><Field label="Categoria" value={form.category} onChangeText={(v) => setForm({ ...form, category: v })} maxLength={60} placeholder="Sub 17" /></View>
-            <View style={{ flex: 1 }}><Field label="Conquista" value={form.result} onChangeText={(v) => setForm({ ...form, result: v })} maxLength={80} placeholder="Campeão, 3º lugar..." /></View>
-          </View>
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}><Field label="Clube ou organizador" value={form.institution} onChangeText={(v) => setForm({ ...form, institution: v })} maxLength={120} /></View>
-            <View style={{ flex: 1 }}><Field label="Cidade" value={form.location} onChangeText={(v) => setForm({ ...form, location: v })} maxLength={120} /></View>
-          </View>
+          {(() => {
+            const k = KIND_FORM[form.kind];
+            return (
+              <View style={{ gap: 10 }}>
+                <T variant="small">{k.help}</T>
+                <Field label={k.name} value={form.title} onChangeText={(v) => setForm({ ...form, title: v })} maxLength={120} placeholder={k.namePh} />
+                <View style={styles.row}>
+                  <View style={{ flex: 1 }}><Field label={k.period ? 'Entrada (mm/aaaa)' : 'Mês/ano'} keyboardType="number-pad" value={form.start} onChangeText={(v) => setForm({ ...form, start: maskMonthYear(v) })} placeholder="03/2025" /></View>
+                  {k.period && <View style={{ flex: 1 }}><Field label="Saída (vazio = atual)" keyboardType="number-pad" value={form.end} onChangeText={(v) => setForm({ ...form, end: maskMonthYear(v) })} placeholder="12/2025" /></View>}
+                </View>
+                {(k.category || k.result) && (
+                  <View style={styles.row}>
+                    {k.category && <View style={{ flex: 1 }}><Field label="Categoria" value={form.category} onChangeText={(v) => setForm({ ...form, category: v })} maxLength={60} placeholder="Sub 17" /></View>}
+                    {k.result && <View style={{ flex: 1 }}><Field label={k.result} value={form.result} onChangeText={(v) => setForm({ ...form, result: v })} maxLength={80} placeholder="Campeão, 3º lugar..." /></View>}
+                  </View>
+                )}
+                {k.inst && <Field label={k.inst} value={form.institution} onChangeText={(v) => setForm({ ...form, institution: v })} maxLength={120} placeholder={k.instPh} />}
+                {k.city && <CityField value={form.location} onChange={(v) => setForm({ ...form, location: v })} />}
+              </View>
+            );
+          })()}
           {form.id && <T variant="small">Ao salvar, o selo da entidade sai até ser confirmado de novo.</T>}
           {error && <Notice tone="danger" text={error} />}
           <View style={styles.row}>
@@ -368,7 +413,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
           </View>
           <View style={styles.row}>
             <View style={{ flex: 1 }}><Field label="E-mail" autoCapitalize="none" keyboardType="email-address" value={prof.email} onChangeText={(v) => setProf({ ...prof, email: v })} maxLength={120} /></View>
-            <View style={{ flex: 1 }}><Field label="Cidade" value={prof.city} onChangeText={(v) => setProf({ ...prof, city: v })} maxLength={80} /></View>
+            <View style={{ flex: 1 }}><CityField value={prof.city} onChange={(v) => setProf({ ...prof, city: v })} /></View>
           </View>
           {refs.map((r, i) => (
             <View key={i} style={styles.row}>

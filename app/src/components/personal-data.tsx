@@ -1,5 +1,6 @@
 // Formulários de "Meus dados": dados pessoais e endereço (com CEP automático), esporte e corpo do atleta.
 // CPF e endereço são opcionais (D78, 1a); altura/peso/mão só atleta e responsáveis veem (3a).
+import { CityField } from '@/components/city-field';
 import { toast } from '@/components/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -42,7 +43,7 @@ function AddressFields({ a, set }: { a: Addr; set: (a: Addr) => void }) {
       </View>
       <Field label="Bairro" value={a.district} onChangeText={(v) => set({ ...a, district: v })} maxLength={80} />
       <View style={styles.row}>
-        <View style={{ flex: 3 }}><Field label="Cidade" value={a.city} onChangeText={(v) => set({ ...a, city: v })} maxLength={80} /></View>
+        <View style={{ flex: 3 }}><CityField value={a.city} onChange={(v, c) => set({ ...a, city: c ? c.name : v, uf: c ? c.uf : a.uf })} /></View>
         <View style={{ flex: 1 }}><Field label="UF" autoCapitalize="characters" maxLength={2} value={a.uf} onChangeText={(v) => set({ ...a, uf: v.toUpperCase() })} /></View>
       </View>
     </View>

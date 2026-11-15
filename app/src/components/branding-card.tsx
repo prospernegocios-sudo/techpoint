@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import { Button, Card, Notice, T, styles } from '@/components/ui';
-import { clubPalette, readableOn, suggestTheme } from '@/lib/colors';
+import { clubPalette, readableOn, suggestTheme, suggestThemes } from '@/lib/colors';
 import { pickLogo, type PickedLogo } from '@/lib/logo';
 
 export type Branding = { logo: PickedLogo | null; logoUrl: string | null; primary: string | null; accent: string | null; candidates: string[] };
@@ -15,7 +15,7 @@ function Swatch({ color, selected, onPress }: { color: string; selected: boolean
   );
 }
 
-export function BrandingCard({ value, onChange }: { value: Branding; onChange: (b: Branding) => void }) {
+export function BrandingCard({ value, onChange, orgName }: { value: Branding; onChange: (b: Branding) => void; orgName?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -50,13 +50,34 @@ export function BrandingCard({ value, onChange }: { value: Branding; onChange: (
         <View style={{ flex: 1 }}><Button title={preview ? 'Trocar logo' : 'Escolher logo'} kind="outline" loading={busy} onPress={choose} /></View>
       </View>
       {error && <Notice text={error} />}
+      {(value.candidates?.length ?? 0) > 0 && (
+        <View style={{ gap: 8 }}>
+          <T variant="small" style={{ fontWeight: '600' }}>Temas sugeridos a partir do seu logo</T>
+          <View style={styles.wrap}>
+            {suggestThemes(value.candidates).map((t) => {
+              const sel = value.primary === t.primary && value.accent === t.accent;
+              return (
+                <Pressable key={t.name} accessibilityRole="button" accessibilityState={{ selected: sel }} onPress={() => onChange({ ...value, primary: t.primary, accent: t.accent })}
+                  style={{ flexGrow: 1, flexBasis: 120, borderRadius: 14, overflow: 'hidden', borderWidth: sel ? 3 : 1, borderColor: sel ? '#0E1116' : '#DDE3EC' }}>
+                  <View style={{ backgroundColor: t.primary, padding: 10 }}><Text style={{ color: readableOn(t.primary), fontWeight: '800' }}>{t.name}</Text></View>
+                  <View style={{ backgroundColor: t.accent, height: 18 }} />
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      )}
       <T variant="small" style={{ fontWeight: '600' }}>Cor principal (cabeçalho, botões, menu)</T>
       <View style={styles.wrap}>{options.map((c) => <Swatch key={`p${c}`} color={c} selected={value.primary === c} onPress={() => onChange({ ...value, primary: c })} />)}</View>
       <T variant="small" style={{ fontWeight: '600' }}>Cor de destaque (botão de check-in)</T>
       <View style={styles.wrap}>{options.map((c) => <Swatch key={`a${c}`} color={c} selected={value.accent === c} onPress={() => onChange({ ...value, accent: c })} />)}</View>
       {pal && (
         <View style={{ gap: 8, padding: 12, borderRadius: 14, backgroundColor: pal.background, borderWidth: 1, borderColor: pal.border }}>
-          <T variant="small">Prévia</T>
+          <T variant="small">Prévia: assim os atletas e as famílias veem o app do clube</T>
+          <View style={{ alignItems: 'center', gap: 6, paddingVertical: 8 }}>
+            {preview ? <Image source={{ uri: preview }} style={{ width: 56, height: 56, borderRadius: 12 }} accessibilityLabel="Logo" /> : null}
+            <Text style={{ color: pal.text, fontWeight: '800', fontSize: 18 }}>{orgName ?? 'Seu clube'}</Text>
+          </View>
           <View style={{ backgroundColor: pal.primary, borderRadius: 12, padding: 12 }}>
             <Text style={{ color: pal.onPrimary, fontWeight: '700', fontSize: 16 }}>Treino de hoje · 17:00</Text>
           </View>

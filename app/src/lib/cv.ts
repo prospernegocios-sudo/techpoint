@@ -74,7 +74,7 @@ export function useAthleteCv(athleteId: string | undefined) {
 
 const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-/** HTML do currículo para PDF (A4 retrato, cores do TechPoint). */
+/** HTML do currículo para PDF (A4 retrato). */
 export function cvHtml(cv: Cv): string {
   const period = (e: CvEntry) => `${monthLabel(e.started_on)}${e.ended_on ? ` – ${monthLabel(e.ended_on)}` : e.kind === 'clube' ? ' – atual' : ''}`;
   const body = cv.body && (cv.body.height_cm || cv.body.weight_kg || cv.body.dominant_hand)
@@ -95,11 +95,11 @@ export function cvHtml(cv: Cv): string {
   <div class="top"><div class="brand">Tech<span>Point</span></div><h1>${esc(cv.full_name)}</h1>
   <p>${esc([cv.modality, cv.position, `${cv.age} anos`, cv.org].filter(Boolean).join(' · '))}</p>${body}</div>
   <div class="stats">${start}${att}${cv.trainings_total ? `<div class="stat"><b>${cv.trainings_total}</b><small>treinos registrados com prova${cv.first_training ? ` desde ${monthLabel(cv.first_training)}` : ''}</small></div>` : ''}<div class="stat"><b>${cv.entries.filter((e) => e.verified).length}</b><small>itens confirmados pela entidade</small></div></div>
-  ${cv.teams.length ? `<h2>Equipes no TechPoint</h2>${cv.teams.map((t) => `<div class="item"><div class="when">desde ${monthLabel(t.since)}</div><div class="t">${esc(t.name)}</div><div class="s">${esc(t.category ?? '')}</div></div>`).join('')}` : ''}
+  ${cv.teams.length ? `<h2>Equipes</h2>${cv.teams.map((t) => `<div class="item"><div class="when">desde ${monthLabel(t.since)}</div><div class="t">${esc(t.name)}</div><div class="s">${esc(t.category ?? '')}</div></div>`).join('')}` : ''}
   <h2>Trajetória</h2>
   ${cv.entries.length ? cv.entries.map((e) => `<div class="item"><div class="when">${period(e)} · ${esc(cvKindLabel(e.kind))}</div><div class="t">${esc(e.title)}</div>
     <div class="s">${esc([e.institution, e.category, e.location].filter(Boolean).join(' · '))}</div>${e.description ? `<div>${esc(e.description)}</div>` : ''}
     ${e.verified ? `<div class="ok">✓ Confirmado por ${esc(e.verified_by_org ?? 'entidade')}</div>` : ''}</div>`).join('') : '<p class="s">Nenhum item cadastrado.</p>'}
-  <div class="foot">Currículo esportivo gerado pelo TechPoint em ${new Date().toLocaleDateString('pt-BR')}. Assiduidade calculada a partir de check-ins com GPS, foto e hora do servidor. Itens “confirmados” foram validados pela equipe da entidade.</div>
+  <div class="foot">Currículo esportivo atualizado em ${new Date().toLocaleDateString('pt-BR')}. Assiduidade calculada a partir de check-ins com GPS, foto e hora do servidor. Itens “confirmados” foram validados pela equipe da entidade.</div>
   </body></html>`;
 }

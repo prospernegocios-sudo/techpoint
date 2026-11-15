@@ -87,7 +87,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
     if (error) return fail(error);
     refresh();
     const url = `${SITE_URL}/cv/${data.token}`;
-    openWhatsApp(`Currículo esportivo de ${c.full_name} no TechPoint: ${url}`);
+    openWhatsApp(`Currículo esportivo de ${c.full_name}: ${url}`);
   };
   const revoke = async (id: string) => {
     const { error } = await supabase.from('athlete_cv_shares').update({ revoked_at: new Date().toISOString() }).eq('id', id);
@@ -122,7 +122,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
 
       {c.teams.length > 0 && (
         <Card>
-          <T variant="subtitle">Equipes no TechPoint</T>
+          <T variant="subtitle">Equipes</T>
           {c.teams.map((t, i) => <T key={i} variant="body">• {t.name}{t.category ? ` (${t.category})` : ''} · desde {monthLabel(t.since)}</T>)}
         </Card>
       )}

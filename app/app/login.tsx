@@ -1,10 +1,11 @@
 // Tela de login. Caminho principal: Google (uma vez; depois o app abre com biometria).
 // Alternativa discreta: e-mail e senha (entrar, criar conta, recuperar senha).
 // No computador: painel da marca à esquerda e cartão de acesso à direita.
+import { useSavedBrand } from '@/lib/brand';
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect } from 'expo-router';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions, Image } from 'react-native';
 import { Button, Notice, T } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
@@ -50,7 +51,19 @@ function Link({ title, onPress, align = 'center' }: { title: string; onPress: ()
 
 function Brand({ wide }: { wide: boolean }) {
   const { colors } = useTheme();
+  const brand = useSavedBrand();
   const fg = wide ? colors.onPrimary : colors.text;
+  if (brand) {
+    return (
+      <View style={{ gap: 12, alignItems: wide ? 'flex-start' : 'center' }}>
+        {brand.logo_url
+          ? <Image source={{ uri: brand.logo_url }} style={{ width: wide ? 96 : 84, height: wide ? 96 : 84, borderRadius: 20 }} resizeMode="contain" accessibilityLabel={`Logo ${brand.name}`} />
+          : null}
+        <Text style={{ fontSize: 30, fontWeight: '800', color: fg, letterSpacing: -0.5, textAlign: wide ? 'left' : 'center' }}>{brand.name}</Text>
+        <Text style={{ color: fg, opacity: 0.85, fontSize: 15 }}>Entre para continuar</Text>
+      </View>
+    );
+  }
   return (
     <View style={{ gap: wide ? 28 : 10, alignItems: wide ? 'flex-start' : 'center' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -192,7 +205,7 @@ export default function Login() {
 
   const legal = (
     <Text style={{ fontSize: 11.5, color: colors.textMuted, textAlign: 'center', maxWidth: 420, alignSelf: 'center' }}>
-      Ao continuar, você concorda com os termos de uso e a política de privacidade do TechPoint (versão de teste).
+      Ao continuar, você concorda com os termos de uso e a política de privacidade. Feito com TechPoint.
     </Text>
   );
 

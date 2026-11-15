@@ -1,4 +1,5 @@
 // Dados da entidade, responsáveis legais e meus dados de administrador (só administradores).
+import { SITE_URL, shareText } from '@/lib/links';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -37,6 +38,7 @@ export default function DadosEntidade() {
   const [brand, setBrand] = useState<Branding>({ logo: null, logoUrl: null, primary: null, accent: null, candidates: [] });
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [slug, setSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (!q.data) return;
@@ -126,7 +128,23 @@ export default function DadosEntidade() {
       </View>
       {msg && <Notice tone={msg.tone} text={msg.text} />}
 
-      <BrandingCard value={brand} onChange={setBrand} />
+      <Card>
+        <T variant="subtitle">Endereço do clube na internet</T>
+        <T variant="small">É a porta de entrada com a marca do clube. Mande para atletas e famílias. Se o clube tiver domínio próprio (ex.: dfvolei.com.br), peça para redirecioná-lo para este endereço.</T>
+        <Field label="Endereço" autoCapitalize="none" value={slug ?? q.data.org.slug ?? ""} maxLength={40}
+          onChangeText={(v) => setSlug(v.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9-]/g, ''))}
+          hint={`${SITE_URL}/${slug ?? q.data.org.slug}`} />
+        <View style={styles.row}>
+          <Button title="Copiar endereço" kind="outline" style={{ flex: 1 }} onPress={() => shareText(`${SITE_URL}/${slug ?? q.data!.org.slug}`)} />
+          {slug != null && slug !== q.data.org.slug && <Button title="Salvar endereço" style={{ flex: 1 }} onPress={async () => {
+            const { error } = await supabase.from('organizations').update({ slug }).eq('id', orgId!);
+            setMsg(error ? { tone: 'danger', text: error.code === '23505' ? 'Esse endereço já está em uso. Tente outro.' : 'Endereço inválido: use letras minúsculas, números e hífen (3 a 40).' } : { tone: 'success', text: 'Endereço salvo.' });
+            if (!error) { setSlug(null); q.refetch(); }
+          }} />}
+        </View>
+      </Card>
+
+      <BrandingCard value={brand} onChange={setBrand} orgName={q.data.org.name ?? undefined} />
       <Button title="Salvar logo e cores" loading={busy} onPress={saveBrand} />
 
       <OrgForm value={org} onChange={setOrg} cnpjLocked={Boolean(q.data.org.cnpj)} />

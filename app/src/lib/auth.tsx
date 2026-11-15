@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const unlock = useCallback(async () => {
     const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: 'Desbloquear o TechPoint',
+      promptMessage: 'Desbloquear o app',
       cancelLabel: 'Cancelar',
       fallbackLabel: 'Usar senha do celular',
       disableDeviceFallback: false,

@@ -215,7 +215,7 @@ const CSS = `<style>
 </style>`;
 
 const FOOTER = `  <div class="note">
-    <b>Como os registros foram feitos.</b> Cada atleta registrou entrada e saída pelo próprio celular, no aplicativo TechPoint.
+    <b>Como os registros foram feitos.</b> Cada atleta registrou entrada e saída pelo próprio celular, no aplicativo da entidade (plataforma TechPoint).
     No momento do registro, o aplicativo leu a localização do GPS uma única vez e tirou uma foto na hora pela câmera (não é possível usar foto da galeria).
     O servidor conferiu o horário do treino e a distância até o local, e gravou a <b>hora do servidor</b>, que não depende do relógio do celular.
     Quando o celular estava sem internet, o registro mostra a <b>hora do aparelho</b> e, separada, a hora em que o servidor o recebeu (aceito em até 24 horas); nesses casos o servidor atesta apenas o recebimento.

@@ -18,9 +18,9 @@ export default function CvPublico() {
       return data as Cv | null;
     },
   });
-  if (q.isLoading) return <Loading />;
+  if (q.isLoading) return <><Stack.Screen options={{ title: 'Currículo esportivo' }} /><Loading /></>;
   const c = q.data;
-  if (!c) return <Screen><Notice tone="warning" text="Este link de currículo expirou ou foi cancelado." /></Screen>;
+  if (!c) return <Screen><Stack.Screen options={{ title: 'Currículo esportivo' }} /><Notice tone="warning" text="Este link de currículo expirou ou foi cancelado." /></Screen>;
   const body = c.body ? [c.body.height_cm ? `${c.body.height_cm} cm` : '', c.body.weight_kg ? `${String(c.body.weight_kg).replace('.', ',')} kg` : '', handLabel(c.body.dominant_hand)].filter(Boolean).join(' · ') : '';
   return (
     <Screen>
@@ -48,7 +48,7 @@ export default function CvPublico() {
           </View>
         ))}
       </Card>
-      <T variant="small" style={{ textAlign: 'center' }}>Currículo esportivo · TechPoint</T>
+      <T variant="small" style={{ textAlign: 'center' }}>Currículo esportivo · Feito com TechPoint</T>
     </Screen>
   );
 }

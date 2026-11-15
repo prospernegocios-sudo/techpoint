@@ -91,6 +91,17 @@ export function suggestTheme(candidates: string[]): { primary: string; accent: s
   return { primary, accent: other ?? mix(candidates[0], '#FFFFFF', 0.55) };
 }
 
+/** Até 3 temas prontos a partir das cores do logo: clássico, invertido e suave. */
+export function suggestThemes(candidates: string[]): { name: string; primary: string; accent: string }[] {
+  const s = suggestTheme(candidates);
+  if (!s) return [];
+  const out = [{ name: 'Clássico', ...s }];
+  const inv = { primary: ensureContrast(s.accent, '#FFFFFF', 3), accent: s.primary };
+  if (inv.primary !== s.primary) out.push({ name: 'Invertido', ...inv });
+  out.push({ name: 'Suave', primary: ensureContrast(mix(s.primary, '#0E1116', 0.25), '#FFFFFF', 4.5), accent: mix(s.accent, '#FFFFFF', 0.35) });
+  return out;
+}
+
 const status = { success: '#16A34A', warning: '#F59E0B', danger: '#DC2626' };
 
 /** Tema "Cores do clube" (claro e escuro) a partir das duas cores escolhidas. */

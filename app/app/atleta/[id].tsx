@@ -51,7 +51,7 @@ export default function FichaAtleta() {
   const refresh = () => qc.invalidateQueries({ queryKey: ['athlete', id] });
 
   const sendLink = (gd: Guardian) =>
-    openWhatsApp(`Olá${gd.name ? `, ${gd.name.split(' ')[0]}` : ''}! Para acompanhar ${first} no TechPoint (${me.org?.name}) e autorizar o uso dos dados, abra: ${guardianUrl(gd.token)}`, gd.phone);
+    openWhatsApp(`Olá${gd.name ? `, ${gd.name.split(' ')[0]}` : ''}! Para acompanhar ${first} no app do ${me.org?.name} e autorizar o uso dos dados, abra: ${guardianUrl(gd.token)}`, gd.phone);
 
   const addGuardian = async () => {
     if (!form) return;

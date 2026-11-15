@@ -61,7 +61,7 @@ export default function Convites() {
     }
     setLink(inviteUrl(token!));
   };
-  const inviteText = () => `Olá! Este é o convite para entrar no ${teamName(teamId!)} (${org?.name}) no TechPoint: ${link}`;
+  const inviteText = () => `Olá! Este é o convite para entrar no ${teamName(teamId!)} do ${org?.name}: ${link}`;
 
   const decide = async (r: Req, approve: boolean) => {
     setError(null);
@@ -101,7 +101,7 @@ export default function Convites() {
             <>
               <T variant="small">Agora o responsável precisa autorizar. Envie o link para ele:</T>
               <Button title="Enviar link ao responsável (WhatsApp)" kind="accent"
-                onPress={() => openWhatsApp(`Olá! Para autorizar ${done.name.split(' ')[0]} a usar o TechPoint no ${org?.name}, abra: ${guardianUrl(done.guardianToken!)}`, done.phone)} />
+                onPress={() => openWhatsApp(`Olá! Para autorizar ${done.name.split(' ')[0]} a usar o app do ${org?.name}, abra: ${guardianUrl(done.guardianToken!)}`, done.phone)} />
             </>
           ) : <T variant="small">Atleta maior de idade: já pode fazer check-in.</T>}
           <Button title="Fechar" kind="ghost" onPress={() => setDone(null)} />

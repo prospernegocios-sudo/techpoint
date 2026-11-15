@@ -6,6 +6,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { useAuth } from './auth';
 import { registerForPush } from './push';
 import { useTheme } from './theme';
+import { loadBrand } from './brand';
 import { supabase } from './supabase';
 
 export type Role = 'admin' | 'manager' | 'coach' | 'athlete' | 'guardian';
@@ -154,7 +155,9 @@ export function MeProvider({ children }: { children: ReactNode }) {
   const { setClubColors } = useTheme();
   const tp = value.org?.theme_primary, ta = value.org?.theme_accent;
   useEffect(() => {
-    setClubColors(tp && ta ? { primary: tp, accent: ta } : null);
+    if (tp && ta) { setClubColors({ primary: tp, accent: ta }); return; }
+    // Sem entidade carregada (antes do login): usa a marca do endereço aberto (white label).
+    loadBrand().then((b) => setClubColors(b?.primary && b?.accent ? { primary: b.primary, accent: b.accent } : null));
   }, [tp, ta, setClubColors]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

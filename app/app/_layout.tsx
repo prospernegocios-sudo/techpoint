@@ -1,4 +1,5 @@
 // Raiz do app: provedores (tema, login, dados) e a trava de biometria.
+import { useSavedBrand } from '@/lib/brand';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -20,12 +21,13 @@ function LockScreen() {
   const { unlock, signOut } = useAuth();
   const { colors } = useTheme();
   const [tried, setTried] = useState(false);
+  const brand = useSavedBrand();
   useEffect(() => {
     unlock().finally(() => setTried(true));
   }, [unlock]);
   return (
     <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', padding: 24, gap: 16 }}>
-      <T variant="title" style={{ textAlign: 'center' }}>TechPoint</T>
+      <T variant="title" style={{ textAlign: 'center' }}>{brand?.name ?? 'TechPoint'}</T>
       <T variant="muted" style={{ textAlign: 'center' }}>Use sua digital ou o reconhecimento facial para abrir o app.</T>
       {tried && <Button title="Desbloquear" big onPress={() => unlock()} />}
       {tried && <Button title="Sair da conta" kind="ghost" onPress={signOut} />}

@@ -5,6 +5,6 @@ import { useAuth } from '@/lib/auth';
 
 export default function Index() {
   const { session, loading } = useAuth();
-  if (loading) return <Loading text="Abrindo o TechPoint..." />;
+  if (loading) return <Loading text="Abrindo..." />;
   return <Redirect href={session ? '/(tabs)' : '/login'} />;
 }

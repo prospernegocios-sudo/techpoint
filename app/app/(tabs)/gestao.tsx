@@ -15,14 +15,11 @@ export default function Gestao() {
 
   const groups: { title: string; items: Item[] }[] = [
     { title: 'Treinos e presença', items: [
-      { title: 'Novo treino', desc: 'Marcar um treino ou um treino de teste agora', href: '/cadastro/treino', icon: 'calendar-outline', show: isStaff },
     ] },
     { title: 'Projetos', items: [
       { title: 'Projetos incentivados', desc: 'Plano aprovado, metas, beneficiários e indicadores', href: '/projeto', icon: 'ribbon-outline', show: isStaff && hasModule('investimentos') },
     ] },
     { title: 'Estrutura', items: [
-      { title: 'Convites e pedidos', desc: 'Link do time pelo WhatsApp e aprovação de novos atletas', href: '/cadastro/convites', icon: 'person-add-outline', show: isStaff },
-      { title: 'Atletas', desc: 'Cadastro, responsáveis e autorização (LGPD)', href: '/cadastro/atletas', icon: 'people-outline', show: isStaff },
       { title: 'Equipes', desc: 'Categorias e turmas (Sub 15, Sub 17...)', href: '/cadastro/equipes', icon: 'shirt-outline', show: isManager },
       { title: 'Locais de treino', desc: '"Estou no local agora" e raio permitido', href: '/cadastro/locais', icon: 'location-outline', show: isManager },
     ] },

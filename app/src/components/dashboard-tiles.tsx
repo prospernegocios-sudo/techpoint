@@ -42,6 +42,7 @@ export function Tile({ icon, title, value, sub, tone, hue = 'neutral', onPress }
 const Grid = ({ children }: { children: React.ReactNode }) => <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>{children}</View>;
 const go = (h: Href) => () => router.push(h);
 
+/** Início da equipe (auditoria 13–21): exatamente 5 botões, nesta ordem. */
 export function TeamTiles({ dash }: { dash: { today: TodayEvent[]; pendingWeek: number; joinPending: number; cvToConfirm: number; pendingEventId: string | null } }) {
   const me = useMe();
   const alerts = useQuery({
@@ -50,20 +51,18 @@ export function TeamTiles({ dash }: { dash: { today: TodayEvent[]; pendingWeek: 
   });
   const t = dash.today[0];
   const docs = (alerts.data?.expiring ?? 0) + (alerts.data?.expired ?? 0);
+  const athleteNotes = [dash.cvToConfirm ? `${dash.cvToConfirm} ${dash.cvToConfirm === 1 ? 'item' : 'itens'} de currículo para confirmar` : '', docs ? `${docs} atestado${docs === 1 ? '' : 's'} vencendo ou vencido${docs === 1 ? '' : 's'}` : ''].filter(Boolean);
   return (
     <Grid>
-      <Tile hue="primary" icon="people" title={t ? 'Treino de hoje' : 'Treinos hoje'} value={t ? `${t.present}/${t.expected}` : 0}
-        sub={t ? `${t.team} · presentes` : 'Toque para marcar um treino'} onPress={t ? go({ pathname: '/evento/[id]', params: { id: t.id } }) : go('/cadastro/treino')} />
-      <Tile icon="hourglass-outline" title="Pendências" value={dash.pendingWeek} tone={dash.pendingWeek ? 'warning' : 'success'}
-        sub={dash.pendingWeek ? 'Registros para aprovar' : 'Nada pendente'} onPress={dash.pendingEventId ? go({ pathname: '/evento/[id]', params: { id: dash.pendingEventId } }) : go('/acao')} />
-      <Tile hue="tertiary" icon="person-add-outline" title="Convites e pedidos" value={dash.joinPending} tone={dash.joinPending ? 'warning' : undefined}
-        sub={dash.joinPending ? 'Atletas esperando aprovação' : 'Convidar pelo WhatsApp'} onPress={go('/cadastro/convites')} />
-      <Tile hue="accent" icon="trophy-outline" title="Currículos" value={dash.cvToConfirm} tone={dash.cvToConfirm ? 'warning' : undefined}
-        sub="Itens para confirmar" onPress={go('/cadastro/atletas')} />
-      <Tile hue="tertiary" icon="document-text-outline" title="Documentos" value={docs} tone={docs ? 'danger' : 'success'}
-        sub={docs ? 'Atestados vencidos ou vencendo' : 'Atestados em dia'} onPress={go('/cadastro/atletas')} />
-      <Tile icon="bar-chart-outline" title="Relatórios" sub="Frequência em PDF ou planilha" onPress={go('/relatorios')} />
-      {me.isManager && <Tile icon="shirt-outline" title="Equipes e locais" sub="Categorias, ginásios e raio" onPress={go('/gestao')} />}
+      <Tile hue="primary" icon="calendar" title="Treinos" value={t ? `${t.present}/${t.expected}` : dash.today.length}
+        sub={t ? `Hoje: ${t.team} · presentes` : 'Ver treinos e criar novo'} onPress={go('/treinos')} />
+      <Tile hue="tertiary" icon="people" title="Atletas" tone={docs ? 'warning' : undefined}
+        sub={athleteNotes.length ? athleteNotes.join(' · ') : 'Currículos, documentos e dados'} onPress={go('/cadastro/atletas')} />
+      <Tile hue="accent" icon="bar-chart" title="Relatórios" sub="Frequência: presenças e faltas" onPress={go('/relatorios')} />
+      <Tile hue="neutral" icon="person-add" title="Convites e pedidos" value={dash.joinPending} tone={dash.joinPending ? 'warning' : undefined}
+        sub={dash.joinPending ? 'Atletas esperando aprovação' : 'Link do time pelo WhatsApp'} onPress={go('/cadastro/convites')} />
+      <Tile hue="neutral" icon="hourglass" title="Pendências" value={dash.pendingWeek} tone={dash.pendingWeek ? 'warning' : 'success'}
+        sub={dash.pendingWeek ? 'Registros para aprovar' : 'Nada pendente'} onPress={dash.pendingEventId ? go({ pathname: '/evento/[id]', params: { id: dash.pendingEventId } }) : go('/treinos')} />
     </Grid>
   );
 }

@@ -7,6 +7,7 @@ import { useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountButton } from '@/components/account-menu';
 import { CenterButton } from '@/components/center-button';
+import { HomeButton } from '@/components/home-button';
 import { useAuth } from '@/lib/auth';
 import { useMe } from '@/lib/me';
 import { useTheme } from '@/lib/theme';
@@ -21,6 +22,7 @@ export default function TabsLayout() {
   // Tela larga (computador/tablet deitado): menu na lateral.
   const wide = useWindowDimensions().width >= 900;
   if (!session) return <Redirect href="/login" />;
+  const teamMode = mode === 'team';
   // Ícone com a "pílula" do Material You na aba ativa (no celular).
   const icon = (name: keyof typeof Ionicons.glyphMap) => function TabIcon({ color: c, focused }: { color: unknown; focused: boolean }) {
     const color = c as string;
@@ -34,7 +36,7 @@ export default function TabsLayout() {
   };
   return (
     <Tabs
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerStyle: { backgroundColor: colors.background },
         headerShadowVisible: false,
         headerRight: () => <AccountButton />,
@@ -43,7 +45,9 @@ export default function TabsLayout() {
         tabBarPosition: wide ? 'left' : 'bottom',
         tabBarVariant: wide ? 'material' : 'uikit',
         tabBarLabelPosition: wide ? 'beside-icon' : 'below-icon',
-        tabBarStyle: wide
+        // Equipe (auditoria 13–21): sem menu lateral nem barra de baixo; navegação pelos 5 botões do Início.
+        headerLeft: teamMode && route.name !== 'index' ? () => <HomeButton /> : undefined,
+        tabBarStyle: teamMode ? { display: 'none' as const } : wide
           ? { backgroundColor: colors.surfaceContainer, borderRightWidth: 0, minWidth: 220, paddingTop: 12 }
           : { backgroundColor: colors.surfaceContainer, borderTopWidth: 0, height: 80 + bottom, paddingBottom: 12 + bottom, paddingTop: 10, elevation: 0 },
         tabBarActiveTintColor: wide ? colors.onPrimaryContainer : colors.text,
@@ -51,7 +55,7 @@ export default function TabsLayout() {
         tabBarItemStyle: wide ? { borderRadius: 999, marginHorizontal: 10, marginVertical: 2 } : undefined,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontSize: mode === 'athlete' ? 11.5 : 12.5, fontWeight: '600', marginTop: 2 },
-      }}
+      })}
     >
       <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: icon('home') }} />
       <Tabs.Screen

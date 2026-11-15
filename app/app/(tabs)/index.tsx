@@ -99,7 +99,8 @@ export default function Home() {
   }
 
   // Responsável acompanha pelos cartões dos filhos; a agenda é da equipe e dos atletas.
-  const list = me.mode === 'guardian' ? [] : events.data ?? [];
+  // Equipe: a agenda fica em Treinos (auditoria 13–21); Início só com os 5 botões.
+  const list = me.mode === 'guardian' || me.mode === 'team' ? [] : events.data ?? [];
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
@@ -149,16 +150,6 @@ export default function Home() {
       {me.isStaff && dash.data && (
         <View style={{ gap: 10 }}>
           <TeamTiles dash={dash.data} />
-          {dash.data.today.map((t) => (
-            <Card key={t.id} onPress={() => router.push({ pathname: '/evento/[id]', params: { id: t.id } })}>
-              <View style={[styles.row, { justifyContent: 'space-between' }]}>
-                <T variant="subtitle" style={{ flex: 1 }}>{formatTime(t.starts_at)} · {t.team}</T>
-                <Badge label={`${t.present}/${t.expected} presentes`} tone={t.present ? 'success' : 'muted'} />
-              </View>
-              {t.pending > 0 && <T variant="small" color={colors.warning}>{t.pending} pendente(s) para aprovar</T>}
-              <T variant="small" color={colors.primary}>Abrir lista de presença ›</T>
-            </Card>
-          ))}
           {dash.data.alerts.length > 0 && (
             <Card>
               <T variant="subtitle">Metas abaixo do alvo</T>
@@ -170,7 +161,6 @@ export default function Home() {
               ))}
             </Card>
           )}
-          <T variant="subtitle" style={{ marginTop: 6 }}>Agenda</T>
         </View>
       )}
 
@@ -182,7 +172,7 @@ export default function Home() {
 
       {events.isLoading && <Loading />}
       {events.error && <Notice tone="danger" text="Não foi possível carregar a agenda. Verifique a internet." />}
-      {!events.isLoading && list.length === 0 && me.mode !== 'guardian' && <T variant="muted">Nenhum treino nos próximos 7 dias.</T>}
+      {!events.isLoading && list.length === 0 && me.mode === 'athlete' && <T variant="muted">Nenhum treino nos próximos 7 dias.</T>}
 
       {/* Atleta: cartão de destaque (Material You) com o treino de agora ou o próximo, e o botão de check-in */}
       {isAthlete && me.athlete && (() => {

@@ -126,6 +126,7 @@ export function AccountButton() {
                     ))}
                   </View>
                 )}
+ {(me.isManager || me.isPlatformAdmin || me.hasModule('investimentos')) && me.mode === 'team' && <Row icon="business-outline" label="Gestão do clube" onPress={go(() => router.push('/gestao'))} />}
                 {me.isPlatformAdmin && <Row icon="shield-outline" label="Painel do gestor master" onPress={go(() => router.push('/entidade/analise'))} />}
                 <Row icon="log-out-outline" label="Sair da conta" danger onPress={go(() => { signOut(); })} />
               </View>

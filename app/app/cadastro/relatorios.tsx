@@ -1,55 +1,36 @@
-// Área única de relatórios (achado de UX nº 4): pergunta se é para um projeto.
+// Relatórios da equipe (auditoria, itens 15 e 16): frequência interativa e desempenho (em breve).
+// A prestação de contas fica só no módulo Projetos Incentivados (dentro de cada projeto).
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, router } from 'expo-router';
-import { Pressable, View } from 'react-native';
-import { Card, Loading, Notice, Screen, T } from '@/components/ui';
+import { View } from 'react-native';
+import { Badge, Card, Notice, Screen, T } from '@/components/ui';
 import { useMe } from '@/lib/me';
-import { statusLabels, useProjects } from '@/lib/projects';
 import { useTheme } from '@/lib/theme';
 
 export default function Relatorios() {
-  const { org, isStaff, hasModule } = useMe();
-  const withProjects = hasModule('investimentos');
+  const { isStaff } = useMe();
   const { colors } = useTheme();
-  const projects = useProjects(org?.id);
   if (!isStaff) return <Screen><Notice tone="danger" text="Apenas a equipe da entidade gera relatórios." /></Screen>;
+  const Item = ({ icon, title, sub, onPress, soon }: { icon: keyof typeof Ionicons.glyphMap; title: string; sub: string; onPress?: () => void; soon?: boolean }) => (
+    <Card onPress={onPress} style={soon ? { opacity: 0.7 } : undefined}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: soon ? colors.surfaceContainerHigh : colors.primaryContainer, alignItems: 'center', justifyContent: 'center' }}>
+          <Ionicons name={icon} size={22} color={soon ? colors.textMuted : colors.onPrimaryContainer} />
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <T variant="body" style={{ fontWeight: '700' }}>{title}</T>
+          <T variant="small">{sub}</T>
+        </View>
+        {soon ? <Badge label="Em desenvolvimento" /> : <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
+      </View>
+    </Card>
+  );
   return (
     <Screen>
       <Stack.Screen options={{ title: 'Relatórios' }} />
-      {withProjects && <>
-      <T variant="subtitle">O relatório é para um projeto incentivado?</T>
-      <T variant="muted">Relatório de projeto fica emitido: numerado, congelado e com retificação. O avulso é livre, para consulta ou envio rápido.</T>
-
-      <T variant="small" style={{ fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 }}>Sim, de um projeto</T>
-      {projects.isLoading && <Loading />}
-      {projects.data?.length === 0 && <Notice text="Nenhum projeto cadastrado. Cadastre em Gestão > Projetos incentivados." />}
-      {projects.data?.map((p) => (
-        <Card key={p.id} onPress={() => router.push({ pathname: '/projeto/[id]/relatorios', params: { id: p.id } })}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <Ionicons name="ribbon-outline" size={22} color={colors.primary} />
-            <View style={{ flex: 1 }}>
-              <T variant="body" style={{ fontWeight: '700' }}>{p.name}</T>
-              <T variant="small">{statusLabels[p.status]}</T>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </View>
-        </Card>
-      ))}
-      </>}
-
-      {withProjects && <T variant="small" style={{ fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 }}>Não, relatório avulso</T>}
-      <Pressable accessibilityRole="button" onPress={() => router.push('/cadastro/relatorio')}>
-        <Card>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <Ionicons name="document-text-outline" size={22} color={colors.primary} />
-            <View style={{ flex: 1 }}>
-              <T variant="body" style={{ fontWeight: '700' }}>Relatório de frequência</T>
-              <T variant="small">PDF com fotos ou planilha, por período e equipes</T>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </View>
-        </Card>
-      </Pressable>
+      <Item icon="pie-chart-outline" title="Relatório de Frequência" sub="Presenças e faltas dos atletas por treino ou período" onPress={() => router.push('/frequencia')} />
+      <Item icon="trending-up-outline" title="Relatório de Desempenho" sub="Em breve: evolução dos atletas" soon />
+      <Item icon="download-outline" title="Exportar frequência (PDF ou planilha)" sub="Documento com fotos dos registros, por período e equipes" onPress={() => router.push('/cadastro/relatorio')} />
     </Screen>
   );
 }

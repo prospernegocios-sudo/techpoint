@@ -140,7 +140,7 @@ export function toCsv(data: ReportData, rows: ReportRow[]): string {
       co?.code ?? '', stayMinutes(r) ?? '', notes,
     ].map(csvCell).join(';');
   });
-  const title = [`Relatório de frequência - ${data.project.name ?? ''}`, `Período ${isoDayToBr(data.period.from)} a ${isoDayToBr(data.period.to)}`, 'Horários de Brasília'];
+  const title = [`Relatório de frequência - ${data.project.name || data.org.name}`, `Período ${isoDayToBr(data.period.from)} a ${isoDayToBr(data.period.to)}`, 'Horários de Brasília'];
   // BOM para o Excel reconhecer os acentos.
   return '﻿' + [title.map(csvCell).join(';'), head.map(csvCell).join(';'), ...lines].join('\r\n');
 }
@@ -246,8 +246,8 @@ ${CSS}</head><body>
   <div class="head">
     <h1>${data.logo_url ? `<img src="${esc(data.logo_url)}" alt="" style="height:34px;width:34px;object-fit:contain;vertical-align:middle;margin-right:8px;border-radius:6px"/>` : ''}Relatório de frequência de atletas</h1>
     <table><tbody>
-      <tr><td><b>Projeto:</b> ${esc(p.name)}</td><td><b>Nº do projeto:</b> ${esc(p.number) || '—'}</td></tr>
-      <tr><td><b>Entidade proponente:</b> ${esc(p.proponent || data.org.name)}</td><td><b>Clube:</b> ${esc(data.org.name)}</td></tr>
+      ${p.name ? `<tr><td><b>Projeto:</b> ${esc(p.name)}</td><td><b>Nº do projeto:</b> ${esc(p.number) || '—'}</td></tr>
+      <tr><td><b>Entidade proponente:</b> ${esc(p.proponent || data.org.name)}</td><td><b>Clube:</b> ${esc(data.org.name)}</td></tr>` : `<tr><td colspan="2"><b>Clube:</b> ${esc(data.org.name)}</td></tr>`}
       <tr><td><b>Período:</b> ${isoDayToBr(data.period.from)} a ${isoDayToBr(data.period.to)}</td><td><b>Equipes:</b> ${data.teams.map((t) => esc(t.name)).join(', ')}</td></tr>
       <tr><td><b>Treinos no período:</b> ${data.events.length}</td><td><b>Frequência média:</b> ${avg}% (${totalPresent} presenças de ${totalExpected} previstas)</td></tr>
       <tr><td><b>Gerado em:</b> ${brDateTime(data.generated_at)} (horário de Brasília)</td><td><b>Gerado por:</b> ${esc(data.generated_by)} — TechPoint</td></tr>

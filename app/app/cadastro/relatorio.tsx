@@ -18,9 +18,6 @@ export default function Relatorio() {
   const { org, isStaff } = useMe();
   const teams = useTeams(org?.id);
   const today = new Date();
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-  const [proponent, setProponent] = useState('');
   const [from, setFrom] = useState(br(new Date(today.getFullYear(), today.getMonth(), 1)));
   const [to, setTo] = useState(br(today));
   const [teamIds, setTeamIds] = useState<string[]>([]);
@@ -41,14 +38,13 @@ export default function Relatorio() {
     setError(null);
     setLast(null);
     const f = parseBrDate(from), t = parseBrDate(to);
-    if (name.trim().length < 3) { setError('Informe o nome do projeto.'); return null; }
     if (!f || !t) { setError('Confira as datas do período (dd/mm/aaaa).'); return null; }
     if (t < f) { setError('A data final precisa ser depois da data inicial.'); return null; }
     if (teamIds.length === 0) { setError('Escolha pelo menos uma equipe.'); return null; }
     setBusy('Buscando os registros...');
     const data = await fetchReport({
       orgId: org!.id, teamIds, from: toIsoDate(f), to: toIsoDate(t),
-      project: { name: name.trim(), number: number.trim() || undefined, proponent: proponent.trim() || undefined },
+      project: { name: '' },
     });
     if (data.events.length === 0) {
       setBusy(null);
@@ -77,13 +73,7 @@ export default function Relatorio() {
   return (
     <Screen>
       <Stack.Screen options={{ title: 'Relatório de frequência' }} />
-      <T variant="muted">Para prestação de contas de projetos incentivados e patrocinadores. Cada registro sai com hora do servidor, GPS, distância do local, foto e código de verificação.</T>
-
-      <Card>
-        <Field label="Nome do projeto" placeholder="Ex.: Vôlei para Todos 2026" value={name} onChangeText={setName} maxLength={120} />
-        <Field label="Número do projeto (opcional)" placeholder="Ex.: 58000.012345/2026-00" value={number} onChangeText={setNumber} maxLength={60} />
-        <Field label="Entidade proponente (opcional)" placeholder={org?.name} value={proponent} onChangeText={setProponent} maxLength={120} />
-      </Card>
+      <T variant="muted">PDF com fotos ou planilha. Cada registro sai com hora do servidor, GPS, distância do local, foto e código de verificação.</T>
 
       <Card>
         <T variant="subtitle">Período</T>

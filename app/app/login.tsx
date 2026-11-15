@@ -54,13 +54,18 @@ function Brand({ wide }: { wide: boolean }) {
   const brand = useSavedBrand();
   const fg = wide ? colors.onPrimary : colors.text;
   if (brand) {
+    // Marca do clube em destaque: centralizada, logo grande sobre fundo claro e nome em letras grandes.
+    const box = wide ? 220 : 148;
     return (
-      <View style={{ gap: 12, alignItems: wide ? 'flex-start' : 'center' }}>
-        {brand.logo_url
-          ? <Image source={{ uri: brand.logo_url }} style={{ width: wide ? 96 : 84, height: wide ? 96 : 84, borderRadius: 20 }} resizeMode="contain" accessibilityLabel={`Logo ${brand.name}`} />
-          : null}
-        <Text style={{ fontSize: 30, fontWeight: '800', color: fg, letterSpacing: -0.5, textAlign: wide ? 'left' : 'center' }}>{brand.name}</Text>
-        <Text style={{ color: fg, opacity: 0.85, fontSize: 15 }}>Entre para continuar</Text>
+      <View style={{ gap: wide ? 22 : 14, alignItems: 'center', alignSelf: 'stretch' }}>
+        {brand.logo_url ? (
+          <View style={{ width: box, height: box, borderRadius: wide ? 48 : 36, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center',
+            shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 20, shadowOffset: { width: 0, height: 8 }, elevation: 6 }}>
+            <Image source={{ uri: brand.logo_url }} style={{ width: box * 0.82, height: box * 0.82 }} resizeMode="contain" accessibilityLabel={`Logo ${brand.name}`} />
+          </View>
+        ) : null}
+        <Text style={{ fontSize: wide ? 52 : 38, fontWeight: '700', color: fg, letterSpacing: -1, textAlign: 'center', lineHeight: wide ? 58 : 44 }}>{brand.name}</Text>
+        <Text style={{ color: fg, opacity: 0.85, fontSize: wide ? 18 : 16, textAlign: 'center' }}>Entre para continuar</Text>
       </View>
     );
   }
@@ -101,6 +106,7 @@ export default function Login() {
   const { session, signInWithGoogle, signInWithPassword, signUpWithPassword, resetPassword } = useAuth();
   const { colors } = useTheme();
   const wide = useWindowDimensions().width >= 900;
+  const brand = useSavedBrand();
   const [mode, setMode] = useState<Mode>('choose');
   const [busy, setBusy] = useState<null | 'google' | 'email'>(null);
   const [error, setError] = useState<string | null>(null);
@@ -212,8 +218,8 @@ export default function Login() {
   if (wide) {
     return (
       <View style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.background }}>
-        <View style={{ flex: 1.1, backgroundColor: colors.hero, padding: 56, justifyContent: 'center' }}>
-          <View style={{ maxWidth: 520 }}><Brand wide /></View>
+        <View style={{ flex: 1.1, backgroundColor: colors.hero, padding: 56, justifyContent: 'center', alignItems: brand ? 'center' : 'flex-start' }}>
+          <View style={{ maxWidth: 520, width: '100%' }}><Brand wide /></View>
         </View>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 40, gap: 16 }} keyboardShouldPersistTaps="handled">
           {card}

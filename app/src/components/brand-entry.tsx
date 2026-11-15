@@ -28,16 +28,16 @@ export function BrandEntry({ slug }: { slug: string }) {
   return (
     <Screen style={{ justifyContent: 'center' }}>
       <Stack.Screen options={{ headerShown: false, title: b.name }} />
-      <View style={{ alignItems: 'center', gap: 16, paddingVertical: 32 }}>
+      <View style={{ alignItems: 'center', gap: 18, paddingVertical: 32 }}>
         {b.logo_url
-          ? <Image source={{ uri: b.logo_url }} style={{ width: 120, height: 120, borderRadius: 24 }} resizeMode="contain" accessibilityLabel={`Logo ${b.name}`} />
-          : <View style={{ width: 120, height: 120, borderRadius: 24, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ color: colors.onPrimary, fontSize: 44, fontWeight: '800' }}>{b.name.slice(0, 2).toUpperCase()}</Text>
+          ? <Image source={{ uri: b.logo_url }} style={{ width: 220, height: 220, maxWidth: '70%' }} resizeMode="contain" accessibilityLabel={`Logo ${b.name}`} />
+          : <View style={{ width: 180, height: 180, borderRadius: 48, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ color: colors.onPrimary, fontSize: 64, fontWeight: '700' }}>{b.name.slice(0, 2).toUpperCase()}</Text>
             </View>}
-        <T variant="title" style={{ textAlign: 'center' }}>{b.name}</T>
-        <T variant="muted" style={{ textAlign: 'center' }}>Presença nos treinos, documentos e currículo esportivo dos atletas.</T>
+        <Text style={{ color: colors.text, fontSize: 44, fontWeight: '700', letterSpacing: -1, textAlign: 'center', lineHeight: 50 }}>{b.name}</Text>
+        <T variant="muted" style={{ textAlign: 'center', fontSize: 17, maxWidth: 420 }}>Presença nos treinos, documentos e currículo esportivo dos atletas.</T>
       </View>
-      <Button title="Entrar" big onPress={() => router.push('/login')} />
+      <Button title="Entrar" big onPress={() => router.push('/login')} style={{ width: '100%', maxWidth: 420, alignSelf: 'center' }} />
       <T variant="small" style={{ textAlign: 'center', marginTop: 24 }}>Feito com TechPoint</T>
     </Screen>
   );

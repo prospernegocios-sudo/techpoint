@@ -11,6 +11,10 @@
    - um botão "☰" recolhe o menu (fica só com os ícones) e expande de novo (ícone + nome);
    - o aparelho lembra a escolha.
 
+3. **Hotsite com os manuais** (D111): os manuais por módulo, com telas do clube de demonstração BT Sport Club, entram no hotsite como prova de capacidade. Manual pronto: módulo Eventos. Falta o TG escolher onde hospedar (recomendado: techpoint.app.br no Cloudflare Pages, grátis) e fazer os manuais dos outros módulos.
+4. **Editar e apagar evento** (o treinador ainda não consegue pelo app).
+5. **Abrir endereço interno direto no navegador** (ex.: /relatorios) leva ao Início: corrigir.
+
 ## Pendentes de antes
 - Fase 4: convocações ("vou / não vou" e autorização de viagem).
 - Google Play: cadastro da Prosper (D-U-N-S).

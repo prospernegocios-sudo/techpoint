@@ -7,7 +7,7 @@ import { ageOn, formatDay, formatTime } from '@/lib/format';
 import { useMe } from '@/lib/me';
 import { supabase } from '@/lib/supabase';
 
-type Member = { athlete_id: string; athletes: { id: string; full_name: string; birth_date: string; status: string; profile_id: string | null } | null };
+type Member = { athlete_id: string; athletes: { id: string; full_name: string; birth_date: string; status: string; profile_id: string | null; is_demo: boolean } | null };
 
 export default function Equipe() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,7 +18,7 @@ export default function Equipe() {
     queryFn: async () => {
       const [t, m, r, e] = await Promise.all([
         supabase.from('teams').select('id, name, category').eq('id', id!).single(),
-        supabase.from('team_members').select('athlete_id, athletes(id, full_name, birth_date, status, profile_id)').eq('team_id', id!),
+        supabase.from('team_members').select('athlete_id, athletes(id, full_name, birth_date, status, profile_id, is_demo)').eq('team_id', id!),
         supabase.from('athlete_join_requests').select('id', { count: 'exact', head: true }).eq('team_id', id!).eq('status', 'pending'),
         supabase.from('events').select('id, starts_at, ends_at').eq('team_id', id!).neq('status', 'canceled').gte('ends_at', new Date().toISOString()).order('starts_at').limit(5),
       ]);
@@ -61,7 +61,7 @@ export default function Equipe() {
           const a = m.athletes!;
           return (
             <Card key={a.id} style={{ flexGrow: 1, flexBasis: 260 }} onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: a.id } })}>
-              <T variant="body" style={{ fontWeight: '700' }}>{a.full_name}</T>
+              <T variant="body" style={{ fontWeight: '700' }}>{a.full_name}{a.is_demo ? ' · fictício' : ''}</T>
               <T variant="small">{ageOn(new Date(a.birth_date + 'T12:00:00'))} anos</T>
               <View style={styles.wrap}>
                 {a.profile_id ? <Badge label="Com conta" tone="success" /> : <Badge label="Sem conta" />}

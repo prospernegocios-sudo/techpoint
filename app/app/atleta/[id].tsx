@@ -26,12 +26,12 @@ export default function FichaAtleta() {
     queryKey: ['athlete', id],
     queryFn: async () => {
       const [a, g, c] = await Promise.all([
-        supabase.from('athletes').select('id, org_id, full_name, birth_date, status, profile_id, email').eq('id', id!).single(),
+        supabase.from('athletes').select('id, org_id, full_name, birth_date, status, profile_id, email, is_demo').eq('id', id!).single(),
         supabase.from('athlete_guardians').select('id, name, phone, email, relationship, status, token, profile_id').eq('athlete_id', id!).neq('status', 'revoked').order('created_at'),
         supabase.from('guardian_consents').select('id, source, granted_at, revoked_at, note').eq('athlete_id', id!).order('granted_at', { ascending: false }),
       ]);
       if (a.error) throw a.error;
-      return { a: a.data as { id: string; org_id: string; full_name: string; birth_date: string; status: string; profile_id: string | null; email: string | null }, g: (g.data ?? []) as Guardian[], c: (c.data ?? []) as Consent[] };
+      return { a: a.data as { id: string; org_id: string; full_name: string; birth_date: string; status: string; profile_id: string | null; email: string | null; is_demo: boolean }, g: (g.data ?? []) as Guardian[], c: (c.data ?? []) as Consent[] };
     },
   });
   const [form, setForm] = useState<{ name: string; phone: string; email: string; relationship: string } | null>(null);
@@ -91,6 +91,7 @@ export default function FichaAtleta() {
       <Stack.Screen options={{ title: isSelf ? 'Meus dados' : 'Atleta' }} />
       <T variant="title">{a.full_name}</T>
       <T variant="muted">{age} anos{a.email ? ` · ${a.email}` : ''}</T>
+      {a.is_demo && <Badge label="Dado fictício (teste)" />}
       {msg && <Notice tone={msg.tone} text={msg.text} />}
 
       <Card>

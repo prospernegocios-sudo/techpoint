@@ -16,7 +16,7 @@ export type AttendanceRow = {
   distance_m: number | null; accuracy_m: number | null; photo_path: string | null; flags: string[];
   justification: string | null; manual_reason: string | null; synced_offline: boolean;
 };
-export type AthleteRow = { id: string; full_name: string; birth_date: string; email: string | null; profile_id: string | null; status: string };
+export type AthleteRow = { id: string; full_name: string; birth_date: string; email: string | null; profile_id: string | null; status: string; is_demo?: boolean };
 
 const unwrap = <T,>(r: { data: unknown; error: unknown }): T => {
   if (r.error) throw r.error;
@@ -97,7 +97,7 @@ export function useAthletes(orgId: string | undefined) {
     enabled: Boolean(orgId),
     queryFn: async () =>
       unwrap<(AthleteRow & { team_members: { team_id: string }[] })[]>(
-        await supabase.from('athletes').select('id, full_name, birth_date, email, profile_id, status, team_members(team_id)').eq('org_id', orgId!).order('full_name'),
+        await supabase.from('athletes').select('id, full_name, birth_date, email, profile_id, status, is_demo, team_members(team_id)').eq('org_id', orgId!).order('full_name'),
       ),
   });
 }

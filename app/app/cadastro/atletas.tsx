@@ -101,6 +101,7 @@ export default function Atletas() {
           <View style={styles.wrap}>
             {a.profile_id ? <Badge label="Com conta no app" tone="success" /> : a.email ? <Badge label="Aguardando 1º login" tone="warning" /> : <Badge label="Sem conta" />}
             {a.status === 'pending_consent' && <Badge label="Aguardando autorização" tone="warning" />}
+            {a.is_demo && <Badge label="Fictício" />}
           </View>
         </Card>
       ))}

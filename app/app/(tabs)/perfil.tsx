@@ -83,9 +83,10 @@ export default function Perfil() {
         </Card>
       )}
       {me.athlete && (
-        <Button title="Meus responsáveis e autorização" kind="outline" onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: me.athlete!.id } })} />
+        <Button title="Meus responsáveis, autorização e documentos" kind="outline" onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: me.athlete!.id } })} />
       )}
       <Button title="Sair da conta" kind="outline" onPress={signOut} />
+      <Button title="Excluir minha conta" kind="ghost" onPress={() => router.push('/excluir-conta')} />
       <T variant="small" style={{ textAlign: 'center' }}>TechPoint versão {Constants.expoConfig?.version}</T>
       <T variant="small" style={{ textAlign: 'center' }}>TechPoint · versão de teste</T>
     </Screen>

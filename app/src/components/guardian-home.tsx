@@ -59,9 +59,10 @@ export function GuardianHome() {
                 </View>
               );
             })}
-            {k.status !== 'pending_consent' && (
+            {k.status !== 'pending_consent' && (<>
+              <Button title="Documentos (atestado, RG)" kind="outline" onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: k.id } })} />
               <Button title="Ver ou revogar a autorização" kind="ghost" onPress={() => router.push({ pathname: '/consentimento/[athleteId]', params: { athleteId: k.id } })} />
-            )}
+            </>)}
           </Card>
         );
       })}

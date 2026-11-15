@@ -1,9 +1,10 @@
-// Ficha do atleta: autorização (LGPD), responsáveis (link pelo WhatsApp) e consentimento em papel.
+// Ficha do atleta: autorização (LGPD), responsáveis (link pelo WhatsApp), consentimento em papel e documentos.
 // Usada pela equipe e pelo próprio atleta (para cadastrar o responsável).
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
+import { DocumentsCard } from '@/components/documents-card';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { digits, maskPhone, validEmail, validPhone } from '@/lib/br';
 import { toFriendlyError } from '@/lib/errors';
@@ -87,7 +88,7 @@ export default function FichaAtleta() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: isSelf ? 'Meus responsáveis' : 'Atleta' }} />
+      <Stack.Screen options={{ title: isSelf ? 'Meus dados' : 'Atleta' }} />
       <T variant="title">{a.full_name}</T>
       <T variant="muted">{age} anos{a.email ? ` · ${a.email}` : ''}</T>
       {msg && <Notice tone={msg.tone} text={msg.text} />}
@@ -146,6 +147,7 @@ export default function FichaAtleta() {
           <Button title="Registrar consentimento em papel" kind="outline" disabled={paper.trim().length < 5} onPress={recordPaper} />
         </Card>
       )}
+      {me.profile && <DocumentsCard orgId={a.org_id} athleteId={a.id} meId={me.profile.id} isStaff={me.isStaff} />}
       {isSelf && <Button title="Voltar" kind="ghost" onPress={() => router.back()} />}
     </Screen>
   );

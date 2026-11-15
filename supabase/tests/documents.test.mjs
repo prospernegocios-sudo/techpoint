@@ -67,6 +67,9 @@ const scenario = [
   `reset role;`,
   keep('after_coach_delete', `select count(*)::int n from public.athlete_documents where file_path = '${path(ORG, ATH, 'a.pdf')}'`),
   keep('audited', `select count(*)::int n from public.audit_log where table_name = 'athlete_documents'`),
+  `reset role; insert into public.guardian_consents (org_id, athlete_id, guardian_profile_id, source, terms_version, scope) values ('${ORG}','${ATH2}','${U.mom}','app','v2','{"documents":false}');`,
+  as(U.coach),
+  doc('coach_denied_by_consent', ORG, ATH2, 'f.pdf', U.coach),
   // Exclusão de conta
   as(U.kid),
   tryRun('del_req', `select public.request_account_deletion('Não jogo mais')`),
@@ -105,6 +108,10 @@ test('responsável envia e vê os documentos do filho; treinador vê os da entid
   assert.equal(R.stranger_sees.n, 0);
   assert.equal(ok('stranger_obj'), false);
   assert.equal(R.other_org_sees.n, 0);
+});
+
+test('se o responsável negou "documentos" no consentimento, ninguém envia documento do menor', () => {
+  assert.equal(ok('coach_denied_by_consent'), false);
 });
 
 test('só a equipe ou quem enviou apaga; tudo fica auditado', () => {

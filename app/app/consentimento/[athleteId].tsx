@@ -7,6 +7,7 @@ import { Badge, Button, Card, Loading, Notice, Screen, T, styles } from '@/compo
 import { toFriendlyError } from '@/lib/errors';
 import { brDateTime } from '@/lib/report';
 import { supabase } from '@/lib/supabase';
+import { openInNewTab } from '@/lib/open';
 import { CONSENT_VERSION, consentIntro, consentItems } from '@/lib/terms';
 
 type Consent = { id: string; source: string; terms_version: string; scope: Record<string, boolean>; granted_at: string; revoked_at: string | null; guardian_profile_id: string | null };
@@ -81,6 +82,7 @@ export default function Consentimento() {
           {error && <Notice tone="danger" text={error} />}
           <Button title={`Autorizo o uso dos dados de ${first}`} kind="accent" big loading={busy} onPress={grant} />
           <T variant="small">Versão do termo: {CONSENT_VERSION}. O aceite fica registrado com data e hora.</T>
+          <Button title="Ler a Política de Privacidade" kind="ghost" onPress={() => openInNewTab('/privacidade')} />
         </>
       )}
     </Screen>

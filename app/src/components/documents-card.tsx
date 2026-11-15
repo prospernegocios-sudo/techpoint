@@ -34,16 +34,19 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ['athlete-docs', athleteId] });
 
-  const add = (files: PickedFile[]) => {
+  // "Enviar documentos" abre embaixo a escolha da categoria; depois o seletor de arquivos (pedido do TG, 15/11).
+  const [chooser, setChooser] = useState(false);
+  const add = (files: PickedFile[], kind: DocKind | null = null) => {
     const bad = files.find((p) => !p.mime || p.size > MAX_DOC_BYTES);
     if (bad) setMsg({ tone: 'danger', text: !bad.mime ? `${bad.name}: envie PDF, PNG ou JPG.` : `${bad.name}: máximo 10 MB.` }); else setMsg(null);
     const ok = files.filter((p) => p.mime && p.size <= MAX_DOC_BYTES);
-    if (ok.length) setQueue((q) => [...q, ...ok.map((picked) => ({ picked, kind: null, other: '', valid: '' }))]);
+    if (ok.length) setQueue((q) => [...q, ...ok.map((picked) => ({ picked, kind, other: '', valid: '' }))]);
   };
-  const pickFile = async () => {
+  const pickFile = async (kind: DocKind | null = null) => {
+    setChooser(false);
     const r = await DocumentPicker.getDocumentAsync({ type: ['application/pdf', 'image/png', 'image/jpeg'], copyToCacheDirectory: true, multiple: true });
     if (r.canceled || !r.assets.length) return;
-    add(r.assets.map((a) => ({ uri: a.uri, name: a.name, mime: docMime(a.name, a.mimeType) ?? '', size: a.size ?? 0, file: a.file })));
+    add(r.assets.map((a) => ({ uri: a.uri, name: a.name, mime: docMime(a.name, a.mimeType) ?? '', size: a.size ?? 0, file: a.file })), kind);
   };
   const takePhoto = async () => {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
@@ -185,8 +188,24 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
           ))}
         </View>
       )}
+      {chooser && (
+        <View accessibilityRole="menu" style={{ borderRadius: 20, backgroundColor: colors.surfaceContainerHigh, overflow: 'hidden', paddingVertical: 6 }}>
+          <T variant="small" style={{ fontWeight: '700', paddingHorizontal: 16, paddingVertical: 8 }}>Que tipo de documento você vai enviar?</T>
+          {DOC_KINDS.map((k) => (
+            <Pressable key={k.key} accessibilityRole="menuitem" accessibilityLabel={k.label} onPress={() => pickFile(k.key)}
+              style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52, paddingHorizontal: 16, backgroundColor: pressed ? colors.primaryContainer : 'transparent' })}>
+              <Ionicons name={k.key === 'atestado' ? 'medkit-outline' : k.key === 'identidade' ? 'id-card-outline' : k.key === 'comprovante_residencia' ? 'home-outline' : k.key === 'autorizacao' ? 'create-outline' : 'document-outline'} size={22} color={colors.primary} />
+              <View style={{ flex: 1 }}>
+                <T variant="body" style={{ fontWeight: '600' }}>{k.label}</T>
+                <T variant="small">{k.hint}</T>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </Pressable>
+          ))}
+        </View>
+      )}
       <View style={styles.row}>
-        <Button title={queue.length ? '+ Mais arquivos' : 'Enviar documentos'} kind="outline" style={{ flex: 1 }} onPress={pickFile} />
+        <Button title={chooser ? 'Fechar' : queue.length ? '+ Mais arquivos' : 'Enviar documentos'} kind="outline" style={{ flex: 1 }} onPress={() => setChooser(!chooser)} />
         {Platform.OS !== 'web' && <Button title="+ Foto" kind="outline" style={{ flex: 1 }} onPress={takePhoto} />}
       </View>
       {queue.length > 0 && (

@@ -2,11 +2,27 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from './supabase';
 
+export type EventKind = 'competicao' | 'reuniao' | 'palestra' | 'outro';
+export const EVENT_KINDS: { key: EventKind; label: string; icon: 'trophy-outline' | 'people-outline' | 'mic-outline' | 'calendar-outline' }[] = [
+  { key: 'competicao', label: 'Competição', icon: 'trophy-outline' },
+  { key: 'reuniao', label: 'Reunião', icon: 'people-outline' },
+  { key: 'palestra', label: 'Palestra', icon: 'mic-outline' },
+  { key: 'outro', label: 'Outro', icon: 'calendar-outline' },
+];
+export const eventKind = (k: string) => EVENT_KINDS.find((x) => x.key === k) ?? EVENT_KINDS[3];
+
 export type Convocation = {
-  id: string; org_id: string; team_id: string | null; title: string; location: string | null;
+  id: string; org_id: string; team_id: string | null; title: string; location: string | null; kind: EventKind; start_time: string | null;
   starts_on: string; ends_on: string | null; notes: string | null; created_at: string;
 };
-export type ConvAthlete = { convocation_id: string; athlete_id: string; acknowledged_at: string | null; athletes?: { full_name: string } | null };
+export type ConvAthlete = { convocation_id: string; athlete_id: string; acknowledged_at: string | null; cv_entry_id?: string | null; athletes?: { full_name: string } | null };
+/** Data e hora do evento para exibir: "29/11/2026 às 19:00" ou "29/11 a 30/11/2026". */
+export function eventWhen(c: Pick<Convocation, 'starts_on' | 'ends_on' | 'start_time'>) {
+  const d = (x: string) => x.split('-').reverse().join('/');
+  return `${d(c.starts_on)}${c.ends_on && c.ends_on !== c.starts_on ? ` a ${d(c.ends_on)}` : ''}${c.start_time ? ` às ${c.start_time.slice(0, 5)}` : ''}`;
+}
+/** Evento já realizado (o último dia passou). */
+export const eventPast = (c: Pick<Convocation, 'starts_on' | 'ends_on'>, today = new Date().toISOString().slice(0, 10)) => (c.ends_on ?? c.starts_on) < today;
 
 /** Convocações do atleta (ou do filho, para o responsável), com a ciência. */
 export function useMyConvocations(athleteId: string | undefined) {
@@ -14,12 +30,12 @@ export function useMyConvocations(athleteId: string | undefined) {
     queryKey: ['my-convocations', athleteId], enabled: Boolean(athleteId),
     queryFn: async () => {
       const { data, error } = await supabase.from('convocation_athletes')
-        .select('convocation_id, athlete_id, acknowledged_at, convocations(id, org_id, team_id, title, location, starts_on, ends_on, notes, created_at)')
+        .select('convocation_id, athlete_id, acknowledged_at, cv_entry_id, convocations(id, org_id, team_id, kind, start_time, title, location, starts_on, ends_on, notes, created_at)')
         .eq('athlete_id', athleteId!);
       if (error) throw error;
       return ((data ?? []) as unknown as (ConvAthlete & { convocations: Convocation | null })[])
         .filter((x) => x.convocations)
-        .map((x) => ({ ...x.convocations!, acknowledged_at: x.acknowledged_at }))
+        .map((x) => ({ ...x.convocations!, acknowledged_at: x.acknowledged_at, cv_entry_id: x.cv_entry_id ?? null }))
         .sort((a, b) => b.starts_on.localeCompare(a.starts_on));
     },
   });
@@ -31,7 +47,7 @@ export function useOrgConvocations(orgId: string | undefined) {
     queryKey: ['org-convocations', orgId], enabled: Boolean(orgId),
     queryFn: async () => {
       const { data, error } = await supabase.from('convocations')
-        .select('id, org_id, team_id, title, location, starts_on, ends_on, notes, created_at, convocation_athletes(convocation_id, athlete_id, acknowledged_at, athletes(full_name))')
+        .select('id, org_id, team_id, kind, start_time, title, location, starts_on, ends_on, notes, created_at, convocation_athletes(convocation_id, athlete_id, acknowledged_at, athletes(full_name))')
         .eq('org_id', orgId!).order('starts_on', { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as (Convocation & { convocation_athletes: ConvAthlete[] })[];
@@ -41,6 +57,12 @@ export function useOrgConvocations(orgId: string | undefined) {
 
 export async function acknowledgeConvocation(convocationId: string, athleteId: string) {
   const { error } = await supabase.rpc('acknowledge_convocation', { p_convocation_id: convocationId, p_athlete_id: athleteId });
+  if (error) throw error;
+}
+
+/** Incluir ou tirar do currículo um evento realizado (escolha do atleta). */
+export async function setEventInCv(convocationId: string, athleteId: string, include: boolean) {
+  const { error } = await supabase.rpc('set_event_in_cv', { p_convocation_id: convocationId, p_athlete_id: athleteId, p_include: include });
   if (error) throw error;
 }
 

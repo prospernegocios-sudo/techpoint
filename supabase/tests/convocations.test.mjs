@@ -39,6 +39,7 @@ ${tryRun('coach_creates', `insert into public.convocations (id, org_id, team_id,
 ${tryRun('coach_adds', `insert into public.convocation_athletes (convocation_id, athlete_id, org_id) values ('${CONV}','${ATH}','${ORG}')`)}
 ${as(U.kid2)}
 ${keep('kid2_sees', `select count(*)::int n from public.convocations`)}
+${tryRun('kid2_cv_other', `select public.set_event_in_cv('${CONV}','${ATH}', true)`)}
 ${tryRun('kid2_ack_other', `select public.acknowledge_convocation('${CONV}','${ATH}')`)}
 ${tryRun('kid2_ack_self_not_called', `select public.acknowledge_convocation('${CONV}','${ATH2}')`)}
 ${as(U.kid)}
@@ -46,6 +47,10 @@ ${keep('kid_sees', `select count(*)::int n from public.convocations`)}
 ${tryRun('kid_direct_update', `update public.convocation_athletes set acknowledged_at = now() where athlete_id = '${ATH}'`)}
 ${keep('after_direct', `select (acknowledged_at is not null) b from public.convocation_athletes where athlete_id = '${ATH}'`)}
 ${tryRun('kid_ack', `select public.acknowledge_convocation('${CONV}','${ATH}')`)}
+${tryRun('kid_cv_in', `select public.set_event_in_cv('${CONV}','${ATH}', true)`)}
+${keep('cv_entry', `select count(*)::int n from public.athlete_cv_entries where athlete_id = '${ATH}' and title = 'Taça C'`)}
+${tryRun('kid_cv_out', `select public.set_event_in_cv('${CONV}','${ATH}', false)`)}
+${keep('cv_entry_after', `select count(*)::int n from public.athlete_cv_entries where athlete_id = '${ATH}' and title = 'Taça C'`)}
 ${tryRun('kid_justify', `insert into public.absence_justifications (org_id, event_id, athlete_id, reason, details, created_by) values ('${ORG}','${EV}','${ATH}','escola','Prova de matemática','${U.kid}')`)}
 ${tryRun('kid_justify_other', `insert into public.absence_justifications (org_id, event_id, athlete_id, reason, created_by) values ('${ORG}','${EV}','${ATH2}','viagem','${U.kid}')`)}
 ${as(U.mom)}
@@ -84,4 +89,11 @@ test('atleta justifica a própria falta; responsável e treinador veem; outro at
 test('quem é de fora não vê convocações nem justificativas', () => {
   assert.equal(R.other_sees.c, 0);
   assert.equal(R.other_sees.j, 0);
+});
+test('evento realizado entra e sai do currículo só por escolha do próprio atleta', () => {
+  assert.equal(ok('kid2_cv_other'), false);
+  assert.equal(ok('kid_cv_in'), true, R.kid_cv_in?.error);
+  assert.equal(R.cv_entry.n, 1);
+  assert.equal(ok('kid_cv_out'), true, R.kid_cv_out?.error);
+  assert.equal(R.cv_entry_after.n, 0);
 });

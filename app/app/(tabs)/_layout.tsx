@@ -69,9 +69,9 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="competicoes"
         options={{
-          title: 'Competições',
+          title: 'Eventos',
           href: mode === 'athlete' ? '/(tabs)/competicoes' : null,
-          tabBarIcon: icon('medal'),
+          tabBarIcon: icon('calendar'),
         }}
       />
       <Tabs.Screen

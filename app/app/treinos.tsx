@@ -55,7 +55,7 @@ export default function Treinos() {
       <Stack.Screen options={{ title: 'Treinos' }} />
       <View style={[styles.row, { flexWrap: 'wrap', gap: 10 }]}>
         <Button title="Criar novo treino" icon="add" kind="accent" style={{ flexGrow: 1 }} onPress={() => router.push('/cadastro/treino')} />
-        <Button title="Convocações para competições" icon="megaphone-outline" kind="tonal" style={{ flexGrow: 1 }} onPress={() => router.push('/convocacoes')} />
+        <Button title="Eventos da equipe" icon="calendar-outline" kind="tonal" style={{ flexGrow: 1 }} onPress={() => router.push('/convocacoes')} />
       </View>
       <View style={styles.wrap}>
         <Chip label={`Hoje (${lists.hoje.length})`} selected={view === 'hoje'} onPress={() => setView('hoje')} />

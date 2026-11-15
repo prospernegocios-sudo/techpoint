@@ -51,8 +51,8 @@ export default function ExcluirConta() {
       <Card>
         <T variant="subtitle">Como funciona</T>
         <T variant="body">1. Você faz o pedido aqui, já conectado à sua conta.</T>
-        <T variant="body">2. Em até 15 dias a sua conta é excluída: você perde o acesso, e o seu nome, e-mail, telefone, fotos de perfil, documentos enviados e vínculos de responsável são apagados.</T>
-        <T variant="body">3. Registros de presença que fazem parte da prestação de contas de projetos (Lei de Incentivo, convênios, patrocínios) podem ser guardados pelo prazo exigido por lei, sem uso para outra finalidade (LGPD, art. 16).</T>
+        <T variant="body">2. Em até 15 dias a sua conta é desativada: você perde o acesso, deixa de receber avisos e os seus dados saem da tela da entidade.</T>
+        <T variant="body">3. Os dados ficam arquivados, sem uso, apenas pelo prazo exigido por lei (por exemplo, a prestação de contas de projetos da Lei de Incentivo, convênios e patrocínios), como permite a LGPD (art. 16). Terminado o prazo, são apagados de vez.</T>
         <T variant="small">Responsáveis: para excluir os dados de um atleta menor de idade, faça o pedido com a conta de responsável ou fale com a entidade.</T>
       </Card>
 

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Mapa de navegação</title>
+<style>
+@page { size: A4 landscape; margin: 10mm; }
+body { font-family: Arial, sans-serif; color:#14213D; margin:0; background:#F5F7F0; }
+.page { padding: 22px 26px; page-break-after: always; }
+h1 { margin:0; color:#0B2A5C; font-size:24pt; } h1 span { color:#0E7C86; }
+.sub { color:#4A5568; margin:4px 0 14px; }
+h2 { color:#0B2A5C; border-left:6px solid #C6F432; padding-left:10px; font-size:15pt; margin:14px 0 8px; }
+.tree { display:flex; gap:14px; align-items:flex-start; }
+.col { flex:1; background:#fff; border-radius:12px; padding:10px 12px; border-top:8px solid var(--c); box-shadow:0 2px 8px rgba(11,42,92,.08); }
+.col h3 { margin:0 0 6px; font-size:12.5pt; color:var(--c); }
+.n { font-size:9.6pt; margin:3px 0; line-height:1.35; }
+.n b { color:#0B2A5C; }
+.k { display:inline-block; min-width:18px; text-align:center; font-weight:bold; font-size:8.5pt; border-radius:9px; padding:0 5px; margin-right:4px; color:#14213D; background:var(--k,#C6F432); }
+.l1 { margin-left:0; } .l2 { margin-left:14px; } .l3 { margin-left:28px; } .l4 { margin-left:42px; }
+.root { text-align:center; margin-bottom:10px; }
+.root .box { display:inline-block; background:#0B2A5C; color:#F5F7F0; border-radius:12px; padding:8px 18px; font-weight:bold; }
+.root .box span { color:#C6F432; }
+.pub { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+.pub div { background:#fff; border:1px dashed #8A97AD; border-radius:10px; padding:4px 10px; font-size:9pt; }
+table { border-collapse:collapse; width:100%; font-size:9.6pt; background:#fff; }
+th, td { border:1px solid #C9D6EA; padding:5px 7px; text-align:left; vertical-align:top; }
+th { background:#0B2A5C; color:#F5F7F0; }
+.ok { color:#0E7C86; font-weight:bold; } .warn { color:#B4531A; font-weight:bold; }
+.stats { display:flex; gap:12px; margin:8px 0 6px; }
+.stat { flex:1; background:#fff; border-radius:12px; padding:10px 14px; border-left:6px solid #C6F432; }
+.stat b { display:block; font-size:20pt; color:#0E7C86; }
+.legend { font-size:9pt; color:#4A5568; margin-top:8px; }
+</style></head><body>
+
+<div class="page">
+<h1>Tech<span>Point</span> · Mapa de navegação do site</h1>
+<div class="sub">Teste feito no site real (techpoint.expo.app), em 15/11/2026, num celular simulado (412 px), com as contas de teste de gestor, atleta e administrador. Os números nas bolinhas são <b>cliques a partir do Início</b>, já com login feito.</div>
+<div class="root"><div class="box">Tech<span>Point</span> · Entrar: Google (1 clique) ou e-mail + senha (2 cliques)</div>
+<div class="pub"><div>Sem login: <b>/convite</b> (link do time)</div><div><b>/responsavel</b> (link do responsável)</div><div><b>/cv</b> (currículo compartilhado)</div><div><b>/privacidade</b></div><div><b>/excluir-conta</b></div></div></div>
+
+<div class="tree">
+<div class="col" style="--c:#0B2A5C">
+<h3>Modo Equipe (gestor, treinador, administrador)</h3>
+<div class="n l1"><span class="k">0</span><b>Início</b>: pendências, treinos de hoje, agenda</div>
+<div class="n l2"><span class="k">1</span>Lista de presença do treino → aprovar, rejeitar, presença manual</div>
+<div class="n l1"><span class="k">1</span><b>Gestão</b></div>
+<div class="n l2"><span class="k">2</span>Novo treino</div>
+<div class="n l2"><span class="k">2</span>Projetos incentivados</div>
+<div class="n l3"><span class="k">3</span>Projeto → <span class="k">4</span>plano, metas, beneficiários, patrocinadores, relatórios</div>
+<div class="n l2"><span class="k">2</span>Convites e pedidos → <span class="k">4</span>gerar link do time</div>
+<div class="n l2"><span class="k">2</span>Atletas → <span class="k">3</span>novo atleta</div>
+<div class="n l3"><span class="k">3</span>Ficha do atleta: autorização, dados, documentos, responsáveis</div>
+<div class="n l4"><span class="k">4</span>Currículo esportivo (confirmar item)</div>
+<div class="n l2"><span class="k">2</span>Equipes → <span class="k">3</span>página do time</div>
+<div class="n l2"><span class="k">2</span>Locais de treino · Pessoas com acesso</div>
+<div class="n l2"><span class="k">2</span>Dados da entidade (administrador)</div>
+<div class="n l2"><span class="k">2</span>Entidades cadastradas (só plataforma)</div>
+<div class="n l1"><span class="k" style="--k:#FF7A3D">1</span><b>Presença</b> (botão do centro) → treino de agora</div>
+<div class="n l1"><span class="k">1</span><b>Relatórios</b></div>
+<div class="n l2"><span class="k">2</span>Relatório de frequência (PDF / planilha)</div>
+<div class="n l2"><span class="k">2</span>Relatórios do projeto</div>
+<div class="n l1"><span class="k">1</span><b>Perfil</b>: dados, aparência, biometria, senha</div>
+<div class="n l2"><span class="k">2</span>Política de privacidade · Excluir conta</div>
+</div>
+
+<div class="col" style="--c:#0E7C86">
+<h3>Modo Atleta</h3>
+<div class="n l1"><span class="k">0</span><b>Início</b>: próximos treinos e horário do check-in</div>
+<div class="n l1"><span class="k">1</span><b>Currículo</b>: tempo de esporte, assiduidade, equipes</div>
+<div class="n l2"><span class="k">2</span>Adicionar à trajetória</div>
+<div class="n l2"><span class="k">2</span>Baixar PDF · Gerar link (WhatsApp)</div>
+<div class="n l1"><span class="k" style="--k:#FF7A3D">1</span><b>Check-in</b> (botão do centro) → câmera → registro <i>(2 toques)</i></div>
+<div class="n l1"><span class="k">1</span><b>Documentos</b> → <span class="k">2</span>enviar (arquivo ou foto)</div>
+<div class="n l1"><span class="k">1</span><b>Meus dados</b>: CPF, endereço (CEP automático), esporte, físico</div>
+<div class="n l2"><span class="k">2</span>Responsáveis e autorização</div>
+<div class="n l2"><span class="k">2</span>Política de privacidade · Excluir conta</div>
+</div>
+
+<div class="col" style="--c:#FF7A3D">
+<h3>Modo Responsável <span style="font-weight:normal;font-size:9pt">(pelo código; sem conta de teste)</span></h3>
+<div class="n l1"><span class="k">0</span><b>Início</b>: chegada e saída dos filhos, autorizar</div>
+<div class="n l1"><span class="k">1</span><b>Meus atletas</b></div>
+<div class="n l2"><span class="k">2</span>Currículo esportivo do filho</div>
+<div class="n l2"><span class="k">2</span>Dados, documentos e responsáveis</div>
+<div class="n l2"><span class="k">2</span>Autorização (LGPD): dar ou revogar</div>
+<div class="n l1"><span class="k">1</span><b>Documentos</b> (de cada filho) → <span class="k">2</span>enviar</div>
+<div class="n l1"><span class="k">1</span><b>Meus dados</b>: CPF, nascimento, celular, endereço</div>
+<div class="n l2"><span class="k">2</span>Política de privacidade · Excluir conta</div>
+<h3 style="margin-top:12px">Pelo link (sem login)</h3>
+<div class="n l1">Convite do time → entrar com Google → pedido → aprovação</div>
+<div class="n l1">Link do responsável → entrar → autorizar</div>
+<div class="n l1">Link do currículo → página pública (sem CPF, endereço ou documentos)</div>
+</div>
+</div>
+<div class="legend">Na tela do computador o rodapé vira um menu lateral, com os mesmos itens e os mesmos cliques.</div>
+</div>
+
+<div class="page">
+<h1>Cliques por função <span>· resultado do teste</span></h1>
+<div class="stats">
+<div class="stat"><b>30</b>caminhos testados no site real</div>
+<div class="stat"><b>1,9</b>cliques em média para chegar a cada função</div>
+<div class="stat"><b>4</b>cliques no máximo (convite pelo link e currículo visto pela equipe)</div>
+<div class="stat"><b>1</b>defeito grave encontrado e já corrigido</div>
+</div>
+<table>
+<tr><th style="width:30%">Função</th><th style="width:8%">Cliques</th><th>Caminho</th><th style="width:12%">Situação</th></tr>
+<tr><td>Entrar (e-mail e senha)</td><td>2 + digitar</td><td>Continuar com e-mail → Entrar</td><td class="ok">OK</td></tr>
+<tr><td>Atleta: ver próximos treinos</td><td>0</td><td>Já aparece no Início</td><td class="ok">OK</td></tr>
+<tr><td>Atleta: fazer check-in</td><td>1 + foto</td><td>Botão do centro</td><td class="ok">OK</td></tr>
+<tr><td>Atleta: currículo / adicionar item</td><td>1 / 2</td><td>Currículo → Adicionar à trajetória</td><td class="ok">OK</td></tr>
+<tr><td>Atleta: enviar documento</td><td>2</td><td>Documentos → Enviar documento</td><td class="ok">OK</td></tr>
+<tr><td>Atleta: meus dados / responsáveis</td><td>1 / 2</td><td>Meus dados → Meus responsáveis…</td><td class="ok">OK</td></tr>
+<tr><td>Equipe: lista de presença de um treino</td><td>1</td><td>Início → cartão do treino</td><td class="ok">OK (estava em branco, corrigido)</td></tr>
+<tr><td>Equipe: presença do treino de agora</td><td>1</td><td>Botão do centro</td><td class="warn">Ver melhoria 2</td></tr>
+<tr><td>Equipe: criar treino</td><td>2</td><td>Gestão → Novo treino</td><td class="ok">OK</td></tr>
+<tr><td>Equipe: cadastrar atleta</td><td>3</td><td>Gestão → Atletas → + Novo atleta</td><td class="ok">OK</td></tr>
+<tr><td>Equipe: convidar pelo link</td><td>4</td><td>Gestão → Convites → time → Gerar link</td><td class="warn">Ver melhoria 4</td></tr>
+<tr><td>Equipe: aprovar pedido de entrada</td><td>2 + 1</td><td>Gestão → Convites e pedidos → Aprovar</td><td class="ok">OK</td></tr>
+<tr><td>Equipe: ficha / documentos do atleta</td><td>3</td><td>Gestão → Atletas → atleta</td><td class="ok">OK (estava em branco, corrigido)</td></tr>
+<tr><td>Equipe: currículo do atleta (confirmar)</td><td>4</td><td>Gestão → Atletas → atleta → Currículo</td><td class="warn">Ver melhoria 5</td></tr>
+<tr><td>Equipe: relatório de frequência</td><td>2</td><td>Relatórios → Relatório de frequência</td><td class="ok">OK</td></tr>
+<tr><td>Equipe: projetos, equipes, locais, pessoas</td><td>2</td><td>Gestão → item</td><td class="ok">OK</td></tr>
+<tr><td>Administrador: dados da entidade</td><td>2</td><td>Gestão → Dados da entidade</td><td class="ok">OK</td></tr>
+<tr><td>Todos: política de privacidade / excluir conta</td><td>2</td><td>Perfil (Meus dados) → item</td><td class="ok">OK</td></tr>
+</table>
+</div>
+
+<div class="page">
+<h1>Achados de UX <span>· o que corrigir</span></h1>
+<table>
+<tr><th style="width:4%">#</th><th style="width:30%">Achado</th><th>Proposta</th><th style="width:11%">Gravidade</th></tr>
+<tr><td>1</td><td><b>Telas com endereço variável abriam em branco no site</b> (ficha do atleta, lista de presença, currículo de um atleta). O servidor não achava os pedaços do site cujo nome tem colchetes.</td><td><b>Corrigido e publicado</b> em 15/11: o site agora carrega tudo num pacote só. Os 30 caminhos foram testados de novo e passaram. O app Android não tinha esse problema.</td><td class="warn">Grave · resolvido</td></tr>
+<tr><td>2</td><td>Botão do centro <b>sem treino agora</b>: no site, o clique parece não fazer nada (a pessoa continua no Início).</td><td>Mostrar uma tela curta: “Nenhum treino agora · próximo: ter 20:00 · o check-in abre às 19:30”.</td><td>Média</td></tr>
+<tr><td>3</td><td>No celular, o rodapé do atleta corta os nomes (“Docume…”, “Meus da…”).</td><td>Usar nomes curtos: <b>Docs</b> e <b>Dados</b>, ou só ícones com nome menor.</td><td>Média</td></tr>
+<tr><td>4</td><td>Convidar pelo link leva 4 cliques e exige escolher o time antes, senão aparece um erro.</td><td>Escolher o time sozinho quando há só um, e pôr um atalho “Convidar atleta” no Início da equipe (fica em 2 cliques).</td><td>Baixa</td></tr>
+<tr><td>5</td><td>Para confirmar o currículo de um atleta, a equipe dá 4 cliques.</td><td>Botão “Currículo” direto no cartão do atleta, na lista (fica em 3), e aviso no Início: “3 itens de currículo para confirmar”.</td><td>Baixa</td></tr>
+<tr><td>6</td><td>A ficha do atleta ficou longa: autorização, currículo, dados, físico, documentos e responsáveis numa rolagem só.</td><td>Separar em abas internas: <b>Resumo · Dados · Documentos · Responsáveis</b>.</td><td>Baixa</td></tr>
+<tr><td>7</td><td>No site, campos de data seguem o idioma do navegador (num navegador em inglês aparece mm/dd/yyyy).</td><td>Usar sempre o formato dd/mm/aaaa.</td><td>Baixa</td></tr>
+<tr><td>8</td><td>Os cartões “Pendências” e “Treinos hoje” do Início não são clicáveis.</td><td>Tocar em “Pendências” abre a lista do que falta aprovar.</td><td>Baixa</td></tr>
+</table>
+<h2>O que está bom</h2>
+<div class="n">• Nenhuma função passa de 4 cliques. A média é 1,9.</div>
+<div class="n">• O check-in do atleta é 1 clique mais a foto: o ponto mais usado está no lugar mais fácil, o botão do centro.</div>
+<div class="n">• Os modos (Equipe, Atleta, Responsável) mostram só o que cada pessoa usa.</div>
+<div class="n">• O currículo vazio já orienta o primeiro passo (“Informe o início no esporte…”).</div>
+<div class="n">• Páginas públicas importantes (convite, responsável, currículo, privacidade, exclusão) abrem sem login.</div>
+</div>
+</body></html>

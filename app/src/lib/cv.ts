@@ -24,6 +24,7 @@ export type Cv = {
   body: { height_cm: number | null; weight_kg: number | null; dominant_hand: string | null; show_in_cv: boolean } | null;
   teams: { name: string; category: string | null; since: string }[];
   attendance_12m: { events: number; present: number; pct: number | null };
+  trainings_total?: number; first_training?: string | null;
   entries: CvEntry[];
 };
 
@@ -93,7 +94,7 @@ export function cvHtml(cv: Cv): string {
   </style></head><body>
   <div class="top"><div class="brand">Tech<span>Point</span></div><h1>${esc(cv.full_name)}</h1>
   <p>${esc([cv.modality, cv.position, `${cv.age} anos`, cv.org].filter(Boolean).join(' · '))}</p>${body}</div>
-  <div class="stats">${start}${att}<div class="stat"><b>${cv.entries.filter((e) => e.verified).length}</b><small>itens confirmados pela entidade</small></div></div>
+  <div class="stats">${start}${att}${cv.trainings_total ? `<div class="stat"><b>${cv.trainings_total}</b><small>treinos registrados com prova${cv.first_training ? ` desde ${monthLabel(cv.first_training)}` : ''}</small></div>` : ''}<div class="stat"><b>${cv.entries.filter((e) => e.verified).length}</b><small>itens confirmados pela entidade</small></div></div>
   ${cv.teams.length ? `<h2>Equipes no TechPoint</h2>${cv.teams.map((t) => `<div class="item"><div class="when">desde ${monthLabel(t.since)}</div><div class="t">${esc(t.name)}</div><div class="s">${esc(t.category ?? '')}</div></div>`).join('')}` : ''}
   <h2>Trajetória</h2>
   ${cv.entries.length ? cv.entries.map((e) => `<div class="item"><div class="when">${period(e)} · ${esc(cvKindLabel(e.kind))}</div><div class="t">${esc(e.title)}</div>

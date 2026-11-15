@@ -10,7 +10,7 @@ import { useTheme } from '@/lib/theme';
 type Item = { title: string; desc: string; href: Href; icon: keyof typeof Ionicons.glyphMap; show: boolean };
 
 export default function Gestao() {
-  const { isManager, isStaff, isAdmin, isPlatformAdmin, org, mode, modes, setMode } = useMe();
+  const { isManager, isStaff, isAdmin, isPlatformAdmin, org, mode, modes, setMode, hasModule } = useMe();
   const { colors } = useTheme();
 
   const groups: { title: string; items: Item[] }[] = [
@@ -18,7 +18,7 @@ export default function Gestao() {
       { title: 'Novo treino', desc: 'Marcar um treino ou um treino de teste agora', href: '/cadastro/treino', icon: 'calendar-outline', show: isStaff },
     ] },
     { title: 'Projetos', items: [
-      { title: 'Projetos incentivados', desc: 'Plano aprovado, metas, beneficiários e indicadores', href: '/projeto', icon: 'ribbon-outline', show: isStaff },
+      { title: 'Projetos incentivados', desc: 'Plano aprovado, metas, beneficiários e indicadores', href: '/projeto', icon: 'ribbon-outline', show: isStaff && hasModule('investimentos') },
     ] },
     { title: 'Estrutura', items: [
       { title: 'Convites e pedidos', desc: 'Link do time pelo WhatsApp e aprovação de novos atletas', href: '/cadastro/convites', icon: 'person-add-outline', show: isStaff },

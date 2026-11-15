@@ -30,13 +30,14 @@ export type Profile = { id: string; full_name: string | null; email: string | nu
 type Membership = { org_id: string; role: Role; organizations: Org | null };
 export type MyAthlete = { id: string; org_id: string; full_name: string; birth_date: string };
 
-type MeData = { profile: Profile | null; memberships: Membership[]; athletes: MyAthlete[] };
+type MeData = { profile: Profile | null; memberships: Membership[]; athletes: MyAthlete[]; modules: { org_id: string; module: string; status: string; ends_on: string | null }[] };
 
 async function fetchMe(userId: string): Promise<MeData> {
-  const [p, m, a] = await Promise.all([
+  const [p, m, a, mo] = await Promise.all([
     supabase.from('profiles').select('id, full_name, email, is_platform_admin').eq('id', userId).maybeSingle(),
     supabase.from('memberships').select('org_id, role, organizations(id, name, review_status, logo_path, theme_primary, theme_accent)').eq('profile_id', userId).eq('active', true),
     supabase.from('athletes').select('id, org_id, full_name, birth_date').eq('profile_id', userId),
+    supabase.from('org_modules').select('org_id, module, status, ends_on'),
   ]);
   if (p.error) throw p.error;
   if (m.error) throw m.error;
@@ -45,6 +46,7 @@ async function fetchMe(userId: string): Promise<MeData> {
     profile: p.data as Profile | null,
     memberships: (m.data ?? []) as unknown as Membership[],
     athletes: (a.data ?? []) as MyAthlete[],
+    modules: (mo.data ?? []) as MeData['modules'],
   };
 }
 
@@ -67,6 +69,8 @@ type MeCtx = {
   isManager: boolean;
   isAdmin: boolean;
   isPlatformAdmin: boolean;
+  /** Módulo adicional contratado pela entidade atual (ex.: 'investimentos'). */
+  hasModule: (m: 'investimentos' | 'reservas') => boolean;
 };
 
 const Ctx = createContext<MeCtx | null>(null);
@@ -136,6 +140,7 @@ export function MeProvider({ children }: { children: ReactNode }) {
       isManager: mode === 'team' && (staffRole === 'admin' || staffRole === 'manager'),
       isAdmin: mode === 'team' && staffRole === 'admin',
       isPlatformAdmin,
+      hasModule: (mod) => Boolean(data?.modules.some((x) => x.org_id === org?.id && x.module === mod && x.status !== 'suspended' && (!x.ends_on || x.ends_on >= new Date().toISOString().slice(0, 10)))),
     };
   }, [q.data, q.isLoading, q.error, orgId, role]);
 

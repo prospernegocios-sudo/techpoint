@@ -20,6 +20,7 @@ insert into auth.users (id, email, aud, role, raw_user_meta_data) values
  ('${U.ath}','p.atleta@teste.local','authenticated','authenticated','{"full_name":"Atleta P"}'),
  ('${U.mgrB}','p.gestorb@teste.local','authenticated','authenticated','{"full_name":"Gestor PB"}');
 insert into public.organizations (id, name, slug) values ('${ORG}','Clube P','clube-p-teste'), ('${ORG_B}','Clube PB','clube-pb-teste');
+insert into public.org_modules (org_id, module) values ('${ORG}','investimentos'), ('${ORG_B}','investimentos');
 insert into public.memberships (org_id, profile_id, role) values
  ('${ORG}','${U.mgr}','manager'), ('${ORG}','${U.coach}','coach'), ('${ORG_B}','${U.mgrB}','manager');
 insert into public.venues (id, org_id, name, latitude, longitude) values ('${VEN}','${ORG}','Ginásio P',-15.79,-47.88);

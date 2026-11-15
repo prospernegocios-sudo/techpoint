@@ -8,13 +8,15 @@ import { statusLabels, useProjects } from '@/lib/projects';
 import { useTheme } from '@/lib/theme';
 
 export default function Relatorios() {
-  const { org, isStaff } = useMe();
+  const { org, isStaff, hasModule } = useMe();
+  const withProjects = hasModule('investimentos');
   const { colors } = useTheme();
   const projects = useProjects(org?.id);
   if (!isStaff) return <Screen><Notice tone="danger" text="Apenas a equipe da entidade gera relatórios." /></Screen>;
   return (
     <Screen>
       <Stack.Screen options={{ title: 'Relatórios' }} />
+      {withProjects && <>
       <T variant="subtitle">O relatório é para um projeto incentivado?</T>
       <T variant="muted">Relatório de projeto fica emitido: numerado, congelado e com retificação. O avulso é livre, para consulta ou envio rápido.</T>
 
@@ -33,8 +35,9 @@ export default function Relatorios() {
           </View>
         </Card>
       ))}
+      </>}
 
-      <T variant="small" style={{ fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 }}>Não, relatório avulso</T>
+      {withProjects && <T variant="small" style={{ fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 }}>Não, relatório avulso</T>}
       <Pressable accessibilityRole="button" onPress={() => router.push('/cadastro/relatorio')}>
         <Card>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

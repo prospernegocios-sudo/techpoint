@@ -112,6 +112,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
           <T variant="subtitle">{c.attendance_12m.pct != null ? `${String(c.attendance_12m.pct).replace('.', ',')}%` : '—'}</T>
           <T variant="small">assiduidade nos treinos (12 meses)</T>
         </Card>
+        <Card style={{ flexGrow: 1, flexBasis: 150 }}><T variant="subtitle">{c.trainings_total ?? 0}</T><T variant="small">treinos registrados{c.first_training ? ` desde ${monthLabel(c.first_training)}` : ''}</T></Card>
         <Card style={{ flexGrow: 1, flexBasis: 150 }}><T variant="subtitle">{c.entries.filter((e) => e.verified).length}</T><T variant="small">confirmados pela entidade</T></Card>
       </View>
       {!c.sport_started_on && <Notice tone="info" text="Informe o início no esporte (mês e ano) em Meus dados → Esporte." />}

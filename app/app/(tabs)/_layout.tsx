@@ -1,6 +1,6 @@
 // Abas principais com o botão central (D62).
-// Atleta: Início · Currículo · Check-in · Documentos · Meus dados.
-// Responsável: Início · Meus atletas · Documentos · Meus dados. Equipe: Início · Gestão · Presença · Relatórios · Perfil.
+// Atleta: Início · Competições · Check-in · Currículo · Perfil (D95).
+// Responsável: Início · Meus atletas · Perfil. Equipe: Início · Gestão · Presença · Relatórios · Perfil.
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
@@ -33,7 +33,7 @@ export default function TabsLayout() {
           : { backgroundColor: colors.surface, borderTopColor: colors.border, height: 70 + bottom, paddingBottom: 10 + bottom, paddingTop: 6 },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 13, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: mode === 'athlete' ? 11.5 : 13, fontWeight: '600' },
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color as string} size={size} /> }} />
@@ -46,11 +46,11 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="curriculo"
+        name="competicoes"
         options={{
-          title: 'Currículo',
-          href: mode === 'athlete' ? '/(tabs)/curriculo' : null,
-          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color as string} size={size} />,
+          title: 'Competições',
+          href: mode === 'athlete' ? '/(tabs)/competicoes' : null,
+          tabBarIcon: ({ color, size }) => <Ionicons name="medal" color={color as string} size={size} />,
         }}
       />
       <Tabs.Screen
@@ -71,6 +71,14 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="curriculo"
+        options={{
+          title: 'Currículo',
+          href: mode === 'athlete' ? '/(tabs)/curriculo' : null,
+          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color as string} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="relatorios"
         options={{
           title: 'Relatórios',
@@ -83,11 +91,11 @@ export default function TabsLayout() {
         options={{
           title: 'Documentos',
           tabBarLabel: 'Docs',
-          href: mode === 'athlete' || mode === 'guardian' ? '/(tabs)/documentos' : null,
+          href: null,
           tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" color={color as string} size={size} />,
         }}
       />
-      <Tabs.Screen name="perfil" options={{ title: team ? 'Perfil' : 'Meus dados', tabBarLabel: team ? 'Perfil' : 'Dados', tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" color={color as string} size={size} /> }} />
+      <Tabs.Screen name="perfil" options={{ title: mode === 'athlete' ? 'Perfil do atleta' : 'Perfil', tabBarLabel: 'Perfil', tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" color={color as string} size={size} /> }} />
     </Tabs>
   );
 }

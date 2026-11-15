@@ -10,6 +10,7 @@ import { getQueue, syncQueue } from '@/lib/attendance';
 import { formatDay, formatTime } from '@/lib/format';
 import { orgLogoUrl, modeLabels, useMe } from '@/lib/me';
 import { useSetupSteps, useTeamDashboard } from '@/lib/dashboard';
+import { AthleteTiles, GuardianTiles, TeamTiles } from '@/components/dashboard-tiles';
 import { GuardianHome } from '@/components/guardian-home';
 import { useEvents, useMyAttendance, type EventRow } from '@/lib/queries';
 import { nextAction } from '@/lib/next-action';
@@ -135,36 +136,7 @@ export default function Home() {
       {/* Painel do dia da equipe */}
       {me.isStaff && dash.data && (
         <View style={{ gap: 10 }}>
-          <T variant="subtitle">Hoje</T>
-          <View style={styles.wrap}>
-            <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={dash.data.pendingEventId ? () => router.push({ pathname: '/evento/[id]', params: { id: dash.data!.pendingEventId! } }) : undefined}>
-              <T variant="small">Pendências para aprovar (7 dias)</T>
-              <T variant="title" color={dash.data.pendingWeek ? colors.warning : colors.text}>{dash.data.pendingWeek}</T>
-              <T variant="small" color={dash.data.pendingWeek ? colors.primary : colors.textMuted}>{dash.data.pendingWeek ? 'Toque para revisar ›' : 'Nada pendente ✓'}</T>
-            </Card>
-            {dash.data.joinPending > 0 && (
-              <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={() => router.push('/cadastro/convites')}>
-                <T variant="small">Novos atletas para aprovar</T>
-                <T variant="title" color={colors.warning}>{dash.data.joinPending}</T>
-              </Card>
-            )}
-            <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={() => (dash.data!.today[0] ? router.push({ pathname: '/evento/[id]', params: { id: dash.data!.today[0].id } }) : router.push('/cadastro/treino'))}>
-              <T variant="small">Treinos hoje</T>
-              <T variant="title">{dash.data.today.length}</T>
-              <T variant="small" color={colors.primary}>{dash.data.today.length ? 'Abrir presença ›' : 'Marcar um treino ›'}</T>
-            </Card>
-            {dash.data.cvToConfirm > 0 && (
-              <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={() => router.push('/cadastro/atletas')}>
-                <T variant="small">Itens de currículo para confirmar</T>
-                <T variant="title" color={colors.warning}>{dash.data.cvToConfirm}</T>
-                <T variant="small" color={colors.primary}>Ver atletas ›</T>
-              </Card>
-            )}
-          </View>
-          <View style={styles.row}>
-            <Button title="+ Convidar atleta" kind="outline" style={{ flex: 1 }} onPress={() => router.push('/cadastro/convites')} />
-            <Button title="+ Novo treino" kind="outline" style={{ flex: 1 }} onPress={() => router.push('/cadastro/treino')} />
-          </View>
+          <TeamTiles dash={dash.data} />
           {dash.data.today.map((t) => (
             <Card key={t.id} onPress={() => router.push({ pathname: '/evento/[id]', params: { id: t.id } })}>
               <View style={[styles.row, { justifyContent: 'space-between' }]}>
@@ -190,6 +162,7 @@ export default function Home() {
         </View>
       )}
 
+      {me.mode === 'guardian' && <GuardianTiles />}
       {me.mode === 'guardian' && <GuardianHome />}
 
       {queueInfo.pending > 0 && <Notice tone="warning" text={`${queueInfo.pending} registro(s) guardado(s) no celular. Vamos enviar assim que a internet voltar.`} />}
@@ -199,6 +172,9 @@ export default function Home() {
       {events.error && <Notice tone="danger" text="Não foi possível carregar a agenda. Verifique a internet." />}
       {!events.isLoading && list.length === 0 && me.mode !== 'guardian' && <T variant="muted">Nenhum treino nos próximos 7 dias.</T>}
 
+      {isAthlete && me.athlete && (
+        <AthleteTiles next={list[0] ? { title: `${list[0].teams?.name ?? 'Treino'} · ${list[0].venues?.name ?? ''}`, when: `${formatDay(list[0].starts_at)} ${formatTime(list[0].starts_at)}` } : null} />
+      )}
       {/* Atleta: cartão fixo do treino de agora, com o botão grande no topo */}
       {isAthlete && me.athlete && (() => {
         const now = list.find((ev) => nextAction(ev, mine.data ?? []).action);

@@ -9,19 +9,21 @@ export const DOCS_BUCKET = 'athlete-docs';
 export const MAX_DOC_BYTES = 10 * 1024 * 1024;
 
 export type DocKind = 'atestado' | 'identidade' | 'cpf' | 'comprovante_residencia' | 'autorizacao' | 'outro';
-export const DOC_KINDS: { key: DocKind; label: string }[] = [
-  { key: 'atestado', label: 'Atestado médico' },
-  { key: 'identidade', label: 'RG ou certidão' },
-  { key: 'cpf', label: 'CPF' },
-  { key: 'comprovante_residencia', label: 'Comprovante de residência' },
-  { key: 'autorizacao', label: 'Autorização assinada' },
-  { key: 'outro', label: 'Outro' },
+/** Tipos que aparecem para envio (D94). "Único": o novo substitui o anterior, que vira histórico. */
+export const DOC_KINDS: { key: DocKind; label: string; single: boolean; hint: string }[] = [
+  { key: 'atestado', label: 'Atestado médico', single: false, hint: 'Sem limite. Cada atestado fica registrado com a validade.' },
+  { key: 'identidade', label: 'Documento de identidade', single: true, hint: 'RG, CNH ou certidão. O novo substitui o atual.' },
+  { key: 'comprovante_residencia', label: 'Comprovante de residência', single: true, hint: 'O novo substitui o atual.' },
+  { key: 'autorizacao', label: 'Autorização assinada', single: false, hint: 'Ex.: autorização de viagem de uma competição.' },
+  { key: 'outro', label: 'Outro', single: false, hint: 'Qualquer outro documento.' },
 ];
-export const kindLabel = (k: string) => DOC_KINDS.find((d) => d.key === k)?.label ?? 'Documento';
+const LEGACY: Record<string, string> = { cpf: 'CPF' };
+export const kindLabel = (k: string) => DOC_KINDS.find((d) => d.key === k)?.label ?? LEGACY[k] ?? 'Documento';
 
 export type AthleteDoc = {
   id: string; org_id: string; athlete_id: string; kind: DocKind; title: string | null; file_path: string;
   mime_type: string; size_bytes: number; valid_until: string | null; uploaded_by: string | null; created_at: string;
+  superseded_at?: string | null;
 };
 
 const MIME_BY_EXT: Record<string, string> = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
@@ -49,7 +51,7 @@ export function useAthleteDocuments(athleteId: string | undefined) {
     enabled: Boolean(athleteId),
     queryFn: async () => {
       const { data, error } = await supabase.from('athlete_documents')
-        .select('id, org_id, athlete_id, kind, title, file_path, mime_type, size_bytes, valid_until, uploaded_by, created_at')
+        .select('id, org_id, athlete_id, kind, title, file_path, mime_type, size_bytes, valid_until, uploaded_by, created_at, superseded_at')
         .eq('athlete_id', athleteId!).order('created_at', { ascending: false });
       if (error) throw error;
       return (data ?? []) as AthleteDoc[];

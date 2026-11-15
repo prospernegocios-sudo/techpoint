@@ -3,8 +3,9 @@ import { toast } from '@/components/toast';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useQueryClient } from '@tanstack/react-query';
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Alert, Platform, View } from 'react-native';
+import { Alert, Platform, Pressable, View } from 'react-native';
 import { DateField } from '@/components/date-field';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, T, styles } from '@/components/ui';
 import {
@@ -14,6 +15,7 @@ import {
 import { toFriendlyError } from '@/lib/errors';
 import { parseBrDate, toIsoDate } from '@/lib/format';
 import { isoDayToBr } from '@/lib/report';
+import { useTheme } from '@/lib/theme';
 
 type Props = { orgId: string; athleteId: string; meId: string; isStaff: boolean };
 
@@ -22,6 +24,8 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
   const docs = useAthleteDocuments(athleteId);
   const [form, setForm] = useState<{ kind: DocKind; title: string; valid: string; picked: PickedFile | null } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const { colors } = useTheme();
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ['athlete-docs', athleteId] });
 
@@ -81,37 +85,66 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
     Alert.alert('Apagar documento?', kindLabel(d.kind), [{ text: 'Cancelar', style: 'cancel' }, { text: 'Apagar', style: 'destructive', onPress: run }]);
   };
 
+  const all = docs.data ?? [];
+  const order = ['atestado', 'identidade', 'comprovante_residencia', 'autorizacao', 'cpf', 'outro'];
+  const groups = order.map((key) => {
+    const items = all.filter((d) => d.kind === key);
+    return { key, label: kindLabel(key), current: items.filter((d) => !d.superseded_at), old: items.filter((d) => d.superseded_at) };
+  }).filter((g) => g.current.length + g.old.length > 0);
+
+  const docRow = (d: AthleteDoc, tag: string | null) => {
+    const v = d.superseded_at ? null : validity(d.valid_until);
+    return (
+      <View key={d.id} style={[styles.row, { paddingVertical: 4, opacity: d.superseded_at ? 0.7 : 1 }]}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <T variant="small" style={{ fontWeight: '700' }}>{d.title || (d.mime_type === 'application/pdf' ? 'PDF' : 'Imagem')}{tag ? ` · ${tag}` : ''}</T>
+          <T variant="small">Enviado em {isoDayToBr(d.created_at.slice(0, 10))}{d.valid_until ? ` · válido até ${isoDayToBr(d.valid_until)}` : ''}</T>
+        </View>
+        {v === 'expired' && <Badge label="Vencido" tone="danger" />}
+        {v === 'soon' && <Badge label="Vence logo" tone="warning" />}
+        {v === 'ok' && <Badge label="Válido" tone="success" />}
+        <Pressable accessibilityRole="button" accessibilityLabel="Abrir documento" onPress={() => open(d)} hitSlop={8}><Ionicons name="eye-outline" size={22} color={colors.primary} /></Pressable>
+        {(isStaff || d.uploaded_by === meId) && (
+          <Pressable accessibilityRole="button" accessibilityLabel="Apagar documento" onPress={() => remove(d)} hitSlop={8}><Ionicons name="trash-outline" size={20} color={colors.danger} /></Pressable>
+        )}
+      </View>
+    );
+  };
+
   return (
     <Card>
       <T variant="subtitle">Documentos</T>
-      <T variant="small">Atestado, RG, CPF e outros. PDF, PNG ou JPG de até 10 MB. Só a equipe da entidade, o atleta e os responsáveis veem.</T>
+      <T variant="small">Organizados por tipo. PDF, PNG ou JPG de até 10 MB. Só a equipe da entidade, o atleta e os responsáveis veem.</T>
       {msg && <Notice tone={msg.tone} text={msg.text} />}
       {docs.isLoading && <Loading />}
       {docs.error && <Notice tone="danger" text="Não foi possível carregar os documentos." />}
       {docs.data?.length === 0 && <T variant="muted">Nenhum documento enviado.</T>}
-      {(docs.data ?? []).map((d) => {
-        const v = validity(d.valid_until);
-        return (
-          <View key={d.id} style={{ gap: 6, paddingVertical: 6 }}>
-            <View style={[styles.row, { justifyContent: 'space-between' }]}>
-              <T variant="body" style={{ flex: 1, fontWeight: '700' }}>{kindLabel(d.kind)}{d.title ? ` · ${d.title}` : ''}</T>
-              {v === 'expired' && <Badge label="Vencido" tone="danger" />}
-              {v === 'soon' && <Badge label="Vence em breve" tone="warning" />}
-              {v === 'ok' && <Badge label="Válido" tone="success" />}
+      {groups.map((g) => (
+        <View key={g.key} style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, gap: 6 }}>
+          <Pressable accessibilityRole="button" onPress={() => setOpenGroup(openGroup === g.key ? null : g.key)} style={[styles.row, { justifyContent: 'space-between' }]}>
+            <View style={[styles.row, { flex: 1 }]}>
+              <Ionicons name={openGroup === g.key ? 'folder-open-outline' : 'folder-outline'} size={20} color={colors.primary} />
+              <T variant="body" style={{ fontWeight: '800' }}>{g.label}</T>
+              <T variant="small">({g.current.length}{g.old.length ? ` + ${g.old.length} anterior${g.old.length > 1 ? 'es' : ''}` : ''})</T>
             </View>
-            <T variant="small">
-              Enviado em {isoDayToBr(d.created_at.slice(0, 10))}{d.valid_until ? ` · válido até ${isoDayToBr(d.valid_until)}` : ''} · {d.mime_type === 'application/pdf' ? 'PDF' : 'imagem'}
-            </T>
-            <View style={styles.row}>
-              <Button title="Abrir" kind="outline" style={{ flex: 1 }} onPress={() => open(d)} />
-              {(isStaff || d.uploaded_by === meId) && <Button title="Apagar" kind="ghost" style={{ flex: 1 }} onPress={() => remove(d)} />}
+            <Ionicons name={openGroup === g.key ? 'chevron-up' : 'chevron-down'} size={18} color={colors.textMuted} />
+          </Pressable>
+          {(openGroup === g.key ? g.current : g.current.slice(0, 1)).map((d, idx) => docRow(d, idx === 0 && g.current.length > 1 ? 'mais recente' : null))}
+          {openGroup === g.key && g.old.length > 0 && (
+            <View style={{ marginLeft: 18, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: colors.border, gap: 4 }}>
+              <T variant="small" style={{ fontWeight: '700' }}>Versões anteriores</T>
+              {g.old.map((d) => docRow(d, 'substituído'))}
             </View>
-          </View>
-        );
-      })}
+          )}
+          {openGroup !== g.key && (g.current.length > 1 || g.old.length > 0) && (
+            <Pressable onPress={() => setOpenGroup(g.key)}><T variant="small" color={colors.primary}>Ver todos ›</T></Pressable>
+          )}
+        </View>
+      ))}
       {form ? (
         <View style={{ gap: 8 }}>
           <View style={styles.wrap}>{DOC_KINDS.map((k) => <Chip key={k.key} label={k.label} selected={form.kind === k.key} onPress={() => setForm({ ...form, kind: k.key })} />)}</View>
+          <T variant="small">{DOC_KINDS.find((k) => k.key === form.kind)?.hint}</T>
           <Field label="Descrição (opcional)" value={form.title} onChangeText={(v) => setForm({ ...form, title: v })} maxLength={120} placeholder="Ex.: atestado para a temporada 2027" />
           {form.kind === 'atestado' && (
             <DateField label="Válido até (opcional)" mode="date" value={form.valid} onChange={(v) => setForm({ ...form, valid: v })} hint="O app avisa quando estiver perto de vencer." />

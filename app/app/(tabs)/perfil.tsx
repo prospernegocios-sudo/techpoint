@@ -4,6 +4,7 @@ import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Switch, View } from 'react-native';
+import { DocumentsCard } from '@/components/documents-card';
 import { AthleteDataForm, MyDataForm } from '@/components/personal-data';
 import { Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
@@ -39,7 +40,10 @@ export default function Perfil() {
       </Card>
 
       {me.mode === 'athlete' && me.athlete ? (
-        <AthleteDataForm athleteId={me.athlete.id} orgId={me.athlete.org_id} birthDate={me.athlete.birth_date} canSeeBody />
+        <>
+          <AthleteDataForm athleteId={me.athlete.id} orgId={me.athlete.org_id} birthDate={me.athlete.birth_date} canSeeBody />
+          {me.profile && <DocumentsCard orgId={me.athlete.org_id} athleteId={me.athlete.id} meId={me.profile.id} isStaff={false} />}
+        </>
       ) : (
         me.profile && <MyDataForm profileId={me.profile.id} name={me.profile.full_name} />
       )}
@@ -92,7 +96,7 @@ export default function Perfil() {
         </Card>
       )}
       {me.athlete && (
-        <Button title="Meus responsáveis, autorização e documentos" kind="outline" onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: me.athlete!.id } })} />
+        <Button title="Responsáveis e autorização" kind="outline" onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: me.athlete!.id } })} />
       )}
       <Button title="Sair da conta" kind="outline" onPress={signOut} />
       <Button title="Política de privacidade" kind="ghost" onPress={() => router.push('/privacidade')} />

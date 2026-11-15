@@ -128,3 +128,27 @@ test('pedido de exclusão de conta: um pedido aberto por pessoa, visível só ao
   assert.equal(R.mom_sees_req.n, 0);
   assert.equal(R.after_cancel.status, 'canceled');
 });
+
+test('identidade nova substitui a anterior; atestados acumulam sem limite', async () => {
+  const q = `begin;
+${fixtures}
+${as(U.coach)}
+insert into public.athlete_documents (org_id, athlete_id, kind, file_path, mime_type, size_bytes, uploaded_by) values
+ ('${ORG}','${ATH}','identidade','${path(ORG, ATH, 'rg1.pdf')}','application/pdf',10,'${U.coach}');
+insert into public.athlete_documents (org_id, athlete_id, kind, file_path, mime_type, size_bytes, uploaded_by) values
+ ('${ORG}','${ATH}','identidade','${path(ORG, ATH, 'rg2.pdf')}','application/pdf',10,'${U.coach}');
+insert into public.athlete_documents (org_id, athlete_id, kind, file_path, mime_type, size_bytes, uploaded_by, valid_until) values
+ ('${ORG}','${ATH}','atestado','${path(ORG, ATH, 'at1.pdf')}','application/pdf',10,'${U.coach}', current_date + 5),
+ ('${ORG}','${ATH}','atestado','${path(ORG, ATH, 'at2.pdf')}','application/pdf',10,'${U.coach}', current_date + 60);
+reset role;
+insert into results select 'rg', jsonb_agg(jsonb_build_object('f', split_part(file_path, '/', 3), 'old', superseded_at is not null) order by file_path) from public.athlete_documents where kind = 'identidade';
+insert into results select 'at', to_jsonb(count(*)) from public.athlete_documents where kind = 'atestado' and superseded_at is null;
+${as(U.coach)}
+insert into results values ('alerts', public.org_documents_alerts('${ORG}'));
+reset role;
+select name, value from results;`;
+  const r = Object.fromEntries((await sql(q)).map((x) => [x.name, x.value]));
+  assert.deepEqual(r.rg, [{ f: 'rg1.pdf', old: true }, { f: 'rg2.pdf', old: false }]);
+  assert.equal(r.at, 2);
+  assert.equal(r.alerts.expiring, 1);
+});

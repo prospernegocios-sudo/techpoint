@@ -1,3 +1,4 @@
+import { AthletePhoto } from '@/components/athlete-photo';
 import { useAthleteHeader } from '@/lib/athlete-header';
 import { ageOn } from '@/lib/format';
 // Perfil / Meus dados: dados pessoais e do atleta, aparência, biometria, senha, privacidade e conta.
@@ -36,7 +37,9 @@ export default function Perfil() {
   ];
   return (
     <Screen>
-      <Card>
+      <Card style={me.mode === 'athlete' && me.athlete ? { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 18 } : undefined}>
+        {me.mode === 'athlete' && me.athlete && <AthletePhoto athleteId={me.athlete.id} name={me.profile?.full_name ?? ''} />}
+        <View style={{ flex: 1, minWidth: 200, gap: 4 }}>
         <T variant="subtitle">{me.profile?.full_name ?? 'Minha conta'}</T>
         {me.mode === 'athlete' && me.athlete && (
           <T variant="body">{[`${ageOn(new Date(me.athlete.birth_date + 'T12:00:00'))} anos`, ath.data?.sex === 'M' ? 'Masculino' : ath.data?.sex === 'F' ? 'Feminino' : null].filter(Boolean).join(' · ')}</T>
@@ -44,6 +47,7 @@ export default function Perfil() {
         <T variant="muted">{me.profile?.email}</T>
         {me.org && <T variant="small">{me.org.name} · {me.mode === 'athlete' && ath.data?.teams.length ? ath.data.teams.join(', ') : me.roles.map((r) => roleLabels[r]).join(', ')}</T>}
         {me.isPlatformAdmin && <T variant="small" color={colors.primary}>Administrador da plataforma</T>}
+        </View>
       </Card>
 
       {me.mode === 'athlete' && me.athlete ? (

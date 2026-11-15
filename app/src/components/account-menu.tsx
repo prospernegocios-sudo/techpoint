@@ -20,14 +20,15 @@ function useAccountPhoto() {
   const me = useMe();
   const meta = (session?.user?.user_metadata ?? {}) as { avatar_url?: string; picture?: string };
   const google = meta.avatar_url ?? meta.picture ?? null;
-  const cv = useAthleteCv(google ? undefined : me.athlete?.id);
+  const cv = useAthleteCv(me.athlete?.id);
   const cvPhoto = useQuery({
-    queryKey: ['account-photo', cv.data?.profile?.photo_path],
+    queryKey: ['account-photo', cv.data?.profile?.photo_path ?? null],
     enabled: Boolean(cv.data?.profile?.photo_path),
     staleTime: 50 * 60_000,
     queryFn: async () => (await cvImageUrls(cv.data!)).photo,
   });
-  return google ?? cvPhoto.data ?? null;
+  // Atleta: a foto que ele subiu no perfil vale mais que a do Google.
+  return cvPhoto.data ?? google ?? null;
 }
 
 function Avatar({ size, name, photo }: { size: number; name: string; photo: string | null }) {

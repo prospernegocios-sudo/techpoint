@@ -12,6 +12,8 @@ import { orgLogoUrl, modeLabels, useMe } from '@/lib/me';
 import { useSetupSteps, useTeamDashboard } from '@/lib/dashboard';
 import { GuardianTiles, TeamTiles } from '@/components/dashboard-tiles';
 import { GuardianHome } from '@/components/guardian-home';
+import { JustifyAbsence } from '@/components/justify-absence';
+import { useJustifications } from '@/lib/convocations';
 import { useEvents, useMyAttendance, type EventRow } from '@/lib/queries';
 import { nextAction } from '@/lib/next-action';
 import { useTheme } from '@/lib/theme';
@@ -31,10 +33,12 @@ function eventPhase(ev: EventRow): 'upcoming' | 'live' | 'ended' {
 export default function Home() {
   const { colors } = useTheme();
   const me = useMe();
-  const events = useEvents(me.org?.id, 0, 7);
-  const evIds = (events.data ?? []).map((e) => e.id);
   const isAthlete = me.mode === 'athlete';
+  // Atleta: últimos 14 dias também, para mostrar faltas e justificar (auditoria, item 16).
+  const events = useEvents(me.org?.id, isAthlete ? 14 : 0, 7);
+  const evIds = (events.data ?? []).map((e) => e.id);
   const mine = useMyAttendance(isAthlete ? me.athlete?.id : undefined, evIds);
+  const justifs = useJustifications(isAthlete && me.athlete ? [me.athlete.id] : [], evIds);
   const dash = useTeamDashboard(me.org?.id, me.isStaff);
   const setup = useSetupSteps(me.org?.id, me.isManager);
   const [queueInfo, setQueueInfo] = useState<{ pending: number; msg?: string }>({ pending: 0 });
@@ -65,7 +69,7 @@ export default function Home() {
 
   useFocusEffect(
     useCallback(() => {
-      events.refetch();
+      if (me.org?.id) events.refetch(); // sem entidade ainda, não consulta (evita pedido inválido)
       refreshQueue();
       const t = setInterval(refreshQueue, 30_000);
       return () => clearInterval(t);
@@ -100,7 +104,13 @@ export default function Home() {
 
   // Responsável acompanha pelos cartões dos filhos; a agenda é da equipe e dos atletas.
   // Equipe: a agenda fica em Treinos (auditoria 13–21); Início só com os 5 botões.
-  const list = me.mode === 'guardian' || me.mode === 'team' ? [] : events.data ?? [];
+  const nowMs = Date.now();
+  const all = me.mode === 'guardian' || me.mode === 'team' ? [] : events.data ?? [];
+  const list = all.filter((e) => new Date(e.ends_at).getTime() >= nowMs);
+  // Treinos já encerrados em que o atleta não registrou chegada.
+  const missed = isAthlete ? all.filter((e) => new Date(e.ends_at).getTime() < nowMs
+    && !(mine.data ?? []).some((r) => r.event_id === e.id && r.kind === 'check_in' && r.status !== 'rejected')).reverse() : [];
+  const justOf = (eventId: string) => (justifs.data ?? []).find((j) => j.event_id === eventId);
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
@@ -246,6 +256,10 @@ export default function Home() {
                   </Pressable>
                 ) : null;
               })()}
+              {!action && me.athlete && me.org && !(mine.data ?? []).some((r) => r.event_id === ev.id && r.kind === 'check_in' && r.status !== 'rejected') && (
+                <JustifyAbsence orgId={me.org.id} eventId={ev.id} athleteId={me.athlete.id} past={false} existing={justOf(ev.id)}
+                  label={`Treino de ${formatDay(ev.starts_at)} às ${formatTime(ev.starts_at)}`} />
+              )}
               {action && me.athlete && (
                 <Button
                   title={action.label}
@@ -268,6 +282,19 @@ export default function Home() {
           </Fragment>
         );
       })}
+      {isAthlete && me.athlete && me.org && missed.length > 0 && (
+        <View style={{ gap: 10 }}>
+          <T variant="subtitle" style={{ marginTop: 8 }}>Faltas recentes</T>
+          {missed.map((ev) => (
+            <Card key={ev.id}>
+              <T variant="body" style={{ fontWeight: '700' }}>{formatDay(ev.starts_at)} · {formatTime(ev.starts_at)}–{formatTime(ev.ends_at)}</T>
+              <T variant="muted">{ev.teams?.name} · {ev.venues?.name}</T>
+              <JustifyAbsence orgId={me.org!.id} eventId={ev.id} athleteId={me.athlete!.id} past existing={justOf(ev.id)}
+                label={`Falta no treino de ${formatDay(ev.starts_at)}`} />
+            </Card>
+          ))}
+        </View>
+      )}
       {corrMsg && <Notice tone="info" text={corrMsg} />}
       <Modal visible={Boolean(corr)} transparent animationType="slide" onRequestClose={() => setCorr(null)}>
         <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}>

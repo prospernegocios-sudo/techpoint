@@ -5,7 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Stack, router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { Button, Card, Chip, Loading, Notice, Screen, T, styles } from '@/components/ui';
+import { reasonLabel, useJustifications } from '@/lib/convocations';
 import { openAthleteDocument } from '@/lib/documents';
 import { openWhatsApp } from '@/lib/links';
 import { useMe } from '@/lib/me';
@@ -26,6 +28,7 @@ export default function Frequencia() {
   const [teamId, setTeamId] = useState<string | null>(null);
   const [show, setShow] = useState<'presentes' | 'ausentes'>('ausentes');
   const [open, setOpen] = useState<string | null>(null);
+  const [chart, setChart] = useState<'barra' | 'pizza'>('pizza');
 
   const report = useQuery({
     queryKey: ['frequencia', me.org?.id, period],
@@ -71,6 +74,7 @@ export default function Frequencia() {
     },
   });
 
+  const justifs = useJustifications(absentIds, [...new Set(absent.map((r) => r.event.id))]);
   if (!me.isStaff) return <Screen><Notice tone="danger" text="Apenas a equipe da entidade vê relatórios." /></Screen>;
   const coachFirst = (me.profile?.full_name ?? '').split(' ')[0] || 'seu treinador';
   const list = show === 'presentes' ? present : absent;
@@ -119,11 +123,30 @@ export default function Frequencia() {
           <T variant="muted">
             {period === 'ultimo' && rows[0] ? `Treino de ${brDate(rows[0].event.starts_at)} às ${brTime(rows[0].event.starts_at)} · ${rows[0].teamName}` : `${events} treino${events === 1 ? '' : 's'} · ${total} presenças esperadas`}
           </T>
-          {/* Gráfico: barra dividida em presentes e ausentes (cada parte é clicável) */}
-          <View accessibilityLabel={`Gráfico: ${present.length} presentes e ${absent.length} ausentes`} style={{ flexDirection: 'row', height: 28, borderRadius: 14, overflow: 'hidden', backgroundColor: colors.surfaceContainerHigh }}>
-            {present.length > 0 && <Pressable accessibilityRole="button" accessibilityLabel="Ver presentes" onPress={() => setShow('presentes')} style={{ flex: present.length, backgroundColor: colors.success }} />}
-            {absent.length > 0 && <Pressable accessibilityRole="button" accessibilityLabel="Ver ausentes" onPress={() => setShow('ausentes')} style={{ flex: absent.length, backgroundColor: colors.danger }} />}
+          <View style={[styles.row, { gap: 8 }]}>
+            <T variant="small">Gráfico:</T>
+            <Chip label="Pizza" selected={chart === 'pizza'} onPress={() => setChart('pizza')} />
+            <Chip label="Barras" selected={chart === 'barra'} onPress={() => setChart('barra')} />
           </View>
+          {chart === 'barra' ? (
+            <View accessibilityLabel={`Gráfico de barras: ${present.length} presentes e ${absent.length} ausentes`} style={{ gap: 10 }}>
+              {([['presentes', present.length, colors.success, 'Presentes'], ['ausentes', absent.length, colors.danger, 'Ausentes']] as const).map(([k, n, c, l]) => (
+                <Pressable key={k} accessibilityRole="button" accessibilityLabel={`Ver ${l.toLowerCase()}`} onPress={() => { setShow(k); setOpen(null); }} style={{ gap: 4 }}>
+                  <View style={[styles.row, { justifyContent: 'space-between' }]}><T variant="small" style={{ fontWeight: '700' }}>{l}</T><T variant="small">{n} · {pct(n)}%</T></View>
+                  <View style={{ height: 26, borderRadius: 13, backgroundColor: colors.surfaceContainerHigh, overflow: 'hidden' }}>
+                    <View style={{ width: `${Math.max(pct(n), n ? 3 : 0)}%`, height: 26, borderRadius: 13, backgroundColor: c, opacity: show === k ? 1 : 0.55 }} />
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <View style={{ alignItems: 'center' }} accessibilityLabel={`Gráfico de pizza: ${present.length} presentes e ${absent.length} ausentes`}>
+              <Pie size={220} parts={[
+                { key: 'presentes', value: present.length, color: colors.success, dim: show !== 'presentes', onPress: () => { setShow('presentes'); setOpen(null); } },
+                { key: 'ausentes', value: absent.length, color: colors.danger, dim: show !== 'ausentes', onPress: () => { setShow('ausentes'); setOpen(null); } },
+              ]} hole={colors.background} label={`${pct(present.length)}%`} sub="presença" text={colors.text} muted={colors.textMuted} />
+            </View>
+          )}
           <View style={[styles.wrap, { gap: 12 }]}>
             <Seg k="presentes" n={present.length} color={colors.success} label="Presentes" />
             <Seg k="ausentes" n={absent.length} color={colors.danger} label="Ausentes" />
@@ -148,13 +171,23 @@ export default function Frequencia() {
                 {isOpen && (
                   <View style={{ gap: 10, marginTop: 6 }}>
                     <T variant="small" style={{ fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 }}>Detalhes da ausência</T>
+                    {(() => {
+                      const j = (justifs.data ?? []).find((x) => x.event_id === r.event.id && x.athlete_id === r.athleteId);
+                      return j ? (
+                        <View style={[styles.row, { gap: 8, alignItems: 'flex-start' }]}>
+                          <Ionicons name="chatbox-ellipses-outline" size={20} color={colors.primary} />
+                          <T variant="body" style={{ flex: 1 }}>Justificativa: <T variant="body" style={{ fontWeight: '700' }}>{reasonLabel(j.reason)}</T>{j.details ? ` · ${j.details}` : ''} <T variant="small">(enviada em {new Date(j.updated_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })})</T></T>
+                        </View>
+                      ) : null;
+                    })()}
                     {extra.isLoading ? <Loading /> : at ? (
                       <View style={[styles.row, { gap: 8 }]}>
                         <Ionicons name="medkit-outline" size={20} color={colors.success} />
                         <T variant="body" style={{ flex: 1 }}>Atestado médico enviado{at.valid_until ? ` (válido até ${at.valid_until.split('-').reverse().join('/')})` : ''}.</T>
                         <Button title="Abrir atestado" kind="tonal" onPress={() => openAthleteDocument(at.file_path)} />
                       </View>
-                    ) : <T variant="body">Sem atestado nem justificativa registrados para esta data.</T>}
+                    ) : !(justifs.data ?? []).some((x) => x.event_id === r.event.id && x.athlete_id === r.athleteId)
+                      ? <T variant="body">Sem atestado nem justificativa registrados para esta data.</T> : <T variant="small">Sem atestado para esta data.</T>}
                     {phone ? (
                       <Button title="Falar com o atleta no WhatsApp" icon="logo-whatsapp" kind="outline" onPress={() => openWhatsApp(message(r), phone)} />
                     ) : <T variant="small">Sem celular cadastrado. Peça para {r.athleteName.split(' ')[0]} preencher em Perfil › Dados pessoais.</T>}
@@ -172,4 +205,34 @@ export default function Frequencia() {
 
 function shiftDay(day: string, n: number) {
   const d = new Date(day + 'T12:00:00'); d.setDate(d.getDate() + n); return isoDay(d);
+}
+
+/** Pizza com fatias clicáveis (presentes × ausentes) e o percentual no meio. */
+function Pie({ size, parts, hole, label, sub, text, muted }: {
+  size: number; parts: { key: string; value: number; color: string; dim: boolean; onPress: () => void }[]; hole: string; label: string; sub: string; text: string; muted: string;
+}) {
+  const total = parts.reduce((a, p) => a + p.value, 0) || 1;
+  const r = size / 2, cx = r, cy = r;
+  let ang = -Math.PI / 2;
+  const slices = parts.filter((p) => p.value > 0).map((p) => {
+    const a0 = ang, a1 = ang + (p.value / total) * Math.PI * 2; ang = a1;
+    if (p.value === total) return { p, d: null as string | null };
+    const large = a1 - a0 > Math.PI ? 1 : 0;
+    const d = `M ${cx} ${cy} L ${cx + r * Math.cos(a0)} ${cy + r * Math.sin(a0)} A ${r} ${r} 0 ${large} 1 ${cx + r * Math.cos(a1)} ${cy + r * Math.sin(a1)} Z`;
+    return { p, d };
+  });
+  return (
+    <View style={{ width: size, height: size }}>
+      <Svg width={size} height={size}>
+        {slices.map(({ p, d }) => d
+          ? <Path key={p.key} d={d} fill={p.color} opacity={p.dim ? 0.45 : 1} onPress={p.onPress} />
+          : <Circle key={p.key} cx={cx} cy={cy} r={r} fill={p.color} opacity={p.dim ? 0.45 : 1} onPress={p.onPress} />)}
+        <Circle cx={cx} cy={cy} r={r * 0.55} fill={hole} />
+      </Svg>
+      <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 30, fontWeight: '700', color: text }}>{label}</Text>
+        <Text style={{ fontSize: 13, color: muted }}>{sub}</Text>
+      </View>
+    </View>
+  );
 }

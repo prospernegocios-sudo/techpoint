@@ -84,3 +84,30 @@ Os arquivos do Drive ficaram deslocados em uma posição a partir do 06A, e por 
 - 07B (~4 s usados, cena 7 aos 0:47): A smiling volleyball coach in his 30s with a whistle around his neck stands on the sideline of a bright indoor volleyball court, looking at a tablet; on the tablet screen, green check marks pop up one by one next to a list of names, live. He nods happily and gives a small fist pump. Players practice in the blurred background. Warm, heartfelt tone. 3D Pixar style, vertical 9:16, no readable text.
 - 09C (~3 s usados, cena 9 aos 1:17): Close-up of a young adult volleyball player in a club jersey holding a smartphone; a glowing card with a trophy icon pops up on the screen and he taps a big green check button; a burst of lime-green sparkles comes out of the phone and he smiles confidently. 3D Pixar style, vertical 9:16, no readable text.
 - 09D (~7 s usados, cena 9 aos 1:20, com o Max como ingrediente): Max stands next to a glowing app icon floating in the air; two new holographic cards with dotted outlines slowly fade in beside it, a megaphone and a sports scoreboard, as if coming soon. Max points at them with an excited "wait for it" expression and rubs his hands together. Futuristic but friendly, lime-green glow. 3D Pixar style, vertical 9:16, no text.
+
+## Refação do Max com continuidade total (pedido do TG em 15/11)
+Na 1ª rodada o Flow trocou o Max por meninos de camisa de time em quase todas as cenas. Para travar o personagem:
+1. Em cada clipe, use o modo **Ingredientes para vídeo** e anexe a **imagem original do Max** (não só o personagem salvo).
+2. Cole o **bloco do Max** abaixo e, em seguida, o texto da cena.
+3. Gere 2 variações e fique com a que tiver barba, sardas e jaqueta verde. Se mesmo assim mudar, use **Frames para vídeo** com a imagem do Max como quadro inicial.
+4. Salve com o mesmo nome e um **M** no final (ex.: 01M.mp4).
+
+Bloco do Max (cole no começo de todos):
+```
+MAX — the exact same adult man in every shot, matching the reference image: a 25-year-old Brazilian man (NOT a child, NOT a teenager, NOT an athlete). 3D Pixar-style animated character. Light skin with freckles across the nose and cheeks, voluminous dark brown hair swept up, thick expressive eyebrows, big warm brown eyes, short trimmed full beard with a thin mustache, confident playful half-smile. Always wears the same outfit: olive green bomber jacket, open, over a dark gray T-shirt with a big white letter "P" on the chest, dark jeans and white sneakers. Never a sports jersey, never a hoodie, never a sweater.
+```
+
+| Novo arquivo | Entra em | Texto da cena |
+|---|---|---|
+| 01M | 0:00 (5 s) | Max walks into frame on the sideline of a bright indoor volleyball court, waves enthusiastically at the camera and starts talking with a big friendly smile, introducing himself. Medium shot, camera slowly pushing in. Vertical 9:16, no text. |
+| 02AM | 0:05 (5 s) | Max on the sideline of the volleyball court points to his side with a mischievous look and raised eyebrows, inviting the viewer to look over there. Medium shot. Vertical 9:16, no text. |
+| 03AM | 0:16 (3 s) | Max stands in front of an empty volleyball court, shrugging with a dramatic confused expression and looking left and right as if searching for someone. A giant glowing lime-green question mark floats above the court. Vertical 9:16, no text. |
+| 03BM | 0:19 (3 s) | Close-up: Max leans toward the camera, raises one eyebrow suspiciously and taps his bearded chin like a comedic detective; slow push-in to his face. Vertical 9:16, no text. |
+| 05M | 0:33 (5 s) | Max snaps his fingers confidently; a burst of lime-green light fills the volleyball court and a glowing rounded-square app icon with a double check mark appears floating next to him. He smiles proudly. Magical, triumphant moment. Vertical 9:16, no text. |
+| 08M | 0:57 (10 s) | Max taps a big glowing button in the air and a neat printed report with colorful bar charts and an approval seal flies out and lands in the hands of a happy sponsor in a suit, who gives a thumbs-up. Max winks. Vertical 9:16, no text. |
+| 09AM | 1:07 (10 s) | Max stands in the center of a modern sports club lobby; floating holographic cards appear around him: a trophy, a meeting and a lecture, each with a green check mark. Max presents them excitedly with big hand gestures. Vertical 9:16, no text. |
+| 09DM | 1:20 (7 s) | Max stands next to a glowing app icon floating in the air; two new holographic cards with dotted outlines slowly fade in beside it, a megaphone and a sports scoreboard, as if coming soon. Max points at them with an excited "wait for it" expression and rubs his hands together. Lime-green glow. Vertical 9:16, no text. |
+| 11AM | 1:39 (7 s) | Max steps close to the camera with a big excited smile, raises one hand next to his mouth as if about to announce great news, eyebrows raised. Warm lighting, sports club office background. Vertical 9:16, no text. |
+| 11CM | 1:53 (7 s) | Inside a sports club office, Max catches swirling papers in the air and they magically fold into one tidy lime-green folder with a big check mark; he holds it up proudly and winks. Vertical 9:16, no text. |
+| 12M | 1:59 (8 s) | Max on the volleyball court points enthusiastically to the side of the frame, then gives a big thumbs-up, inviting the viewer. Leave empty space on the side of the frame. Vertical 9:16, no text. |
+| 13M | 2:07 (5 s) | Max waves goodbye to the camera with a big smile as the camera pulls back and rises above the volleyball court; lime-green light glows in the background. Keep the upper half of the frame clean. Vertical 9:16, no text. |

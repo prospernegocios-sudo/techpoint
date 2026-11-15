@@ -1,5 +1,6 @@
 // Abas principais com o botão central (D62).
-// Atleta: Início · Check-in · Perfil. Equipe: Início · Gestão · Presença · Relatórios · Perfil.
+// Atleta: Início · Currículo · Check-in · Documentos · Meus dados.
+// Responsável: Início · Meus atletas · Documentos · Meus dados. Equipe: Início · Gestão · Presença · Relatórios · Perfil.
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
@@ -45,6 +46,22 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="curriculo"
+        options={{
+          title: 'Currículo',
+          href: mode === 'athlete' ? '/(tabs)/curriculo' : null,
+          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color as string} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="atletas"
+        options={{
+          title: 'Meus atletas',
+          href: mode === 'guardian' ? '/(tabs)/atletas' : null,
+          tabBarIcon: ({ color, size }) => <Ionicons name="people" color={color as string} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="acao"
         options={{
           title: team ? 'Presença' : 'Check-in',
@@ -60,7 +77,15 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="document-text" color={color as string} size={size} />,
         }}
       />
-      <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" color={color as string} size={size} /> }} />
+      <Tabs.Screen
+        name="documentos"
+        options={{
+          title: 'Documentos',
+          href: mode === 'athlete' || mode === 'guardian' ? '/(tabs)/documentos' : null,
+          tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" color={color as string} size={size} />,
+        }}
+      />
+      <Tabs.Screen name="perfil" options={{ title: team ? 'Perfil' : 'Meus dados', tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" color={color as string} size={size} /> }} />
     </Tabs>
   );
 }

@@ -28,7 +28,7 @@ export type Org = {
 };
 export type Profile = { id: string; full_name: string | null; email: string | null; is_platform_admin: boolean };
 type Membership = { org_id: string; role: Role; organizations: Org | null };
-export type MyAthlete = { id: string; org_id: string; full_name: string };
+export type MyAthlete = { id: string; org_id: string; full_name: string; birth_date: string };
 
 type MeData = { profile: Profile | null; memberships: Membership[]; athletes: MyAthlete[] };
 
@@ -36,7 +36,7 @@ async function fetchMe(userId: string): Promise<MeData> {
   const [p, m, a] = await Promise.all([
     supabase.from('profiles').select('id, full_name, email, is_platform_admin').eq('id', userId).maybeSingle(),
     supabase.from('memberships').select('org_id, role, organizations(id, name, review_status, logo_path, theme_primary, theme_accent)').eq('profile_id', userId).eq('active', true),
-    supabase.from('athletes').select('id, org_id, full_name').eq('profile_id', userId),
+    supabase.from('athletes').select('id, org_id, full_name, birth_date').eq('profile_id', userId),
   ]);
   if (p.error) throw p.error;
   if (m.error) throw m.error;

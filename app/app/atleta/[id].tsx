@@ -5,6 +5,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { DocumentsCard } from '@/components/documents-card';
+import { AthleteDataForm } from '@/components/personal-data';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { digits, maskPhone, validEmail, validPhone } from '@/lib/br';
 import { toFriendlyError } from '@/lib/errors';
@@ -148,6 +149,8 @@ export default function FichaAtleta() {
           <Button title="Registrar consentimento em papel" kind="outline" disabled={paper.trim().length < 5} onPress={recordPaper} />
         </Card>
       )}
+      <Button title="Currículo esportivo" kind="accent" onPress={() => router.push({ pathname: '/curriculo/[athleteId]', params: { athleteId: a.id } })} />
+      {!isSelf && <AthleteDataForm athleteId={a.id} orgId={a.org_id} birthDate={a.birth_date} canSeeBody={!me.isStaff} />}
       {me.profile && <DocumentsCard orgId={a.org_id} athleteId={a.id} meId={me.profile.id} isStaff={me.isStaff} />}
       {isSelf && <Button title="Voltar" kind="ghost" onPress={() => router.back()} />}
     </Screen>

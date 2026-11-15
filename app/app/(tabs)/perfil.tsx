@@ -1,8 +1,9 @@
-// Perfil: dados da conta, aparência (paleta e modo) e biometria.
+// Perfil / Meus dados: dados pessoais e do atleta, aparência, biometria, senha, privacidade e conta.
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Switch, View } from 'react-native';
+import { AthleteDataForm, MyDataForm } from '@/components/personal-data';
 import { Button, Card, Chip, Field, Notice, Screen, T, styles } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { RELOCK_OPTIONS, useAuth } from '@/lib/auth';
@@ -36,6 +37,13 @@ export default function Perfil() {
         {me.isPlatformAdmin && <T variant="small" color={colors.primary}>Administrador da plataforma</T>}
       </Card>
 
+      {me.mode === 'athlete' && me.athlete ? (
+        <AthleteDataForm athleteId={me.athlete.id} orgId={me.athlete.org_id} birthDate={me.athlete.birth_date} canSeeBody />
+      ) : (
+        me.profile && <MyDataForm profileId={me.profile.id} name={me.profile.full_name} />
+      )}
+
+      <T variant="subtitle">Configurações</T>
       <Card>
         <T variant="subtitle">Aparência</T>
         <T variant="small">Paleta de cores</T>

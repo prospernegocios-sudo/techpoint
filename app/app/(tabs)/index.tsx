@@ -137,9 +137,10 @@ export default function Home() {
         <View style={{ gap: 10 }}>
           <T variant="subtitle">Hoje</T>
           <View style={styles.wrap}>
-            <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={dash.data.pendingWeek ? () => { const ev = dash.data!.today.find((t) => t.pending > 0) ?? dash.data!.today[0]; if (ev) router.push({ pathname: '/evento/[id]', params: { id: ev.id } }); } : undefined}>
+            <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={dash.data.pendingEventId ? () => router.push({ pathname: '/evento/[id]', params: { id: dash.data!.pendingEventId! } }) : undefined}>
               <T variant="small">Pendências para aprovar (7 dias)</T>
               <T variant="title" color={dash.data.pendingWeek ? colors.warning : colors.text}>{dash.data.pendingWeek}</T>
+              <T variant="small" color={dash.data.pendingWeek ? colors.primary : colors.textMuted}>{dash.data.pendingWeek ? 'Toque para revisar ›' : 'Nada pendente ✓'}</T>
             </Card>
             {dash.data.joinPending > 0 && (
               <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={() => router.push('/cadastro/convites')}>
@@ -147,10 +148,22 @@ export default function Home() {
                 <T variant="title" color={colors.warning}>{dash.data.joinPending}</T>
               </Card>
             )}
-            <Card style={{ flexGrow: 1, flexBasis: 150 }}>
+            <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={() => (dash.data!.today[0] ? router.push({ pathname: '/evento/[id]', params: { id: dash.data!.today[0].id } }) : router.push('/cadastro/treino'))}>
               <T variant="small">Treinos hoje</T>
               <T variant="title">{dash.data.today.length}</T>
+              <T variant="small" color={colors.primary}>{dash.data.today.length ? 'Abrir presença ›' : 'Marcar um treino ›'}</T>
             </Card>
+            {dash.data.cvToConfirm > 0 && (
+              <Card style={{ flexGrow: 1, flexBasis: 150 }} onPress={() => router.push('/cadastro/atletas')}>
+                <T variant="small">Itens de currículo para confirmar</T>
+                <T variant="title" color={colors.warning}>{dash.data.cvToConfirm}</T>
+                <T variant="small" color={colors.primary}>Ver atletas ›</T>
+              </Card>
+            )}
+          </View>
+          <View style={styles.row}>
+            <Button title="+ Convidar atleta" kind="outline" style={{ flex: 1 }} onPress={() => router.push('/cadastro/convites')} />
+            <Button title="+ Novo treino" kind="outline" style={{ flex: 1 }} onPress={() => router.push('/cadastro/treino')} />
           </View>
           {dash.data.today.map((t) => (
             <Card key={t.id} onPress={() => router.push({ pathname: '/evento/[id]', params: { id: t.id } })}>

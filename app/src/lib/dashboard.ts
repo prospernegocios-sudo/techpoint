@@ -20,7 +20,12 @@ export function useTeamDashboard(orgId: string | undefined, enabled: boolean) {
         supabase.from('attendance_records').select('id', { count: 'exact', head: true }).eq('org_id', orgId!).eq('status', 'pending').gte('server_at', weekAgo.toISOString()),
         supabase.from('projects').select('id, name').eq('org_id', orgId!).eq('status', 'active').limit(3),
       ]);
-      const { count: joinPending } = await supabase.from('athlete_join_requests').select('id', { count: 'exact', head: true }).eq('org_id', orgId!).eq('status', 'pending');
+      const [{ count: joinPending }, { count: cvToConfirm }, lastPending] = await Promise.all([
+        supabase.from('athlete_join_requests').select('id', { count: 'exact', head: true }).eq('org_id', orgId!).eq('status', 'pending'),
+        supabase.from('athlete_cv_entries').select('id', { count: 'exact', head: true }).eq('org_id', orgId!).is('verified_at', null),
+        supabase.from('attendance_records').select('event_id').eq('org_id', orgId!).eq('status', 'pending').gte('server_at', weekAgo.toISOString()).order('server_at', { ascending: false }).limit(1),
+      ]);
+      const pendingEventId = ((lastPending.data ?? [])[0] as { event_id: string } | undefined)?.event_id ?? null;
       const events = (evs.data ?? []) as unknown as { id: string; team_id: string; starts_at: string; ends_at: string; teams: { name: string } | null }[];
       const ids = events.map((e) => e.id);
       const teamIds = [...new Set(events.map((e) => e.team_id))];
@@ -43,7 +48,7 @@ export function useTeamDashboard(orgId: string | undefined, enabled: boolean) {
         const goals = ((data as { goals?: { description: string; result: number | null; target: number | null; unit: string | null; kind: string; reached: boolean | null }[] })?.goals ?? []);
         goals.filter((g) => g.reached === false).forEach((g) => alerts.push({ project: p.name, projectId: p.id, goal: g.description, result: g.result, target: g.target, unit: g.unit, kind: g.kind }));
       }
-      return { today, pendingWeek: pend.count ?? 0, alerts, joinPending: joinPending ?? 0 };
+      return { today, pendingWeek: pend.count ?? 0, alerts, joinPending: joinPending ?? 0, cvToConfirm: cvToConfirm ?? 0, pendingEventId };
     },
   });
 }

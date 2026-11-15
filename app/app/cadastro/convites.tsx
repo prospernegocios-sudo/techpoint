@@ -1,7 +1,7 @@
 // Convidar atletas (link por time) e aprovar os pedidos de entrada (D37).
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Button, Card, Chip, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { maskPhone } from '@/lib/br';
@@ -38,6 +38,8 @@ export default function Convites() {
   });
   const params = useLocalSearchParams<{ team?: string }>();
   const [teamId, setTeamId] = useState<string | null>(params.team ?? null);
+  // Com um time só, ele já vem escolhido.
+  useEffect(() => { if (!teamId && teams.data?.length === 1) setTeamId(teams.data[0].id); }, [teams.data, teamId]);
   const [link, setLink] = useState<string | null>(null);
   const [linkFor, setLinkFor] = useState<Record<string, string | null>>({});
   const [done, setDone] = useState<{ name: string; guardianToken: string | null; phone: string | null } | null>(null);
@@ -80,7 +82,8 @@ export default function Convites() {
         <T variant="subtitle">Convidar atletas</T>
         <T variant="small">Gere o link do time e mande no WhatsApp (no grupo ou para cada atleta). Quem abrir faz um pedido, e você aprova aqui.</T>
         <View style={styles.wrap}>{(teams.data ?? []).map((t) => <Chip key={t.id} label={t.name} selected={teamId === t.id} onPress={() => { setTeamId(t.id); setLink(null); }} />)}</View>
-        <Button title="Gerar link do time" onPress={makeLink} />
+        {!teamId && <T variant="small">Toque no time acima para escolher.</T>}
+        <Button title="Gerar link do time" disabled={!teamId} onPress={makeLink} />
         {link && (
           <View style={{ gap: 8 }}>
             <T variant="small" style={{ fontWeight: '700' }}>{link}</T>

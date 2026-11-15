@@ -37,6 +37,7 @@ export default function FichaAtleta() {
   });
   const [form, setForm] = useState<{ name: string; phone: string; email: string; relationship: string } | null>(null);
   const [paper, setPaper] = useState('');
+  const [tab, setTab] = useState<'resumo' | 'dados' | 'docs' | 'resp'>('resumo');
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
 
   if (q.isLoading) return <Loading />;
@@ -94,8 +95,13 @@ export default function FichaAtleta() {
       <T variant="muted">{age} anos{a.email ? ` · ${a.email}` : ''}</T>
       {a.is_demo && <Badge label="Dado fictício (teste)" />}
       {msg && <Notice tone={msg.tone} text={msg.text} />}
+      <View style={styles.wrap}>
+        {([['resumo', 'Resumo'], ['dados', 'Dados'], ['docs', 'Documentos'], ['resp', 'Responsáveis']] as const)
+          .filter(([k]) => !(isSelf && k === 'dados'))
+          .map(([k, l]) => <Chip key={k} label={l} selected={tab === k} onPress={() => setTab(k)} />)}
+      </View>
 
-      <Card>
+      {tab === 'resumo' && <Card>
         <T variant="subtitle">Autorização (LGPD)</T>
         {!minor ? <Badge label="Maior de idade: não precisa de autorização" tone="success" />
           : active ? (
@@ -109,9 +115,11 @@ export default function FichaAtleta() {
               <T variant="small">Enquanto isso, {first} não consegue fazer check-in e não aparece nos relatórios.</T>
             </>
           )}
-      </Card>
+      </Card>}
+      {tab === 'resumo' && <Button title="Currículo esportivo" kind="accent" onPress={() => router.push({ pathname: '/curriculo/[athleteId]', params: { athleteId: a.id } })} />}
+      {tab === 'resp' && !minor && <Notice tone="info" text="Atleta maior de idade: responsável não é obrigatório." />}
 
-      {minor && (
+      {tab === 'resp' && minor && (
         <Card>
           <T variant="subtitle">Responsáveis</T>
           {g.length === 0 && <T variant="muted">Nenhum responsável cadastrado.</T>}
@@ -141,7 +149,7 @@ export default function FichaAtleta() {
         </Card>
       )}
 
-      {minor && !active && me.isManager && (
+      {tab === 'resp' && minor && !active && me.isManager && (
         <Card>
           <T variant="subtitle">Termo assinado em papel</T>
           <T variant="small">Se o responsável assinou o termo na secretaria, registre aqui. Guarde o papel: ele é a prova.</T>
@@ -149,9 +157,8 @@ export default function FichaAtleta() {
           <Button title="Registrar consentimento em papel" kind="outline" disabled={paper.trim().length < 5} onPress={recordPaper} />
         </Card>
       )}
-      <Button title="Currículo esportivo" kind="accent" onPress={() => router.push({ pathname: '/curriculo/[athleteId]', params: { athleteId: a.id } })} />
-      {!isSelf && <AthleteDataForm athleteId={a.id} orgId={a.org_id} birthDate={a.birth_date} canSeeBody={!me.isStaff} />}
-      {me.profile && <DocumentsCard orgId={a.org_id} athleteId={a.id} meId={me.profile.id} isStaff={me.isStaff} />}
+      {tab === 'dados' && !isSelf && <AthleteDataForm athleteId={a.id} orgId={a.org_id} birthDate={a.birth_date} canSeeBody={!me.isStaff} />}
+      {tab === 'docs' && me.profile && <DocumentsCard orgId={a.org_id} athleteId={a.id} meId={me.profile.id} isStaff={me.isStaff} />}
       {isSelf && <Button title="Voltar" kind="ghost" onPress={() => router.back()} />}
     </Screen>
   );

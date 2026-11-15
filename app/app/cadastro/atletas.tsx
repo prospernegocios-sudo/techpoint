@@ -103,6 +103,10 @@ export default function Atletas() {
             {a.status === 'pending_consent' && <Badge label="Aguardando autorização" tone="warning" />}
             {a.is_demo && <Badge label="Fictício" />}
           </View>
+          <View style={styles.row}>
+            <Button title="Ficha" kind="ghost" style={{ flex: 1 }} onPress={() => router.push({ pathname: '/atleta/[id]', params: { id: a.id } })} />
+            <Button title="Currículo" kind="ghost" style={{ flex: 1 }} onPress={() => router.push({ pathname: '/curriculo/[athleteId]', params: { athleteId: a.id } })} />
+          </View>
         </Card>
       ))}
       </View>

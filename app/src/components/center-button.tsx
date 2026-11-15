@@ -16,7 +16,7 @@ export function CenterButton({ wide }: { wide: boolean }) {
     } else if (a.kind === 'roster') {
       router.push({ pathname: '/evento/[id]', params: { id: a.eventId } });
     } else {
-      router.navigate('/(tabs)/acao');
+      router.push('/acao');
     }
   };
   const label = a.kind === 'none' ? a.label : a.label;
@@ -30,7 +30,7 @@ export function CenterButton({ wide }: { wide: boolean }) {
     );
   }
   return (
-    <View style={{ flex: 1, alignItems: 'center' }}>
+    <Pressable accessibilityElementsHidden onPress={go} style={{ flex: 1, alignItems: 'center' }}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={active ? label : `${label}: ${a.kind === 'none' ? a.hint : ''}`}
@@ -45,6 +45,6 @@ export function CenterButton({ wide }: { wide: boolean }) {
         <Ionicons name={icon} size={32} color={active ? colors.onAccent : colors.textMuted} />
       </Pressable>
       <Text style={{ fontSize: 12, fontWeight: '800', marginTop: 2, color: active ? colors.text : colors.textMuted }}>{label}</Text>
-    </View>
+    </Pressable>
   );
 }

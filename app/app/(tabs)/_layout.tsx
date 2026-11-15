@@ -30,7 +30,7 @@ export default function TabsLayout() {
         tabBarLabelPosition: wide ? 'beside-icon' : 'below-icon',
         tabBarStyle: wide
           ? { backgroundColor: colors.surface, borderRightColor: colors.border, minWidth: 220, paddingTop: 12 }
-          : { backgroundColor: colors.surface, borderTopColor: colors.border, height: 64 + bottom, paddingBottom: 8 + bottom, paddingTop: 6 },
+          : { backgroundColor: colors.surface, borderTopColor: colors.border, height: 70 + bottom, paddingBottom: 10 + bottom, paddingTop: 6 },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontSize: 13, fontWeight: '600' },
@@ -57,6 +57,7 @@ export default function TabsLayout() {
         name="atletas"
         options={{
           title: 'Meus atletas',
+          tabBarLabel: 'Atletas',
           href: mode === 'guardian' ? '/(tabs)/atletas' : null,
           tabBarIcon: ({ color, size }) => <Ionicons name="people" color={color as string} size={size} />,
         }}
@@ -81,11 +82,12 @@ export default function TabsLayout() {
         name="documentos"
         options={{
           title: 'Documentos',
+          tabBarLabel: 'Docs',
           href: mode === 'athlete' || mode === 'guardian' ? '/(tabs)/documentos' : null,
           tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" color={color as string} size={size} />,
         }}
       />
-      <Tabs.Screen name="perfil" options={{ title: team ? 'Perfil' : 'Meus dados', tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" color={color as string} size={size} /> }} />
+      <Tabs.Screen name="perfil" options={{ title: team ? 'Perfil' : 'Meus dados', tabBarLabel: team ? 'Perfil' : 'Dados', tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" color={color as string} size={size} /> }} />
     </Tabs>
   );
 }

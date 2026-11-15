@@ -246,8 +246,9 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
           <Pressable accessibilityRole={canShare ? 'button' : undefined} accessibilityLabel={canShare ? 'Trocar foto' : undefined} onPress={canShare ? setPhoto : undefined}>
             {imgs.data?.photo
               ? <Image source={{ uri: imgs.data.photo }} style={{ width: 84, height: 84, borderRadius: 42 }} accessibilityLabel={`Foto de ${c.full_name}`} />
-              : <View style={{ width: 84, height: 84, borderRadius: 28, backgroundColor: colors.primaryContainer, alignItems: 'center', justifyContent: 'center' }}>
-                  <Ionicons name={canShare ? 'camera-outline' : 'person-outline'} size={28} color={colors.textMuted} />
+              : <View style={{ width: 84, height: 84, borderRadius: 42, backgroundColor: colors.primaryContainer, alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                  <Ionicons name={canShare ? 'camera-outline' : 'person-outline'} size={26} color={colors.onPrimaryContainer} />
+                  {canShare && <Text style={{ color: colors.onPrimaryContainer, fontSize: 11, fontWeight: '600' }}>Adicionar foto</Text>}
                 </View>}
           </Pressable>
           <View style={{ flex: 1, gap: 2 }}>
@@ -257,30 +258,7 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
           </View>
         </View>
         <Text style={{ fontSize: 13, color: colors.textMuted, marginTop: 4 }}>{stats}</Text>
-        <View style={styles.row}>
-          <Button title="PDF" kind="primary" style={{ flex: 1 }} onPress={pdf} />
-          {canShare && <Button title="Link" kind="outline" style={{ flex: 1 }} onPress={() => setPanel(panel === 'compartilhar' ? null : 'compartilhar')} />}
-          {canShare && <Button title="Importar" kind="outline" style={{ flex: 1 }} onPress={() => router.push({ pathname: '/curriculo/importar/[athleteId]', params: { athleteId } })} />}
-        </View>
       </Card>
-
-      {panel === 'compartilhar' && (
-        <Card>
-          <T variant="subtitle">Compartilhar</T>
-          <T variant="small">Link só do currículo, sem CPF, endereço, documentos ou nascimento. Vale 90 dias.</T>
-          {(shares.data ?? []).map((s) => (
-            <View key={s.id} style={[styles.row, { alignItems: 'center' }]}>
-              <T variant="small" style={{ flex: 1 }}>Ativo até {new Date(s.expires_at).toLocaleDateString('pt-BR')}</T>
-              <Button title="Copiar" kind="outline" onPress={async () => { if ((await shareText(`${SITE_URL}/cv/${s.token}`)) === 'copied') toast('Link copiado.'); }} />
-              <Button title="Cancelar" kind="outline" onPress={() => revoke(s.id)} />
-            </View>
-          ))}
-          <View style={styles.row}>
-            <Button title="Novo link no WhatsApp" kind="primary" style={{ flex: 1 }} onPress={newShare} />
-            <Button title="Fechar" kind="outline" style={{ flex: 1 }} onPress={close} />
-          </View>
-        </Card>
-      )}
 
       {!c.sport_started_on && canShare && (
         <Pressable onPress={() => router.push('/(tabs)/perfil')} accessibilityRole="link">
@@ -448,6 +426,30 @@ export function CvView({ athleteId, orgId, isStaff, canShare }: Props) {
               </>}
         </Section>
       ) : null}
+      {/* Ações no fim do currículo (auditoria, item 07) */}
+      <View style={{ gap: 10 }}>
+        <Button title="Gerar PDF" icon="document-outline" kind="primary" onPress={pdf} />
+        {canShare && <Button title="Compartilhar através de link" icon="link-outline" kind="outline" onPress={() => setPanel(panel === 'compartilhar' ? null : 'compartilhar')} />}
+        {canShare && <Button title="Importar currículo" icon="cloud-upload-outline" kind="outline" onPress={() => router.push({ pathname: '/curriculo/importar/[athleteId]', params: { athleteId } })} />}
+      </View>
+      {panel === 'compartilhar' && (
+        <Card>
+          <T variant="subtitle">Compartilhar</T>
+          <T variant="small">Link só do currículo, sem CPF, endereço, documentos ou nascimento. Vale 90 dias.</T>
+          {(shares.data ?? []).map((s) => (
+            <View key={s.id} style={[styles.row, { alignItems: 'center' }]}>
+              <T variant="small" style={{ flex: 1 }}>Ativo até {new Date(s.expires_at).toLocaleDateString('pt-BR')}</T>
+              <Button title="Copiar" kind="outline" onPress={async () => { if ((await shareText(`${SITE_URL}/cv/${s.token}`)) === 'copied') toast('Link copiado.'); }} />
+              <Button title="Cancelar" kind="outline" onPress={() => revoke(s.id)} />
+            </View>
+          ))}
+          <View style={styles.row}>
+            <Button title="Novo link no WhatsApp" kind="primary" style={{ flex: 1 }} onPress={newShare} />
+            <Button title="Fechar" kind="outline" style={{ flex: 1 }} onPress={close} />
+          </View>
+        </Card>
+      )}
+
     </View>
   );
 }

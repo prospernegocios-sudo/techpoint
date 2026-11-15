@@ -26,7 +26,10 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
   type Queued = { picked: PickedFile; kind: DocKind | null; other: string; valid: string };
   const [queue, setQueue] = useState<Queued[]>([]);
   const [busy, setBusy] = useState(false);
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  // Explorador de pastas (auditoria, item 09): pasta raiz e pastas por tipo, que abrem e fecham.
+  const [openSet, setOpenSet] = useState<Set<string>>(() => new Set(['root']));
+  const isOpen = (k: string) => openSet.has(k);
+  const toggle = (k: string) => setOpenSet((cur) => { const n = new Set(cur); if (n.has(k)) n.delete(k); else n.add(k); return n; });
   const { colors } = useTheme();
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ['athlete-docs', athleteId] });
@@ -90,7 +93,7 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
   const groups = order.map((key) => {
     const items = all.filter((d) => d.kind === key);
     return { key, label: kindLabel(key), current: items.filter((d) => !d.superseded_at), old: items.filter((d) => d.superseded_at) };
-  }).filter((g) => g.current.length + g.old.length > 0);
+  }).filter((g) => g.current.length + g.old.length > 0 || ['atestado', 'identidade', 'comprovante_residencia', 'autorizacao', 'outro'].includes(g.key));
 
   const docRow = (d: AthleteDoc, tag: string | null) => {
     const v = d.superseded_at ? null : validity(d.valid_until);
@@ -114,33 +117,51 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
   return (
     <Card>
       <T variant="subtitle">Documentos</T>
-      <T variant="small">Organizados por tipo. PDF, PNG ou JPG de até 10 MB. Só a equipe da entidade, o atleta e os responsáveis veem.</T>
+      <T variant="small">Organizados em pastas por tipo: toque numa pasta para abrir ou fechar. PDF, PNG ou JPG de até 10 MB. Só a equipe da entidade, o atleta e os responsáveis veem.</T>
       {msg && <Notice tone={msg.tone} text={msg.text} />}
       {docs.isLoading && <Loading />}
       {docs.error && <Notice tone="danger" text="Não foi possível carregar os documentos." />}
-      {docs.data?.length === 0 && <T variant="muted">Nenhum documento enviado.</T>}
-      {groups.map((g) => (
-        <View key={g.key} style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, gap: 6 }}>
-          <Pressable accessibilityRole="button" onPress={() => setOpenGroup(openGroup === g.key ? null : g.key)} style={[styles.row, { justifyContent: 'space-between' }]}>
-            <View style={[styles.row, { flex: 1 }]}>
-              <Ionicons name={openGroup === g.key ? 'folder-open-outline' : 'folder-outline'} size={20} color={colors.primary} />
-              <T variant="body" style={{ fontWeight: '800' }}>{g.label}</T>
-              <T variant="small">({g.current.length}{g.old.length ? ` + ${g.old.length} anterior${g.old.length > 1 ? 'es' : ''}` : ''})</T>
-            </View>
-            <Ionicons name={openGroup === g.key ? 'chevron-up' : 'chevron-down'} size={18} color={colors.textMuted} />
-          </Pressable>
-          {(openGroup === g.key ? g.current : g.current.slice(0, 1)).map((d, idx) => docRow(d, idx === 0 && g.current.length > 1 ? 'mais recente' : null))}
-          {openGroup === g.key && g.old.length > 0 && (
-            <View style={{ marginLeft: 18, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: colors.border, gap: 4 }}>
-              <T variant="small" style={{ fontWeight: '700' }}>Versões anteriores</T>
-              {g.old.map((d) => docRow(d, 'substituído'))}
-            </View>
-          )}
-          {openGroup !== g.key && (g.current.length > 1 || g.old.length > 0) && (
-            <Pressable onPress={() => setOpenGroup(g.key)}><T variant="small" color={colors.primary}>Ver todos ›</T></Pressable>
-          )}
-        </View>
-      ))}
+            {/* Árvore: Documentos (raiz) › pastas por tipo › arquivos › versões anteriores */}
+      {!docs.isLoading && (() => {
+        const Folder = ({ k, label, count, depth, children }: { k: string; label: string; count: string; depth: number; children: React.ReactNode }) => (
+          <View>
+            <Pressable accessibilityRole="button" accessibilityState={{ expanded: isOpen(k) }} accessibilityLabel={`Pasta ${label}, ${count}`} onPress={() => toggle(k)}
+              style={({ pressed }) => [styles.row, { minHeight: 44, paddingLeft: depth * 18, gap: 8, borderRadius: 12, backgroundColor: pressed ? colors.surfaceContainerHigh : 'transparent' }]}>
+              <Ionicons name={isOpen(k) ? 'chevron-down' : 'chevron-forward'} size={16} color={colors.textMuted} />
+              <Ionicons name={isOpen(k) ? 'folder-open' : 'folder'} size={22} color={colors.primary} />
+              <T variant="body" style={{ fontWeight: '700', flexShrink: 1 }}>{label}</T>
+              <T variant="small">{count}</T>
+            </Pressable>
+            {isOpen(k) && <View style={{ marginLeft: depth * 18 + 22, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: colors.border, gap: 2 }}>{children}</View>}
+          </View>
+        );
+        const total = all.filter((d) => !d.superseded_at).length;
+        return (
+          <Folder k="root" label="Documentos" count={`${total} arquivo${total === 1 ? '' : 's'}`} depth={0}>
+            {groups.map((g) => (
+              <Folder key={g.key} k={g.key} label={g.label} count={g.current.length ? `(${g.current.length})` : '(vazia)'} depth={0}>
+                {g.current.length === 0 && <T variant="small" style={{ paddingVertical: 6 }}>Nenhum arquivo nesta pasta.</T>}
+                {g.current.map((d, idx) => (
+                  <View key={d.id} style={[styles.row, { gap: 8 }]}>
+                    <Ionicons name={d.mime_type === 'application/pdf' ? 'document-text-outline' : 'image-outline'} size={20} color={colors.textMuted} />
+                    <View style={{ flex: 1 }}>{docRow(d, idx === 0 && g.current.length > 1 ? 'mais recente' : null)}</View>
+                  </View>
+                ))}
+                {g.old.length > 0 && (
+                  <Folder k={`${g.key}-old`} label="Versões anteriores" count={`(${g.old.length})`} depth={0}>
+                    {g.old.map((d) => (
+                      <View key={d.id} style={[styles.row, { gap: 8 }]}>
+                        <Ionicons name="time-outline" size={20} color={colors.textMuted} />
+                        <View style={{ flex: 1 }}>{docRow(d, 'substituído')}</View>
+                      </View>
+                    ))}
+                  </Folder>
+                )}
+              </Folder>
+            ))}
+          </Folder>
+        );
+      })()}
       {queue.length > 0 && (
         <View style={{ gap: 10, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10 }}>
           <T variant="body" style={{ fontWeight: '800' }}>Arquivos para enviar ({queue.length})</T>

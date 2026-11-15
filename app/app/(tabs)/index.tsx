@@ -10,7 +10,7 @@ import { getQueue, syncQueue } from '@/lib/attendance';
 import { formatDay, formatTime } from '@/lib/format';
 import { orgLogoUrl, modeLabels, useMe } from '@/lib/me';
 import { useSetupSteps, useTeamDashboard } from '@/lib/dashboard';
-import { AthleteTiles, GuardianTiles, TeamTiles } from '@/components/dashboard-tiles';
+import { GuardianTiles, TeamTiles } from '@/components/dashboard-tiles';
 import { GuardianHome } from '@/components/guardian-home';
 import { useEvents, useMyAttendance, type EventRow } from '@/lib/queries';
 import { nextAction } from '@/lib/next-action';
@@ -209,14 +209,15 @@ export default function Home() {
               <Button title={na.action.label} kind="accent" big icon="location" style={{ alignSelf: 'flex-start', minWidth: 220 }}
                 onPress={() => router.push({ pathname: '/checkin/[eventId]', params: { eventId: ev.id, kind: na.action!.kind } })} />
             ) : (
-              <Text style={{ color: colors.onHeroMuted, fontSize: 13 }}>O botão de check-in aparece aqui na hora do treino.</Text>
+              <View style={{ gap: 2 }}>
+                <Text style={{ color: colors.onHero, fontSize: 14, fontWeight: '600' }}>Não há treino disponível para check-in neste momento.</Text>
+                <Text style={{ color: colors.onHeroMuted, fontSize: 13 }}>O check-in abre 30 minutos antes do treino, pelo app ou pelo site.</Text>
+              </View>
             )}
           </View>
         );
       })()}
-      {isAthlete && me.athlete && (
-        <AthleteTiles next={list[0] ? { title: `${list[0].teams?.name ?? 'Treino'} · ${list[0].venues?.name ?? ''}`, when: `${formatDay(list[0].starts_at)} ${formatTime(list[0].starts_at)}` } : null} />
-      )}
+      {/* Atleta: o Início fica só com os treinos (auditoria, item 03); o resto está no menu. */}
 
       {isAthlete && !me.athlete && (
         <Notice text="Seu cadastro de atleta ainda não está ligado a esta conta. Peça ao gestor para cadastrar seu e-mail do Google no seu cadastro de atleta." />

@@ -1,3 +1,5 @@
+import { useAthleteHeader } from '@/lib/athlete-header';
+import { ageOn } from '@/lib/format';
 // Perfil / Meus dados: dados pessoais e do atleta, aparência, biometria, senha, privacidade e conta.
 import { toast } from '@/components/toast';
 import Constants from 'expo-constants';
@@ -26,6 +28,8 @@ export default function Perfil() {
     setPwMsg(null); toast('Senha alterada.');
   };
   const me = useMe();
+  // Cabeçalho do atleta: idade, sexo e categoria (auditoria, item 08).
+  const ath = useAthleteHeader(me.mode === 'athlete' ? me.athlete?.id : undefined);
   const { colors, palette, setPalette, mode, setMode, clubColors } = useTheme();
   const modes: { id: ModePref; label: string }[] = [
     { id: 'system', label: 'Automático' }, { id: 'light', label: 'Claro' }, { id: 'dark', label: 'Escuro' },
@@ -34,8 +38,11 @@ export default function Perfil() {
     <Screen>
       <Card>
         <T variant="subtitle">{me.profile?.full_name ?? 'Minha conta'}</T>
+        {me.mode === 'athlete' && me.athlete && (
+          <T variant="body">{[`${ageOn(new Date(me.athlete.birth_date + 'T12:00:00'))} anos`, ath.data?.sex === 'M' ? 'Masculino' : ath.data?.sex === 'F' ? 'Feminino' : null].filter(Boolean).join(' · ')}</T>
+        )}
         <T variant="muted">{me.profile?.email}</T>
-        {me.org && <T variant="small">{me.org.name} · {me.roles.map((r) => roleLabels[r]).join(', ')}</T>}
+        {me.org && <T variant="small">{me.org.name} · {me.mode === 'athlete' && ath.data?.teams.length ? ath.data.teams.join(', ') : me.roles.map((r) => roleLabels[r]).join(', ')}</T>}
         {me.isPlatformAdmin && <T variant="small" color={colors.primary}>Administrador da plataforma</T>}
       </Card>
 

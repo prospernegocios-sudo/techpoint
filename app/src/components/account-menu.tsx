@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Image, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { useAthleteHeader } from '@/lib/athlete-header';
 import { useAuth } from '@/lib/auth';
 import { cvImageUrls, useAthleteCv } from '@/lib/cv';
 import { modeLabels, roleLabels, useMe } from '@/lib/me';
@@ -44,11 +45,12 @@ export function AccountButton() {
   const me = useMe();
   const { colors } = useTheme();
   const photo = useAccountPhoto();
+  const ath = useAthleteHeader(me.mode === 'athlete' ? me.athlete?.id : undefined);
   const [open, setOpen] = useState(false);
   if (!session) return null;
   const name = me.profile?.full_name ?? session.user.email ?? 'Minha conta';
   const email = me.profile?.email ?? session.user.email ?? '';
-  const role = me.mode === 'athlete' ? 'Atleta' : me.mode === 'guardian' ? 'Responsável' : me.role ? roleLabels[me.role] : null;
+  const role = me.mode === 'athlete' ? (ath.data?.teams.length ? ath.data.teams.join(', ') : 'Atleta') : me.mode === 'guardian' ? 'Responsável' : me.role ? roleLabels[me.role] : null;
   const go = (fn: () => void) => () => { setOpen(false); fn(); };
 
   const Row = ({ icon, label, onPress, danger }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean }) => (
@@ -87,7 +89,7 @@ export function AccountButton() {
                 <Pressable accessibilityRole="button" onPress={go(() => router.push('/perfil'))}
                   style={({ pressed }) => ({ marginTop: 6, minHeight: 44, paddingHorizontal: 22, borderRadius: 999, borderWidth: 1, borderColor: colors.outline,
                     alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.8 : 1 })}>
-                  <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 14 }}>{me.mode === 'athlete' ? 'Gerenciar meu perfil de atleta' : 'Gerenciar meus dados'}</Text>
+                  <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 14 }}>{me.mode === 'athlete' ? 'Gerenciar o meu perfil de atleta' : 'Gerenciar meus dados'}</Text>
                 </Pressable>
               </View>
 
@@ -124,7 +126,6 @@ export function AccountButton() {
                     ))}
                   </View>
                 )}
-                <Row icon="person-circle-outline" label={me.mode === 'athlete' ? 'Perfil do atleta' : 'Meu perfil'} onPress={go(() => router.push('/perfil'))} />
                 {me.isPlatformAdmin && <Row icon="shield-outline" label="Painel do gestor master" onPress={go(() => router.push('/entidade/analise'))} />}
                 <Row icon="log-out-outline" label="Sair da conta" danger onPress={go(() => { signOut(); })} />
               </View>

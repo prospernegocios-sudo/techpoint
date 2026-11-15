@@ -23,6 +23,7 @@ export default function Atletas() {
   const [name, setName] = useState('');
   const [birth, setBirth] = useState('');
   const [email, setEmail] = useState('');
+  const [sex, setSex] = useState<'' | 'M' | 'F'>('');
   const [teamId, setTeamId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -43,7 +44,7 @@ export default function Atletas() {
     setSaving(true);
     const { data, error: e } = await supabase
       .from('athletes')
-      .insert({ org_id: org!.id, full_name: name.trim(), birth_date: toIsoDate(birthDate), email: mail || null })
+      .insert({ org_id: org!.id, full_name: name.trim(), birth_date: toIsoDate(birthDate), email: mail || null, sex: sex || null })
       .select('id')
       .single();
     if (!e && data) {
@@ -52,7 +53,7 @@ export default function Atletas() {
     }
     setSaving(false);
     if (e) return setError(toFriendlyError(e).message);
-    setName(''); setBirth(''); setEmail(''); setAdding(false);
+    setName(''); setBirth(''); setEmail(''); setSex(''); setAdding(false);
     qc.invalidateQueries({ queryKey: ['athletes'] });
     toast('Atleta cadastrado.');
   };
@@ -72,6 +73,11 @@ export default function Atletas() {
           <Field label="Nome completo" value={name} onChangeText={setName} />
           <Field label="Data de nascimento" value={birth} onChangeText={(t) => setBirth(maskDate(t))} placeholder="Ex.: 15/03/2011" keyboardType="number-pad"
             hint={age !== null ? `${age} anos` : 'Digite só os números: dia, mês e ano.'} />
+          <View style={[styles.row, { gap: 8 }]}>
+            <T variant="small">Sexo:</T>
+            <Chip label="Masculino" selected={sex === 'M'} onPress={() => setSex(sex === 'M' ? '' : 'M')} />
+            <Chip label="Feminino" selected={sex === 'F'} onPress={() => setSex(sex === 'F' ? '' : 'F')} />
+          </View>
           <Field label="E-mail Google do atleta (opcional)" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address"
             hint={`Só para ${MIN_ACCOUNT_AGE} anos ou mais. Com ele, o atleta entra no app e faz o próprio check-in.`} />
           <T variant="small">Equipe</T>

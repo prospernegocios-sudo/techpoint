@@ -23,9 +23,9 @@ export default function Acao() {
     <Screen style={{ justifyContent: 'center' }}>
       <View style={{ alignItems: 'center', gap: 12 }}>
         <Ionicons name="time-outline" size={56} color={colors.textMuted} />
-        <T variant="subtitle">Nenhum treino agora</T>
+        <T variant="subtitle" style={{ textAlign: 'center' }}>Não há treino disponível para check-in neste momento.</T>
         <T variant="muted" style={{ textAlign: 'center' }}>{a.hint}</T>
-        <T variant="small" style={{ textAlign: 'center' }}>O botão do meio fica colorido quando o check-in abre (30 min antes do treino).</T>
+        <T variant="small" style={{ textAlign: 'center' }}>O check-in abre 30 minutos antes do treino e pode ser feito pelo app ou pelo site. O botão do meio fica colorido quando abrir.</T>
       </View>
     </Screen>
   );

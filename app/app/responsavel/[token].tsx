@@ -19,7 +19,7 @@ export default function ConviteResponsavel() {
     queryKey: ['guardian-invite', token],
     queryFn: async () => {
       const { data } = await supabase.rpc('guardian_invite_info', { p_token: token });
-      return data as { athlete_first_name: string; org: string; logo_path: string | null; status: string; minor: boolean } | null;
+      return data as { athlete_first_name: string; athlete_sex: 'M' | 'F' | null; org: string; logo_path: string | null; status: string; minor: boolean } | null;
     },
   });
   const [error, setError] = useState<string | null>(null);
@@ -52,8 +52,8 @@ export default function ConviteResponsavel() {
         {orgLogoUrl(info.data.logo_path) && <Image source={{ uri: orgLogoUrl(info.data.logo_path)! }} style={{ width: 72, height: 72, borderRadius: 16 }} accessibilityLabel="Logo" />}
         <T variant="title" style={{ textAlign: 'center' }}>{info.data.org}</T>
       </Card>
-      <T variant="body">Você foi indicado como responsável por <T variant="body" style={{ fontWeight: '800' }}>{info.data.athlete_first_name}</T> no TechPoint.</T>
-      <T variant="muted">Com isso você acompanha a presença dele nos treinos e decide sobre o uso dos dados.</T>
+      <T variant="body">Você foi indicado {info.data.athlete_sex === 'F' ? 'pela atleta' : info.data.athlete_sex === 'M' ? 'pelo atleta' : 'pelo(a) atleta'} <T variant="body" style={{ fontWeight: '800' }}>{info.data.athlete_first_name}</T> como responsável por {info.data.athlete_sex === 'F' ? 'ela' : info.data.athlete_sex === 'M' ? 'ele' : 'ele(a)'} no <T variant="body" style={{ fontWeight: '800' }}>{info.data.org}</T>.</T>
+      <T variant="muted">Com isso você acompanha a presença {info.data.athlete_sex === 'F' ? 'dela' : info.data.athlete_sex === 'M' ? 'dele' : 'dele(a)'} nos treinos e decide sobre o uso dos dados.</T>
       {error && <Notice tone="danger" text={error} />}
       <Button title="Sou o responsável: continuar" kind="accent" big loading={busy} onPress={accept} />
       <T variant="small">Entrou com a conta errada? Saia em Perfil e entre com a sua conta.</T>

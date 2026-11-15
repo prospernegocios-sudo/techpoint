@@ -45,7 +45,7 @@ export default function Competicoes() {
         <Pressable accessibilityRole="button" onPress={() => router.push('/curriculo')}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: 20, backgroundColor: colors.tertiaryContainer }}>
           <Ionicons name="megaphone-outline" size={22} color={colors.onTertiaryContainer} />
-          <Text style={{ flex: 1, color: colors.onTertiaryContainer }}>Convocações do treinador aparecem aqui em breve, com "vou / não vou" e autorização de viagem.</Text>
+          <Text style={{ flex: 1, color: colors.onTertiaryContainer }}>Suas convocações para competições aparecerão aqui. Ao receber uma convocação, confirme sua ciência.</Text>
         </Pressable>
         <List title="Próximas" items={next} empty="Nenhuma competição marcada." />
         <List title="Disputadas" items={past} empty="Nenhuma competição no currículo ainda." />

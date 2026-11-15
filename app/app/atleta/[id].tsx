@@ -4,8 +4,11 @@ import { toast } from '@/components/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { DocumentsCard } from '@/components/documents-card';
+import { MAX_DOC_BYTES, pickIdDocument, uploadAthleteDocument, useAthleteDocuments, type PickedFile } from '@/lib/documents';
+import { useTheme } from '@/lib/theme';
 import { AthleteDataForm } from '@/components/personal-data';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, Screen, T, styles } from '@/components/ui';
 import { digits, maskPhone, validEmail, validPhone } from '@/lib/br';
@@ -24,6 +27,7 @@ export default function FichaAtleta() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const me = useMe();
   const qc = useQueryClient();
+  const { colors } = useTheme();
   const q = useQuery({
     queryKey: ['athlete', id],
     queryFn: async () => {
@@ -38,6 +42,8 @@ export default function FichaAtleta() {
   });
   const [form, setForm] = useState<{ name: string; phone: string; email: string; relationship: string } | null>(null);
   const [paper, setPaper] = useState('');
+  const [idDoc, setIdDoc] = useState<PickedFile | null>(null);
+  const docs = useAthleteDocuments(id);
   const [tab, setTab] = useState<'resumo' | 'dados' | 'docs' | 'resp'>('resumo');
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
 
@@ -64,8 +70,14 @@ export default function FichaAtleta() {
       email: form.email.trim().toLowerCase() || null, relationship: form.relationship,
     }).select('id, name, phone, email, relationship, status, token, profile_id').single();
     if (error) return setMsg({ tone: 'danger', text: toFriendlyError(error).message });
-    setForm(null);
-    refresh();
+    if (idDoc && me.profile) {
+      try {
+        await uploadAthleteDocument({ orgId: a.org_id, athleteId: a.id, uploaderId: me.profile.id, kind: 'doc_responsavel', title: `Documento de ${form.name.trim()}`, picked: idDoc, guardianId: (data as Guardian).id });
+      } catch (e) { toast(`Responsável salvo, mas o documento não subiu: ${toFriendlyError(e).message}`, 'danger'); }
+    }
+    setForm(null); setIdDoc(null);
+    toast('Responsável salvo.');
+    refresh(); qc.invalidateQueries({ queryKey: ['athlete-docs', id] });
     sendLink(data as Guardian);
   };
 
@@ -131,6 +143,23 @@ export default function FichaAtleta() {
                 <Badge label={gd.status === 'active' ? 'Ligado' : 'Convite enviado'} tone={gd.status === 'active' ? 'success' : 'warning'} />
               </View>
               <T variant="small">{[gd.phone && maskPhone(gd.phone), gd.email].filter(Boolean).join(' · ')}</T>
+              {(() => {
+                const has = (docs.data ?? []).some((d) => d.kind === 'doc_responsavel' && d.guardian_id === gd.id && !d.superseded_at);
+                return (
+                  <Pressable accessibilityRole="button" onPress={async () => {
+                    const f = await pickIdDocument();
+                    if (!f || !me.profile) return;
+                    if (!f.mime || f.size > MAX_DOC_BYTES) return toast('Envie PDF, PNG ou JPG de até 10 MB.', 'danger');
+                    try {
+                      await uploadAthleteDocument({ orgId: a.org_id, athleteId: a.id, uploaderId: me.profile.id, kind: 'doc_responsavel', title: `Documento de ${gd.name ?? 'responsável'}`, picked: f, guardianId: gd.id });
+                      toast('Documento do responsável salvo.'); qc.invalidateQueries({ queryKey: ['athlete-docs', id] });
+                    } catch (e) { toast(toFriendlyError(e).message, 'danger'); }
+                  }} style={[styles.row, { alignItems: 'center' }]}>
+                    <Ionicons name={has ? 'checkmark-circle' : 'id-card-outline'} size={18} color={has ? colors.success : colors.primary} />
+                    <T variant="small" color={colors.primary}>{has ? 'Documento enviado · trocar' : 'Enviar RG, CNH ou passaporte'}</T>
+                  </Pressable>
+                );
+              })()}
               {gd.status === 'invited' && <Button title="Reenviar link pelo WhatsApp" kind="outline" onPress={() => sendLink(gd)} />}
               {me.isStaff && <Button title="Remover" kind="ghost" onPress={() => removeGuardian(gd)} />}
             </View>
@@ -141,8 +170,14 @@ export default function FichaAtleta() {
               <View style={styles.wrap}>{relations.map((r) => <Chip key={r} label={r} selected={form.relationship === r} onPress={() => setForm({ ...form, relationship: r })} />)}</View>
               <Field label="WhatsApp" keyboardType="phone-pad" value={form.phone} onChangeText={(v) => setForm({ ...form, phone: maskPhone(v) })} />
               <Field label="E-mail (opcional)" keyboardType="email-address" autoCapitalize="none" value={form.email} onChangeText={(v) => setForm({ ...form, email: v })} />
+              <T variant="small" style={{ fontWeight: '600' }}>Documento de identificação do responsável (opcional)</T>
+              <Pressable accessibilityRole="button" onPress={async () => { const f = await pickIdDocument(); if (!f) return; if (!f.mime || f.size > MAX_DOC_BYTES) return toast('Envie PDF, PNG ou JPG de até 10 MB.', 'danger'); setIdDoc(f); }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.border }}>
+                <Ionicons name={idDoc ? 'checkmark-circle' : 'id-card-outline'} size={22} color={idDoc ? colors.success : colors.primary} />
+                <T variant="small" style={{ flex: 1 }}>{idDoc ? idDoc.name : 'RG, CNH ou passaporte (PDF ou foto)'}</T>
+              </Pressable>
               <Button title="Salvar e enviar link pelo WhatsApp" kind="accent" onPress={addGuardian} />
-              <Button title="Cancelar" kind="ghost" onPress={() => setForm(null)} />
+              <Button title="Cancelar" kind="ghost" onPress={() => { setForm(null); setIdDoc(null); }} />
             </View>
           ) : (
             <Button title="Adicionar responsável" kind="outline" onPress={() => setForm({ name: '', phone: '', email: '', relationship: 'Mãe' })} />

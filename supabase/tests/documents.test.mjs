@@ -141,8 +141,8 @@ insert into public.athlete_documents (org_id, athlete_id, kind, file_path, mime_
  ('${ORG}','${ATH}','atestado','${path(ORG, ATH, 'at1.pdf')}','application/pdf',10,'${U.coach}', current_date + 5),
  ('${ORG}','${ATH}','atestado','${path(ORG, ATH, 'at2.pdf')}','application/pdf',10,'${U.coach}', current_date + 60);
 reset role;
-insert into results select 'rg', jsonb_agg(jsonb_build_object('f', split_part(file_path, '/', 3), 'old', superseded_at is not null) order by file_path) from public.athlete_documents where kind = 'identidade';
-insert into results select 'at', to_jsonb(count(*)) from public.athlete_documents where kind = 'atestado' and superseded_at is null;
+insert into results select 'rg', jsonb_agg(jsonb_build_object('f', split_part(file_path, '/', 3), 'old', superseded_at is not null) order by file_path) from public.athlete_documents where kind = 'identidade' and athlete_id = '${ATH}';
+insert into results select 'at', to_jsonb(count(*)) from public.athlete_documents where kind = 'atestado' and superseded_at is null and athlete_id = '${ATH}';
 ${as(U.coach)}
 insert into results values ('alerts', public.org_documents_alerts('${ORG}'));
 reset role;

@@ -8,7 +8,7 @@ import { supabase } from './supabase';
 export const DOCS_BUCKET = 'athlete-docs';
 export const MAX_DOC_BYTES = 10 * 1024 * 1024;
 
-export type DocKind = 'atestado' | 'identidade' | 'cpf' | 'comprovante_residencia' | 'autorizacao' | 'outro';
+export type DocKind = 'atestado' | 'identidade' | 'cpf' | 'comprovante_residencia' | 'autorizacao' | 'doc_responsavel' | 'outro';
 /** Tipos que aparecem para envio (D94). "Único": o novo substitui o anterior, que vira histórico. */
 export const DOC_KINDS: { key: DocKind; label: string; single: boolean; hint: string }[] = [
   { key: 'atestado', label: 'Atestado médico', single: false, hint: 'Sem limite. Cada atestado fica registrado com a validade.' },
@@ -17,13 +17,13 @@ export const DOC_KINDS: { key: DocKind; label: string; single: boolean; hint: st
   { key: 'autorizacao', label: 'Autorização assinada', single: false, hint: 'Ex.: autorização de viagem de uma competição.' },
   { key: 'outro', label: 'Outro', single: false, hint: 'Qualquer outro documento.' },
 ];
-const LEGACY: Record<string, string> = { cpf: 'CPF' };
+const LEGACY: Record<string, string> = { cpf: 'CPF', doc_responsavel: 'Documento do responsável' };
 export const kindLabel = (k: string) => DOC_KINDS.find((d) => d.key === k)?.label ?? LEGACY[k] ?? 'Documento';
 
 export type AthleteDoc = {
   id: string; org_id: string; athlete_id: string; kind: DocKind; title: string | null; file_path: string;
   mime_type: string; size_bytes: number; valid_until: string | null; uploaded_by: string | null; created_at: string;
-  superseded_at?: string | null;
+  superseded_at?: string | null; guardian_id?: string | null;
 };
 
 const MIME_BY_EXT: Record<string, string> = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
@@ -51,7 +51,7 @@ export function useAthleteDocuments(athleteId: string | undefined) {
     enabled: Boolean(athleteId),
     queryFn: async () => {
       const { data, error } = await supabase.from('athlete_documents')
-        .select('id, org_id, athlete_id, kind, title, file_path, mime_type, size_bytes, valid_until, uploaded_by, created_at, superseded_at')
+        .select('id, org_id, athlete_id, kind, title, file_path, mime_type, size_bytes, valid_until, uploaded_by, created_at, superseded_at, guardian_id')
         .eq('athlete_id', athleteId!).order('created_at', { ascending: false });
       if (error) throw error;
       return (data ?? []) as AthleteDoc[];
@@ -62,7 +62,7 @@ export function useAthleteDocuments(athleteId: string | undefined) {
 export type PickedFile = { uri: string; name: string; mime: string; size: number; file?: Blob };
 
 export async function uploadAthleteDocument(p: {
-  orgId: string; athleteId: string; uploaderId: string; kind: DocKind; title?: string; validUntil?: string | null; picked: PickedFile;
+  orgId: string; athleteId: string; uploaderId: string; kind: DocKind; title?: string; validUntil?: string | null; picked: PickedFile; guardianId?: string | null;
 }) {
   const ext = EXT_BY_MIME[p.picked.mime] ?? 'bin';
   const rand = Math.random().toString(36).slice(2, 10);
@@ -73,7 +73,7 @@ export async function uploadAthleteDocument(p: {
   if (upErr) throw upErr;
   const { error } = await supabase.from('athlete_documents').insert({
     org_id: p.orgId, athlete_id: p.athleteId, kind: p.kind, title: p.title?.trim() || null, file_path: path,
-    mime_type: p.picked.mime, size_bytes: p.picked.size || 1, valid_until: p.validUntil ?? null, uploaded_by: p.uploaderId,
+    mime_type: p.picked.mime, size_bytes: p.picked.size || 1, valid_until: p.validUntil ?? null, uploaded_by: p.uploaderId, guardian_id: p.guardianId ?? null,
   });
   if (error) {
     await supabase.storage.from(DOCS_BUCKET).remove([path]); // não deixa arquivo solto
@@ -92,4 +92,13 @@ export async function deleteAthleteDocument(doc: AthleteDoc) {
   const { error } = await supabase.from('athlete_documents').delete().eq('id', doc.id);
   if (error) throw error;
   await supabase.storage.from(DOCS_BUCKET).remove([doc.file_path]);
+}
+
+/** Escolhe o RG, CNH ou passaporte do responsável (PDF, PNG ou JPG). */
+export async function pickIdDocument(): Promise<PickedFile | null> {
+  const DocumentPicker = await import('expo-document-picker');
+  const r = await DocumentPicker.getDocumentAsync({ type: ['application/pdf', 'image/png', 'image/jpeg'], copyToCacheDirectory: true });
+  if (r.canceled || !r.assets[0]) return null;
+  const a = r.assets[0];
+  return { uri: a.uri, name: a.name, mime: docMime(a.name, a.mimeType) ?? '', size: a.size ?? 0, file: a.file };
 }

@@ -22,55 +22,55 @@ type Props = { orgId: string; athleteId: string; meId: string; isStaff: boolean 
 export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
   const qc = useQueryClient();
   const docs = useAthleteDocuments(athleteId);
-  const [form, setForm] = useState<{ kind: DocKind; title: string; valid: string; picked: PickedFile | null } | null>(null);
+  // Envio (D97/D99): primeiro os arquivos (vários); depois, em cada um, "relacionado a quê?".
+  type Queued = { picked: PickedFile; kind: DocKind | null; other: string; valid: string };
+  const [queue, setQueue] = useState<Queued[]>([]);
   const [busy, setBusy] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const { colors } = useTheme();
   const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ['athlete-docs', athleteId] });
 
-  const accept = (p: PickedFile) => {
-    if (!p.mime) return setMsg({ tone: 'danger', text: 'Envie PDF, PNG ou JPG.' });
-    if (p.size > MAX_DOC_BYTES) return setMsg({ tone: 'danger', text: 'O arquivo pode ter no máximo 10 MB.' });
-    setMsg(null);
-    setForm((f) => (f ? { ...f, picked: p } : f));
+  const add = (files: PickedFile[]) => {
+    const bad = files.find((p) => !p.mime || p.size > MAX_DOC_BYTES);
+    if (bad) setMsg({ tone: 'danger', text: !bad.mime ? `${bad.name}: envie PDF, PNG ou JPG.` : `${bad.name}: máximo 10 MB.` }); else setMsg(null);
+    const ok = files.filter((p) => p.mime && p.size <= MAX_DOC_BYTES);
+    if (ok.length) setQueue((q) => [...q, ...ok.map((picked) => ({ picked, kind: null, other: '', valid: '' }))]);
   };
-
   const pickFile = async () => {
-    const r = await DocumentPicker.getDocumentAsync({ type: ['application/pdf', 'image/png', 'image/jpeg'], copyToCacheDirectory: true });
-    if (r.canceled || !r.assets[0]) return;
-    const a = r.assets[0];
-    accept({ uri: a.uri, name: a.name, mime: docMime(a.name, a.mimeType) ?? '', size: a.size ?? 0, file: a.file });
+    const r = await DocumentPicker.getDocumentAsync({ type: ['application/pdf', 'image/png', 'image/jpeg'], copyToCacheDirectory: true, multiple: true });
+    if (r.canceled || !r.assets.length) return;
+    add(r.assets.map((a) => ({ uri: a.uri, name: a.name, mime: docMime(a.name, a.mimeType) ?? '', size: a.size ?? 0, file: a.file })));
   };
-
   const takePhoto = async () => {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) return setMsg({ tone: 'danger', text: 'Libere a câmera nas configurações do celular.' });
     const r = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.7 });
     if (r.canceled || !r.assets[0]) return;
     const a = r.assets[0];
-    accept({ uri: a.uri, name: 'foto.jpg', mime: docMime(a.fileName, a.mimeType) ?? 'image/jpeg', size: a.fileSize ?? 1 });
+    add([{ uri: a.uri, name: `foto-${queue.length + 1}.jpg`, mime: docMime(a.fileName, a.mimeType) ?? 'image/jpeg', size: a.fileSize ?? 1 }]);
   };
+  const setItem = (i: number, patch: Partial<Queued>) => setQueue(queue.map((q, j) => (j === i ? { ...q, ...patch } : q)));
 
-  const save = async () => {
-    if (!form?.picked) return setMsg({ tone: 'danger', text: 'Escolha o arquivo ou tire a foto.' });
-    let validUntil: string | null = null;
-    if (form.valid.trim()) {
-      const d = parseBrDate(form.valid);
-      if (!d) return setMsg({ tone: 'danger', text: 'Confira a data de validade (dd/mm/aaaa).' });
-      validUntil = toIsoDate(d);
+  const sendAll = async () => {
+    const missing = queue.findIndex((q) => !q.kind || (q.kind === 'outro' && !q.other.trim()));
+    if (missing >= 0) return setMsg({ tone: 'danger', text: `Diga a que se refere o arquivo ${missing + 1} (${queue[missing].picked.name}).` });
+    const badDate = queue.findIndex((q) => q.valid.trim() && !parseBrDate(q.valid));
+    if (badDate >= 0) return setMsg({ tone: 'danger', text: `Confira a validade do arquivo ${badDate + 1} (dd/mm/aaaa).` });
+    setBusy(true); setMsg(null);
+    const failed: Queued[] = [];
+    for (const q of queue) {
+      const d = q.valid.trim() ? parseBrDate(q.valid) : null;
+      try {
+        await uploadAthleteDocument({ orgId, athleteId, uploaderId: meId, kind: q.kind!, title: q.kind === 'outro' ? q.other.trim() : '', validUntil: d ? toIsoDate(d) : null, picked: q.picked });
+      } catch { failed.push(q); }
     }
-    setBusy(true);
-    try {
-      await uploadAthleteDocument({ orgId, athleteId, uploaderId: meId, kind: form.kind, title: form.title, validUntil, picked: form.picked });
-      setForm(null);
-      setMsg(null); toast('Documento enviado.');
-      refresh();
-    } catch (e) {
-      setMsg({ tone: 'danger', text: toFriendlyError(e).message });
-    } finally {
-      setBusy(false);
-    }
+    setBusy(false);
+    const sent = queue.length - failed.length;
+    setQueue(failed);
+    refresh();
+    if (failed.length) setMsg({ tone: 'danger', text: `${failed.length} não foram enviados (continuam na lista). Tente de novo.` });
+    if (sent) toast(sent > 1 ? `${sent} documentos enviados.` : 'Documento enviado.');
   };
 
   const open = async (d: AthleteDoc) => {
@@ -86,7 +86,7 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
   };
 
   const all = docs.data ?? [];
-  const order = ['atestado', 'identidade', 'comprovante_residencia', 'autorizacao', 'cpf', 'outro'];
+  const order = ['atestado', 'identidade', 'comprovante_residencia', 'doc_responsavel', 'autorizacao', 'cpf', 'outro'];
   const groups = order.map((key) => {
     const items = all.filter((d) => d.kind === key);
     return { key, label: kindLabel(key), current: items.filter((d) => !d.superseded_at), old: items.filter((d) => d.superseded_at) };
@@ -141,24 +141,38 @@ export function DocumentsCard({ orgId, athleteId, meId, isStaff }: Props) {
           )}
         </View>
       ))}
-      {form ? (
-        <View style={{ gap: 8 }}>
-          <View style={styles.wrap}>{DOC_KINDS.map((k) => <Chip key={k.key} label={k.label} selected={form.kind === k.key} onPress={() => setForm({ ...form, kind: k.key })} />)}</View>
-          <T variant="small">{DOC_KINDS.find((k) => k.key === form.kind)?.hint}</T>
-          <Field label="Descrição (opcional)" value={form.title} onChangeText={(v) => setForm({ ...form, title: v })} maxLength={120} placeholder="Ex.: atestado para a temporada 2027" />
-          {form.kind === 'atestado' && (
-            <DateField label="Válido até (opcional)" mode="date" value={form.valid} onChange={(v) => setForm({ ...form, valid: v })} hint="O app avisa quando estiver perto de vencer." />
-          )}
-          <View style={styles.row}>
-            <Button title="Escolher arquivo" kind="outline" style={{ flex: 1 }} onPress={pickFile} />
-            {Platform.OS !== 'web' && <Button title="Tirar foto" kind="outline" style={{ flex: 1 }} onPress={takePhoto} />}
-          </View>
-          {form.picked && <T variant="small">Arquivo: {form.picked.name}</T>}
-          <Button title={busy ? 'Enviando...' : 'Enviar documento'} kind="accent" disabled={busy || !form.picked} onPress={save} />
-          <Button title="Cancelar" kind="ghost" onPress={() => setForm(null)} />
+      {queue.length > 0 && (
+        <View style={{ gap: 10, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10 }}>
+          <T variant="body" style={{ fontWeight: '800' }}>Arquivos para enviar ({queue.length})</T>
+          {queue.map((q, i) => (
+            <View key={i} style={{ gap: 8, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: q.kind ? colors.border : colors.warning }}>
+              <View style={[styles.row, { alignItems: 'center' }]}>
+                <Ionicons name={q.picked.mime === 'application/pdf' ? 'document-outline' : 'image-outline'} size={20} color={colors.primary} />
+                <T variant="small" style={{ flex: 1, fontWeight: '700' }}>{q.picked.name}</T>
+                <Pressable accessibilityRole="button" accessibilityLabel="Tirar da lista" onPress={() => setQueue(queue.filter((_, j) => j !== i))} hitSlop={8}>
+                  <Ionicons name="close-circle" size={22} color={colors.textMuted} />
+                </Pressable>
+              </View>
+              <T variant="small">Este documento é relacionado a quê?</T>
+              <View style={styles.wrap}>
+                {DOC_KINDS.map((k) => <Chip key={k.key} label={k.key === 'atestado' ? 'Atestado de saúde' : k.label} selected={q.kind === k.key} onPress={() => setItem(i, { kind: k.key })} />)}
+              </View>
+              {q.kind === 'outro' && <Field label="Qual documento?" value={q.other} onChangeText={(v) => setItem(i, { other: v })} maxLength={120} placeholder="Ex.: declaração escolar" />}
+              {q.kind === 'atestado' && <DateField label="Válido até (opcional)" mode="date" value={q.valid} onChange={(v) => setItem(i, { valid: v })} />}
+              {q.kind && DOC_KINDS.find((k) => k.key === q.kind)?.single && <T variant="small">{DOC_KINDS.find((k) => k.key === q.kind)?.hint}</T>}
+            </View>
+          ))}
         </View>
-      ) : (
-        <Button title="Enviar documento" kind="outline" onPress={() => { setMsg(null); setForm({ kind: 'atestado', title: '', valid: '', picked: null }); }} />
+      )}
+      <View style={styles.row}>
+        <Button title={queue.length ? '+ Mais arquivos' : 'Enviar documentos'} kind="outline" style={{ flex: 1 }} onPress={pickFile} />
+        {Platform.OS !== 'web' && <Button title="+ Foto" kind="outline" style={{ flex: 1 }} onPress={takePhoto} />}
+      </View>
+      {queue.length > 0 && (
+        <View style={styles.row}>
+          <Button title={busy ? 'Enviando...' : queue.length === 1 ? 'Enviar 1 documento' : `Enviar ${queue.length} documentos`} kind="primary" style={{ flex: 1 }} disabled={busy} onPress={sendAll} />
+          <Button title="Cancelar" kind="outline" style={{ flex: 1 }} onPress={() => { setQueue([]); setMsg(null); }} />
+        </View>
       )}
     </Card>
   );

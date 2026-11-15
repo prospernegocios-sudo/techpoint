@@ -2,6 +2,7 @@
 import { ToastHost } from '@/components/toast';
 import { useSavedBrand } from '@/lib/brand';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AccountButton } from '@/components/account-menu';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -55,6 +56,7 @@ function Shell() {
           screenOptions={{
             headerStyle: { backgroundColor: colors.background },
             headerShadowVisible: false,
+            headerRight: () => <AccountButton />,
             headerTitleStyle: { fontWeight: '600' },
             headerTintColor: colors.text,
             contentStyle: { backgroundColor: colors.background },

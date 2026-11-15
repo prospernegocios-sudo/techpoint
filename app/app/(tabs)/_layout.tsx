@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AccountButton } from '@/components/account-menu';
 import { CenterButton } from '@/components/center-button';
 import { useAuth } from '@/lib/auth';
 import { useMe } from '@/lib/me';
@@ -36,6 +37,7 @@ export default function TabsLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.background },
         headerShadowVisible: false,
+        headerRight: () => <AccountButton />,
         headerTitleStyle: { fontWeight: '600' },
         headerTintColor: colors.text,
         tabBarPosition: wide ? 'left' : 'bottom',

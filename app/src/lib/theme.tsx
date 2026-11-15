@@ -55,7 +55,7 @@ export function withTones(b: BaseColors, isDark: boolean): Colors {
   const [warningContainer, onWarningContainer] = container(b.warning, isDark, b.background);
   const [dangerContainer, onDangerContainer] = container(b.danger, isDark, b.background);
   // Cartão de destaque (treino de agora): a cor da entidade bem escura, com texto branco.
-  const hero = isDark ? mix(b.background, b.primary, 0.45) : ensureContrast(mix(b.primary, '#0E1116', 0.25), '#FFFFFF', 9);
+  const hero = isDark ? tone(b.primary, 0.2, 0.5) : ensureContrast(mix(b.primary, '#0E1116', 0.25), '#FFFFFF', 9);
   return {
     ...b,
     primaryContainer, onPrimaryContainer, accentContainer, onAccentContainer,

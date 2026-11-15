@@ -1,0 +1,228 @@
+<title>Mapa do TechPoint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap">
+<style>
+/* Layout: uma coluna; abas por modo; árvore que abre e fecha; caminho da função escolhida fixo no topo da árvore. */
+:root {
+  --bg: #F3F5EE; --surface: #FFFFFF; --ink: #14213D; --muted: #55607A; --line: #D5DCE8;
+  --navy: #0B2A5C; --lime: #C6F432; --teal: #0E7C86; --orange: #E8672C; --chip: #EEF2F8;
+  --display: 'Space Grotesk', 'Arial Narrow', Arial, sans-serif; --body: 'Inter', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0C1424; --surface: #142038; --ink: #EDF1F8; --muted: #A7B3C9; --line: #2A3A58;
+  --navy: #9FC0FF; --lime: #C6F432; --teal: #4CC3CC; --orange: #FF8A52; --chip: #1C2A47; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0C1424; --surface: #142038; --ink: #EDF1F8; --muted: #A7B3C9; --line: #2A3A58;
+  --navy: #9FC0FF; --lime: #C6F432; --teal: #4CC3CC; --orange: #FF8A52; --chip: #1C2A47; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1 { font-family: var(--display); font-size: clamp(26px, 5vw, 36px); margin: 0; text-wrap: balance; }
+h1 b { color: var(--teal); }
+.lead { color: var(--muted); margin: 0; max-width: 62ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--muted); font-size: 13px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab { font: 600 15px var(--body); border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 10px 16px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--navy); color: var(--bg); border-color: var(--navy); }
+.tab:focus-visible, .node:focus-visible, input:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+.search { width: 100%; font: 15px var(--body); padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.root { font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--navy); padding: 4px 6px 10px; }
+ul { list-style: none; margin: 0; padding: 0; }
+ul ul { margin-left: 18px; padding-left: 12px; border-left: 2px solid var(--line); }
+.node { width: 100%; display: flex; align-items: flex-start; gap: 10px; text-align: left; font: 15px var(--body); color: var(--ink);
+  background: transparent; border: 0; border-radius: 10px; padding: 8px 6px; cursor: pointer; }
+.node:hover { background: var(--chip); }
+.node.sel { background: var(--chip); }
+.n { flex: 0 0 auto; min-width: 26px; height: 26px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center;
+  font: 700 13px var(--body); font-variant-numeric: tabular-nums; background: var(--lime); color: #14213D; }
+.n.c0 { background: var(--chip); color: var(--ink); border: 1.5px solid var(--line); }
+.n.center { background: var(--orange); color: #fff; }
+.t { flex: 1; min-width: 0; }
+.t b { font-weight: 700; }
+.t small { display: block; color: var(--muted); font-size: 13px; }
+.chev { color: var(--muted); font-size: 13px; padding-top: 4px; }
+.path { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--navy); color: var(--bg); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.path .lbl { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
+.path .route { font-family: var(--display); font-weight: 700; font-size: 17px; }
+.path .route .arrow { color: var(--lime); }
+.public { display: flex; flex-wrap: wrap; gap: 8px; }
+.public span { background: var(--surface); border: 1.5px dashed var(--line); border-radius: 10px; padding: 6px 10px; font-size: 13px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.stat b { display: block; font-family: var(--display); font-size: 26px; color: var(--teal); font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 13px; }
+.empty { color: var(--muted); padding: 8px 6px; }
+@media (prefers-reduced-motion: no-preference) { .node { transition: background .15s; } }
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <h1>Tech<b>Point</b> · por onde ir</h1>
+    <p class="lead">Escolha quem você é e toque numa função. O número é <b>quantos toques</b> leva a partir da tela inicial, já com o login feito.</p>
+    <div class="legend"><span><i class="n c0">0</i> já aparece no Início</span><span><i class="n">2</i> toques até a função</span><span><i class="n center">●</i> botão do meio do rodapé</span></div>
+  </header>
+
+  <div class="stats" aria-label="Resumo da auditoria">
+    <div class="stat"><b>33</b><span>caminhos testados no site</span></div>
+    <div class="stat"><b>1,9</b><span>toques em média</span></div>
+    <div class="stat"><b>4</b><span>toques no máximo</span></div>
+    <div class="stat"><b>1</b><span>toque + foto para o check-in</span></div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Quem está usando">
+    <button class="tab" role="tab" id="tab-equipe" data-mode="equipe" aria-selected="true">Equipe</button>
+    <button class="tab" role="tab" id="tab-atleta" data-mode="atleta" aria-selected="false">Atleta</button>
+    <button class="tab" role="tab" id="tab-resp" data-mode="resp" aria-selected="false">Responsável</button>
+    <button class="tab" role="tab" id="tab-publico" data-mode="publico" aria-selected="false">Sem login</button>
+  </div>
+
+  <input class="search" id="busca" type="search" placeholder="Buscar função (ex.: documento, convite, relatório)" aria-label="Buscar função">
+
+  <div class="path" aria-live="polite"><span class="lbl">Caminho</span><span class="route" id="route">Toque numa função abaixo</span><span id="desc" style="font-size:14px;opacity:.9"></span></div>
+
+  <div class="panel"><div class="root" id="rootLabel"></div><ul id="tree"></ul></div>
+</div>
+
+<script>
+// n = toques a partir do Início; c = botão do meio; d = o que faz; k = filhos
+const DATA = {
+  equipe: { label: 'Gestor, treinador e administrador', k: [
+    { t: 'Início', n: 0, d: 'Pendências, treinos de hoje e agenda', k: [
+      { t: 'Lista de presença do treino', n: 1, d: 'Toque no cartão do treino. Aprovar, recusar e presença manual.' },
+      { t: 'Pendências para aprovar', n: 1, d: 'Toque no cartão. Abre o treino com registros esperando você.' },
+      { t: '+ Convidar atleta', n: 1, d: 'Atalho. Escolha o time e envie o link pelo WhatsApp; aprove os pedidos.' },
+      { t: '+ Novo treino', n: 1, d: 'Atalho para marcar um treino.' },
+      { t: 'Currículo para confirmar', n: 1, d: 'Aparece quando há itens de currículo esperando o selo da entidade.' },
+    ]},
+    { t: 'Gestão', n: 1, d: 'Tudo o que se cadastra', k: [
+      { t: 'Novo treino', n: 2 },
+      { t: 'Atletas', n: 2, d: 'Lista com busca e filtro por equipe', k: [
+        { t: '+ Novo atleta', n: 3 },
+        { t: 'Ficha do atleta', n: 3, d: 'Abas: Resumo, Dados, Documentos, Responsáveis', k: [
+          { t: 'Dados (CPF, endereço, esporte)', n: 4 },
+          { t: 'Documentos (atestado, RG)', n: 4 },
+          { t: 'Responsáveis e termo em papel', n: 4 },
+        ]},
+        { t: 'Currículo do atleta', n: 3, d: 'Confirme os itens com o selo da entidade.' },
+      ]},
+      { t: 'Convites e pedidos', n: 2 },
+      { t: 'Projetos incentivados', n: 2, k: [
+        { t: 'Projeto', n: 3, k: [{ t: 'Plano, metas, beneficiários, patrocinadores e relatórios', n: 4 }] },
+      ]},
+      { t: 'Equipes', n: 2, k: [{ t: 'Página do time', n: 3 }] },
+      { t: 'Locais de treino', n: 2 },
+      { t: 'Pessoas com acesso', n: 2 },
+      { t: 'Dados da entidade', n: 2, d: 'Só administrador: CNPJ, endereço, logo e cores.' },
+    ]},
+    { t: 'Presença (botão do meio)', n: 1, c: true, d: 'Abre a lista do treino de agora. Sem treino, mostra o próximo.' },
+    { t: 'Relatórios', n: 1, k: [
+      { t: 'Relatório de frequência', n: 2, d: 'PDF com fotos ou planilha, por período e equipe.' },
+      { t: 'Relatórios do projeto', n: 2 },
+    ]},
+    { t: 'Perfil', n: 1, d: 'Meus dados, aparência, biometria, senha', k: [
+      { t: 'Política de privacidade', n: 2 },
+      { t: 'Excluir minha conta', n: 2 },
+    ]},
+  ]},
+  atleta: { label: 'Atleta', k: [
+    { t: 'Início', n: 0, d: 'Próximos treinos e a hora em que o check-in abre' },
+    { t: 'Currículo', n: 1, d: 'Tempo de esporte, assiduidade e equipes', k: [
+      { t: 'Adicionar à trajetória', n: 2, d: 'Clube, competição, título, seleção ou curso.' },
+      { t: 'Baixar currículo em PDF', n: 2 },
+      { t: 'Link para olheiro (WhatsApp)', n: 2, d: 'Vale 90 dias, sem CPF, endereço ou documentos.' },
+    ]},
+    { t: 'Check-in (botão do meio)', n: 1, c: true, d: 'Abre a câmera; a foto já registra. GPS e hora do servidor.' },
+    { t: 'Docs', n: 1, d: 'Documentos', k: [{ t: 'Enviar documento (arquivo ou foto)', n: 2 }] },
+    { t: 'Dados', n: 1, d: 'CPF, endereço com CEP automático, esporte e físico', k: [
+      { t: 'Responsáveis e autorização', n: 2 },
+      { t: 'Política de privacidade', n: 2 },
+      { t: 'Excluir minha conta', n: 2 },
+    ]},
+  ]},
+  resp: { label: 'Pai, mãe ou responsável', k: [
+    { t: 'Início', n: 0, d: 'Chegada e saída de cada filho; autorizar' },
+    { t: 'Atletas', n: 1, d: 'Meus atletas', k: [
+      { t: 'Currículo esportivo', n: 2 },
+      { t: 'Dados, documentos e responsáveis', n: 2 },
+      { t: 'Autorização (LGPD)', n: 2, d: 'Dar ou revogar o consentimento.' },
+    ]},
+    { t: 'Docs', n: 1, d: 'Documentos de cada filho', k: [{ t: 'Enviar documento', n: 2 }] },
+    { t: 'Dados', n: 1, d: 'Seus dados: CPF, nascimento, celular, endereço', k: [
+      { t: 'Política de privacidade', n: 2 },
+      { t: 'Excluir minha conta', n: 2 },
+    ]},
+  ]},
+  publico: { label: 'Links que abrem sem login', k: [
+    { t: 'Convite do time', n: 0, d: 'O atleta entra com Google e faz o pedido; a equipe aprova.' },
+    { t: 'Link do responsável', n: 0, d: 'O responsável entra e autoriza o filho.' },
+    { t: 'Currículo compartilhado', n: 0, d: 'Página só de leitura, sem dados pessoais.' },
+    { t: 'Política de privacidade', n: 0 },
+    { t: 'Excluir conta', n: 0, d: 'Explica e leva ao login para fazer o pedido.' },
+  ]},
+};
+
+let mode = 'equipe', selected = null, query = '';
+try { mode = localStorage.getItem('tp-mode') || mode; } catch (e) {}
+const open = new Set();
+const $ = (id) => document.getElementById(id);
+
+function matches(node) {
+  if (!query) return true;
+  const hit = (node.t + ' ' + (node.d || '')).toLowerCase().includes(query);
+  return hit || (node.k || []).some(matches);
+}
+
+function render() {
+  document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.mode === mode)));
+  $('rootLabel').textContent = DATA[mode].label;
+  const tree = $('tree'); tree.innerHTML = '';
+  const build = (items, parent, trail) => {
+    items.filter(matches).forEach((node, i) => {
+      const id = trail.concat(node.t).join(' › ');
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.className = 'node' + (selected === id ? ' sel' : '');
+      btn.type = 'button';
+      const kids = node.k && node.k.length;
+      const expanded = query || open.has(id);
+      if (kids) btn.setAttribute('aria-expanded', String(!!expanded));
+      btn.innerHTML = `<i class="n ${node.c ? 'center' : node.n === 0 ? 'c0' : ''}">${node.n}</i><span class="t"><b></b><small></small></span>${kids ? `<span class="chev">${expanded ? '▾' : '▸'}</span>` : ''}`;
+      btn.querySelector('b').textContent = node.t;
+      btn.querySelector('small').textContent = node.d || '';
+      btn.addEventListener('click', () => {
+        if (kids) { open.has(id) ? open.delete(id) : open.add(id); }
+        selected = id; showPath(trail.concat(node.t), node); render();
+      });
+      li.appendChild(btn);
+      if (kids && expanded) { const ul = document.createElement('ul'); build(node.k, ul, trail.concat(node.t)); li.appendChild(ul); }
+      parent.appendChild(li);
+    });
+  };
+  build(DATA[mode].k, tree, []);
+  if (!tree.children.length) tree.innerHTML = '<li class="empty">Nada encontrado. Tente outra palavra.</li>';
+}
+
+function showPath(trail, node) {
+  const steps = trail.filter((s) => s !== 'Início' || trail.length === 1);
+  $('route').innerHTML = '';
+  steps.forEach((s, i) => {
+    if (i) { const a = document.createElement('span'); a.className = 'arrow'; a.textContent = ' → '; $('route').appendChild(a); }
+    $('route').appendChild(document.createTextNode(s));
+  });
+  $('desc').textContent = `${node.n === 0 ? 'Já está na tela.' : node.n + (node.n === 1 ? ' toque' : ' toques')}${node.d ? ' · ' + node.d : ''}`;
+}
+
+document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => {
+  mode = b.dataset.mode; selected = null; open.clear();
+  try { localStorage.setItem('tp-mode', mode); } catch (e) {}
+  $('route').textContent = 'Toque numa função abaixo'; $('desc').textContent = ''; render();
+}));
+$('busca').addEventListener('input', (e) => { query = e.target.value.trim().toLowerCase(); render(); });
+// Abre o primeiro nível do modo de equipe para a página já mostrar o mapa.
+['Início', 'Gestão'].forEach((t) => open.add(t));
+render();
+</script>

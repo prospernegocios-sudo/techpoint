@@ -3,7 +3,7 @@
 // Responsável: Início · Meus atletas · Perfil. Equipe: Início · Gestão · Presença · Relatórios · Perfil.
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
-import { useWindowDimensions } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CenterButton } from '@/components/center-button';
 import { useAuth } from '@/lib/auth';
@@ -20,29 +20,44 @@ export default function TabsLayout() {
   // Tela larga (computador/tablet deitado): menu na lateral.
   const wide = useWindowDimensions().width >= 900;
   if (!session) return <Redirect href="/login" />;
+  // Ícone com a "pílula" do Material You na aba ativa (no celular).
+  const icon = (name: keyof typeof Ionicons.glyphMap) => function TabIcon({ color: c, focused }: { color: unknown; focused: boolean }) {
+    const color = c as string;
+    const glyph = (focused ? name : `${name}-outline`) as keyof typeof Ionicons.glyphMap;
+    if (wide) return <Ionicons name={glyph in Ionicons.glyphMap ? glyph : name} color={color} size={22} />;
+    return (
+      <View style={{ width: 60, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: focused ? colors.primaryContainer : 'transparent' }}>
+        <Ionicons name={glyph in Ionicons.glyphMap ? glyph : name} color={focused ? colors.onPrimaryContainer : color} size={22} />
+      </View>
+    );
+  };
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.surface },
+        headerStyle: { backgroundColor: colors.background },
+        headerShadowVisible: false,
+        headerTitleStyle: { fontWeight: '600' },
         headerTintColor: colors.text,
         tabBarPosition: wide ? 'left' : 'bottom',
         tabBarVariant: wide ? 'material' : 'uikit',
         tabBarLabelPosition: wide ? 'beside-icon' : 'below-icon',
         tabBarStyle: wide
-          ? { backgroundColor: colors.surface, borderRightColor: colors.border, minWidth: 220, paddingTop: 12 }
-          : { backgroundColor: colors.surface, borderTopColor: colors.border, height: 70 + bottom, paddingBottom: 10 + bottom, paddingTop: 6 },
-        tabBarActiveTintColor: colors.primary,
+          ? { backgroundColor: colors.surfaceContainer, borderRightWidth: 0, minWidth: 220, paddingTop: 12 }
+          : { backgroundColor: colors.surfaceContainer, borderTopWidth: 0, height: 80 + bottom, paddingBottom: 12 + bottom, paddingTop: 10, elevation: 0 },
+        tabBarActiveTintColor: wide ? colors.onPrimaryContainer : colors.text,
+        tabBarActiveBackgroundColor: wide ? colors.primaryContainer : undefined,
+        tabBarItemStyle: wide ? { borderRadius: 999, marginHorizontal: 10, marginVertical: 2 } : undefined,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: mode === 'athlete' ? 11.5 : 13, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: mode === 'athlete' ? 11.5 : 12.5, fontWeight: '600', marginTop: 2 },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color as string} size={size} /> }} />
+      <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: icon('home') }} />
       <Tabs.Screen
         name="gestao"
         options={{
           title: 'Gestão',
           href: team ? '/(tabs)/gestao' : null,
-          tabBarIcon: ({ color, size }) => <Ionicons name="clipboard" color={color as string} size={size} />,
+          tabBarIcon: icon('clipboard'),
         }}
       />
       <Tabs.Screen
@@ -50,7 +65,7 @@ export default function TabsLayout() {
         options={{
           title: 'Competições',
           href: mode === 'athlete' ? '/(tabs)/competicoes' : null,
-          tabBarIcon: ({ color, size }) => <Ionicons name="medal" color={color as string} size={size} />,
+          tabBarIcon: icon('medal'),
         }}
       />
       <Tabs.Screen
@@ -59,7 +74,7 @@ export default function TabsLayout() {
           title: 'Meus atletas',
           tabBarLabel: 'Atletas',
           href: mode === 'guardian' ? '/(tabs)/atletas' : null,
-          tabBarIcon: ({ color, size }) => <Ionicons name="people" color={color as string} size={size} />,
+          tabBarIcon: icon('people'),
         }}
       />
       <Tabs.Screen
@@ -75,7 +90,7 @@ export default function TabsLayout() {
         options={{
           title: 'Currículo',
           href: mode === 'athlete' ? '/(tabs)/curriculo' : null,
-          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color as string} size={size} />,
+          tabBarIcon: icon('trophy'),
         }}
       />
       <Tabs.Screen
@@ -83,7 +98,7 @@ export default function TabsLayout() {
         options={{
           title: 'Relatórios',
           href: team ? '/(tabs)/relatorios' : null,
-          tabBarIcon: ({ color, size }) => <Ionicons name="document-text" color={color as string} size={size} />,
+          tabBarIcon: icon('document-text'),
         }}
       />
       <Tabs.Screen
@@ -92,10 +107,10 @@ export default function TabsLayout() {
           title: 'Documentos',
           tabBarLabel: 'Docs',
           href: null,
-          tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" color={color as string} size={size} />,
+          tabBarIcon: icon('folder-open'),
         }}
       />
-      <Tabs.Screen name="perfil" options={{ title: mode === 'athlete' ? 'Perfil do atleta' : 'Perfil', tabBarLabel: 'Perfil', tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" color={color as string} size={size} /> }} />
+      <Tabs.Screen name="perfil" options={{ title: mode === 'athlete' ? 'Perfil do atleta' : 'Perfil', tabBarLabel: 'Perfil', tabBarIcon: icon('person-circle') }} />
     </Tabs>
   );
 }

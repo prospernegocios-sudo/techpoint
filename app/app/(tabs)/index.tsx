@@ -3,7 +3,7 @@
 import { useFocusEffect, router } from 'expo-router';
 import { Fragment, useCallback, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Image, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Badge, Button, Card, Chip, Field, Loading, Notice, T, styles } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { getQueue, syncQueue } from '@/lib/attendance';
@@ -97,11 +97,13 @@ export default function Home() {
       contentContainerStyle={{ padding: 16, gap: 14, width: '100%', maxWidth: 1000, alignSelf: 'center' }}
       refreshControl={<RefreshControl refreshing={events.isRefetching} onRefresh={() => { events.refetch(); mine.refetch(); me.refetch(); dash.refetch(); setup.refetch(); refreshQueue(); }} />}
     >
-      <View style={{ gap: 4 }}>
-        <T variant="small">Olá, {me.profile?.full_name?.split(' ')[0] ?? 'atleta'}</T>
-        <View style={[styles.row, { alignItems: 'center' }]}>
-          {orgLogoUrl(me.org.logo_path) && <Image source={{ uri: orgLogoUrl(me.org.logo_path)! }} style={{ width: 44, height: 44, borderRadius: 10 }} accessibilityLabel={`Logo ${me.org.name}`} />}
-          <T variant="title" style={{ flex: 1 }}>{me.org.name}</T>
+      <View style={[styles.row, { gap: 12 }]}>
+        {orgLogoUrl(me.org.logo_path)
+          ? <Image source={{ uri: orgLogoUrl(me.org.logo_path)! }} style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: colors.surfaceContainer }} resizeMode="contain" accessibilityLabel={`Logo ${me.org.name}`} />
+          : <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: colors.primaryContainer, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.onPrimaryContainer, fontWeight: '700', fontSize: 18 }}>{me.org.name.slice(0, 2).toUpperCase()}</Text></View>}
+        <View style={{ flex: 1 }}>
+          <T variant="small">Olá, {me.profile?.full_name?.split(' ')[0] ?? 'atleta'}</T>
+          <T variant="title">{me.org.name}</T>
         </View>
       </View>
 
@@ -173,23 +175,39 @@ export default function Home() {
       {events.error && <Notice tone="danger" text="Não foi possível carregar a agenda. Verifique a internet." />}
       {!events.isLoading && list.length === 0 && me.mode !== 'guardian' && <T variant="muted">Nenhum treino nos próximos 7 dias.</T>}
 
+      {/* Atleta: cartão de destaque (Material You) com o treino de agora ou o próximo, e o botão de check-in */}
+      {isAthlete && me.athlete && (() => {
+        const now = list.find((ev) => nextAction(ev, mine.data ?? []).action);
+        const ev = now ?? list[0];
+        if (!ev) return null;
+        const na = now ? nextAction(now, mine.data ?? []) : null;
+        const live = eventPhase(ev) === 'live';
+        return (
+          <View style={{ backgroundColor: colors.hero, borderRadius: 28, padding: 20, gap: 14, overflow: 'hidden' }}>
+            <View style={{ position: 'absolute', right: -50, top: -50, width: 170, height: 170, borderRadius: 85, backgroundColor: '#FFFFFF', opacity: 0.07 }} />
+            <View style={[styles.row, { gap: 8 }]}>
+              <Ionicons name={live ? 'radio-button-on' : 'calendar-outline'} size={18} color={live ? colors.accent : colors.onHeroMuted} />
+              <Text style={{ color: colors.onHeroMuted, fontSize: 14, fontWeight: '500' }}>
+                {live ? 'Treino agora' : isToday(ev.starts_at) ? 'Próximo treino · hoje' : `Próximo treino · ${formatDay(ev.starts_at)}`}
+              </Text>
+            </View>
+            <View style={{ gap: 4 }}>
+              <Text style={{ color: colors.onHero, fontSize: 34, fontWeight: '600', letterSpacing: -0.5 }}>{formatTime(ev.starts_at)} – {formatTime(ev.ends_at)}</Text>
+              <Text style={{ color: colors.onHeroMuted, fontSize: 15 }}>{ev.teams?.name}{ev.venues?.name ? ` · ${ev.venues.name}` : ''}</Text>
+              {na?.status ? <Text style={{ color: colors.onHero, fontSize: 14, fontWeight: '600', marginTop: 4 }}>{na.status}</Text> : null}
+            </View>
+            {na?.action ? (
+              <Button title={na.action.label} kind="accent" big icon="location" style={{ alignSelf: 'flex-start', minWidth: 220 }}
+                onPress={() => router.push({ pathname: '/checkin/[eventId]', params: { eventId: ev.id, kind: na.action!.kind } })} />
+            ) : (
+              <Text style={{ color: colors.onHeroMuted, fontSize: 13 }}>O botão de check-in aparece aqui na hora do treino.</Text>
+            )}
+          </View>
+        );
+      })()}
       {isAthlete && me.athlete && (
         <AthleteTiles next={list[0] ? { title: `${list[0].teams?.name ?? 'Treino'} · ${list[0].venues?.name ?? ''}`, when: `${formatDay(list[0].starts_at)} ${formatTime(list[0].starts_at)}` } : null} />
       )}
-      {/* Atleta: cartão fixo do treino de agora, com o botão grande no topo */}
-      {isAthlete && me.athlete && (() => {
-        const now = list.find((ev) => nextAction(ev, mine.data ?? []).action);
-        if (!now) return null;
-        const { action, status } = nextAction(now, mine.data ?? []);
-        return (
-          <Card style={{ borderColor: colors.accent, borderWidth: 2 }}>
-            <Badge label="Treino agora" tone="success" />
-            <T variant="subtitle">{formatTime(now.starts_at)}–{formatTime(now.ends_at)} · {now.teams?.name}</T>
-            <T variant="muted">{now.venues?.name} · {status}</T>
-            <Button title={action!.label} kind="accent" big onPress={() => router.push({ pathname: '/checkin/[eventId]', params: { eventId: now.id, kind: action!.kind } })} />
-          </Card>
-        );
-      })()}
 
       {isAthlete && !me.athlete && (
         <Notice text="Seu cadastro de atleta ainda não está ligado a esta conta. Peça ao gestor para cadastrar seu e-mail do Google no seu cadastro de atleta." />

@@ -1,5 +1,5 @@
 // Cores do clube: lê as cores principais do logo, garante leitura (contraste) e monta o tema.
-import type { Colors } from './theme';
+import type { BaseColors } from './theme';
 
 type RGB = [number, number, number];
 
@@ -130,7 +130,7 @@ export function suggestThemes(candidates: string[]): { name: string; primary: st
 const status = { success: '#16A34A', warning: '#F59E0B', danger: '#DC2626' };
 
 /** Tema "Cores do clube" (claro e escuro) a partir das duas cores escolhidas. */
-export function clubPalette(primary: string, accent: string): { light: Colors; dark: Colors } {
+export function clubPalette(primary: string, accent: string): { light: BaseColors; dark: BaseColors } {
   const p = ensureContrast(primary, '#FFFFFF', 3);
   const lightBg = mix('#FFFFFF', p, 0.05);
   const darkBg = mix('#0E1116', p, 0.08);
@@ -145,4 +145,16 @@ export function clubPalette(primary: string, accent: string): { light: Colors; d
       background: darkBg, surface: mix('#171B22', p, 0.08), border: mix('#2A303B', p, 0.15), text: '#F2F4F8', textMuted: '#A3ACBB', ...status,
     },
   };
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return rgbToHex([f(0) * 255, f(8) * 255, f(4) * 255]);
+}
+/** A mesma cor (matiz) com outra claridade, como os "tons" do Material You. Cinzas continuam cinzas. */
+export function tone(hex: string, lightness: number, minSat = 0.45): string {
+  const [h, s] = rgbToHsl(hexToRgb(hex));
+  return hslToHex(h, s < 0.08 ? s : Math.max(s, minSat), lightness);
 }

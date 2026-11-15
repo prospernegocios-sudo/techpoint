@@ -3,13 +3,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
-import { clubPalette } from './colors';
+import { clubPalette, ensureContrast, mix, tone } from './colors';
 
 export type PaletteId = 'clube' | 'quadra' | 'areia';
 type FixedPalette = Exclude<PaletteId, 'clube'>;
 export type ModePref = 'system' | 'light' | 'dark';
 
-export type Colors = {
+export type BaseColors = {
   primary: string;
   onPrimary: string;
   accent: string;      // botão principal (check-in)
@@ -24,9 +24,53 @@ export type Colors = {
   danger: string;
 };
 
+/** Tons do Material You (MD3), calculados a partir das cores base: valem para qualquer entidade (white label). */
+export type Tones = {
+  primaryContainer: string; onPrimaryContainer: string;
+  accentContainer: string; onAccentContainer: string;
+  tertiary: string; tertiaryContainer: string; onTertiaryContainer: string;
+  successContainer: string; onSuccessContainer: string;
+  warningContainer: string; onWarningContainer: string;
+  dangerContainer: string; onDangerContainer: string;
+  surfaceContainer: string; surfaceContainerHigh: string;
+  outline: string; hero: string; onHero: string; onHeroMuted: string;
+};
+export type Colors = BaseColors & Tones;
+
+const TEAL = '#0E7C86';
+/** Container claro (fundo suave) e o texto legível sobre ele, para uma cor qualquer. */
+function container(c: string, isDark: boolean, bg: string) {
+  if (isDark) {
+    const box = mix(bg, tone(c, 0.3), 0.75);
+    return [box, ensureContrast(tone(c, 0.86), box, 4.5)] as const;
+  }
+  const box = tone(c, 0.92);
+  return [box, ensureContrast(tone(c, 0.2), box, 4.5)] as const;
+}
+export function withTones(b: BaseColors, isDark: boolean): Colors {
+  const [primaryContainer, onPrimaryContainer] = container(b.primary, isDark, b.background);
+  const [accentContainer, onAccentContainer] = container(b.accent, isDark, b.background);
+  const [tertiaryContainer, onTertiaryContainer] = container(TEAL, isDark, b.background);
+  const [successContainer, onSuccessContainer] = container(b.success, isDark, b.background);
+  const [warningContainer, onWarningContainer] = container(b.warning, isDark, b.background);
+  const [dangerContainer, onDangerContainer] = container(b.danger, isDark, b.background);
+  // Cartão de destaque (treino de agora): a cor da entidade bem escura, com texto branco.
+  const hero = isDark ? mix(b.background, b.primary, 0.45) : ensureContrast(mix(b.primary, '#0E1116', 0.25), '#FFFFFF', 9);
+  return {
+    ...b,
+    primaryContainer, onPrimaryContainer, accentContainer, onAccentContainer,
+    tertiary: isDark ? '#4FD8E2' : TEAL, tertiaryContainer, onTertiaryContainer,
+    successContainer, onSuccessContainer, warningContainer, onWarningContainer, dangerContainer, onDangerContainer,
+    surfaceContainer: isDark ? mix(b.surface, '#FFFFFF', 0.04) : mix('#FFFFFF', b.primary, 0.06),
+    surfaceContainerHigh: isDark ? mix(b.surface, '#FFFFFF', 0.08) : mix('#FFFFFF', b.primary, 0.1),
+    outline: isDark ? '#8E95A3' : '#787680',
+    hero, onHero: '#FFFFFF', onHeroMuted: mix('#FFFFFF', b.primary, 0.25),
+  };
+}
+
 const status = { success: '#16A34A', warning: '#F59E0B', danger: '#DC2626' };
 
-export const palettes: Record<FixedPalette, { name: string; light: Colors; dark: Colors }> = {
+export const palettes: Record<FixedPalette, { name: string; light: BaseColors; dark: BaseColors }> = {
   quadra: {
     name: 'Quadra',
     light: {
@@ -95,7 +139,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const isDark = mode === 'dark' || (mode === 'system' && system === 'dark');
     const club = palette === 'clube' && clubColors ? clubPalette(clubColors.primary, clubColors.accent) : null;
     const base = club ?? palettes[palette === 'clube' ? 'quadra' : palette];
-    return { colors: base[isDark ? 'dark' : 'light'], isDark, palette, mode, setPalette, setMode, clubColors, setClubColors };
+    return { colors: withTones(base[isDark ? 'dark' : 'light'], isDark), isDark, palette, mode, setPalette, setMode, clubColors, setClubColors };
   }, [palette, mode, system, clubColors]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

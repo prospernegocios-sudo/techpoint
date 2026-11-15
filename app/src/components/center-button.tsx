@@ -23,7 +23,7 @@ export function CenterButton({ wide }: { wide: boolean }) {
   if (wide) {
     return (
       <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={go}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, margin: 8, padding: 12, borderRadius: 14, backgroundColor: active ? colors.accent : colors.background }}>
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, margin: 8, padding: 14, borderRadius: 999, backgroundColor: active ? colors.accent : colors.surfaceContainerHigh }}>
         <Ionicons name={icon} size={22} color={active ? colors.onAccent : colors.textMuted} />
         <Text style={{ fontWeight: '800', fontSize: 15, color: active ? colors.onAccent : colors.textMuted }}>{label}</Text>
       </Pressable>
@@ -36,8 +36,8 @@ export function CenterButton({ wide }: { wide: boolean }) {
         accessibilityLabel={active ? label : `${label}: ${a.kind === 'none' ? a.hint : ''}`}
         onPress={go}
         style={({ pressed }) => ({
-          marginTop: -26, width: 68, height: 68, borderRadius: 34, alignItems: 'center', justifyContent: 'center',
-          backgroundColor: active ? colors.accent : colors.border, borderWidth: 4, borderColor: colors.surface,
+          marginTop: -26, width: 68, height: 68, borderRadius: 22, alignItems: 'center', justifyContent: 'center',
+          backgroundColor: active ? colors.accent : colors.surfaceContainerHigh, borderWidth: 4, borderColor: colors.surfaceContainer,
           shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 6,
           transform: [{ scale: pressed ? 0.95 : 1 }],
         })}

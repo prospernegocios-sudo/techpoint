@@ -7,10 +7,13 @@ import {
   StepCronogramas, StepDados, StepMetas, StepOrcamento, StepPublico, StepRevisar, StepTextos,
 } from '@/components/proposal-steps';
 import { toast } from '@/components/toast';
-import { Badge, Button, Chip, Loading, Notice, Screen, T } from '@/components/ui';
+import { Button, Card, Chip, Field, Loading, Notice, Screen, T } from '@/components/ui';
 import { toFriendlyError } from '@/lib/errors';
 import { useOfficers } from '@/lib/habilitation';
 import { useMe } from '@/lib/me';
+import { DateField } from '@/components/date-field';
+import { approveProposal } from '@/lib/execution';
+import { parseBrDate, toIsoDate } from '@/lib/format';
 import { AXES, deleteProposal, summarizeAudience, updateProposal, useOrgAthletes, useProposal, type Proposal } from '@/lib/proposal';
 import { exportBudgetCsv, exportProposalDoc } from '@/lib/proposal-export';
 import { supabase } from '@/lib/supabase';
@@ -18,7 +21,7 @@ import { supabase } from '@/lib/supabase';
 const STEPS = ['Dados', 'Textos', 'Público', 'Metas', 'Orçamento', 'Cronogramas', 'Revisar'] as const;
 type Step = (typeof STEPS)[number];
 const STATUS: { key: Proposal['status']; label: string }[] = [
-  { key: 'rascunho', label: 'Rascunho' }, { key: 'enviada', label: 'Enviada ao Ministério' }, { key: 'aprovada', label: 'Aprovada' }, { key: 'arquivada', label: 'Arquivada' },
+  { key: 'rascunho', label: 'Rascunho' }, { key: 'enviada', label: 'Enviada ao Ministério' }, { key: 'arquivada', label: 'Arquivada' },
 ];
 
 export default function ProjetoTecnico() {
@@ -39,6 +42,8 @@ export default function ProjetoTecnico() {
   });
   const qc = useQueryClient();
   const [step, setStep] = useState<Step>('Dados');
+  const [approve, setApprove] = useState<{ number: string; date: string } | null>(null);
+  const [approving, setApproving] = useState(false);
 
   const aud = useMemo(() => {
     if (!q.data || !ath.data) return null;
@@ -68,29 +73,49 @@ export default function ProjetoTecnico() {
     else Alert.alert('Apagar este Projeto Técnico?', undefined, [{ text: 'Cancelar', style: 'cancel' }, { text: 'Apagar', style: 'destructive', onPress: go }]);
   };
 
+  const doApprove = async () => {
+    const d = approve && parseBrDate(approve.date);
+    if (!approve || approve.number.trim().length < 3 || !d) { toast('Informe o número do Termo de Fomento e a data de assinatura.', 'danger'); return; }
+    setApproving(true);
+    try {
+      const projectId = await approveProposal(p.id, approve.number.trim(), toIsoDate(d));
+      toast('Aprovado! O projeto de execução foi criado.');
+      refresh();
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      router.push({ pathname: '/projeto/[id]/execucao', params: { id: projectId } });
+    } catch (e) { toast(toFriendlyError(e).message, 'danger'); } finally { setApproving(false); }
+  };
+  const approved = p.status === 'aprovada';
+
   return (
     <Screen>
       <Stack.Screen options={{ title: 'Projeto Técnico' }} />
       <T variant="title">{p.title}</T>
+      {approved && (
+        <Card style={{ gap: 8 }}>
+          <Notice tone="success" text="Proposta aprovada: virou o projeto de execução. O orçamento aprovado é o valor combinado e não muda mais; ajustes ficam registrados na execução." />
+          {p.project_id && <Button icon="cash-outline" title="Abrir execução e prestação de contas" onPress={() => router.push({ pathname: '/projeto/[id]/execucao', params: { id: p.project_id! } })} />}
+        </Card>
+      )}
       <T variant="small">{AXES.find((a) => a.key === p.axis)?.label} · Termo de Fomento</T>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
-        {STEPS.map((s, i) => <Chip key={s} label={`${i + 1}. ${s}`} selected={step === s} onPress={() => setStep(s)} />)}
+        {STEPS.filter((s) => !approved || s === 'Revisar').map((s) => <Chip key={s} label={`${STEPS.indexOf(s) + 1}. ${s}`} selected={(approved ? 'Revisar' : step) === s} onPress={() => setStep(s)} />)}
       </ScrollView>
 
-      {step === 'Dados' && <StepDados {...props} />}
-      {step === 'Textos' && <StepTextos {...props} />}
-      {step === 'Público' && <StepPublico {...props} teams={ath.data?.teams ?? []} aud={aud} />}
-      {step === 'Metas' && <StepMetas {...props} />}
-      {step === 'Orçamento' && <StepOrcamento {...props} />}
-      {step === 'Cronogramas' && <StepCronogramas {...props} />}
-      {step === 'Revisar' && (
+      {!approved && step === 'Dados' && <StepDados {...props} />}
+      {!approved && step === 'Textos' && <StepTextos {...props} />}
+      {!approved && step === 'Público' && <StepPublico {...props} teams={ath.data?.teams ?? []} aud={aud} />}
+      {!approved && step === 'Metas' && <StepMetas {...props} />}
+      {!approved && step === 'Orçamento' && <StepOrcamento {...props} />}
+      {!approved && step === 'Cronogramas' && <StepCronogramas {...props} />}
+      {(approved || step === 'Revisar') && (
         <StepRevisar {...props} aud={aud} onExportDoc={() => exportProposalDoc(ctx())} onExportCsv={() => exportBudgetCsv(ctx())} />
       )}
 
-      {step !== 'Revisar' && (
+      {!approved && step !== 'Revisar' && (
         <Button kind="tonal" title={`Próximo: ${STEPS[STEPS.indexOf(step) + 1]}`} onPress={() => setStep(STEPS[STEPS.indexOf(step) + 1])} />
       )}
-      {step === 'Dados' && (
+      {!approved && step === 'Dados' && (
         <>
           <T variant="small" style={{ fontWeight: '700', marginTop: 8 }}>Situação</T>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
@@ -99,7 +124,18 @@ export default function ProjetoTecnico() {
                 onPress={() => updateProposal(p.id, { status: s.key }).then(() => { toast('Situação atualizada.'); refresh(); }).catch((e) => toast(toFriendlyError(e).message, 'danger'))} />
             ))}
           </ScrollView>
-          {p.status === 'aprovada' && <Badge label="Na Fase C, o projeto aprovado vira a execução e a prestação de contas" tone="primary" />}
+          {approve ? (
+            <Card style={{ gap: 10 }}>
+              <T variant="body" style={{ fontWeight: '700' }}>Aprovar e criar o projeto de execução</T>
+              <T variant="small">Vai junto: vigência, equipes e atletas do público-alvo (viram beneficiários), metas (as de check-in seguem automáticas) e o orçamento como valor combinado. Depois disso o Projeto Técnico fica travado.</T>
+              <Field label="Nº do Termo de Fomento" value={approve.number} onChangeText={(t) => setApprove({ ...approve, number: t })} placeholder="Ex.: 951234/2027" />
+              <DateField label="Data de assinatura" mode="date" value={approve.date} onChange={(t) => setApprove({ ...approve, date: t })} placeholder="dd/mm/aaaa" />
+              <Button title="Aprovar e criar projeto" icon="checkmark-done-outline" onPress={doApprove} loading={approving} />
+              <Button kind="outline" title="Cancelar" onPress={() => setApprove(null)} />
+            </Card>
+          ) : (
+            <Button kind="tonal" icon="checkmark-done-outline" title="Proposta aprovada pelo Ministério? Aprovar e criar o projeto" onPress={() => setApprove({ number: '', date: '' })} />
+          )}
           <Button kind="outline" icon="trash-outline" title="Apagar este Projeto Técnico" onPress={remove} />
         </>
       )}

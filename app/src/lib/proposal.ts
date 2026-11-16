@@ -87,6 +87,8 @@ export type BudgetItem = {
   description: string; gnd: 3 | 4; unit: string | null; quantity: number; quotes: Quote[]; adopted_rule: AdoptedRule;
   justification: string | null; unit_value: number; rh: RhInfo | null; total: number; start_month: number | null;
   end_month: number | null; position: number;
+  /** Na execução: item trocado ou não adquirido, com justificativa (RCO). */
+  exec_status?: 'normal' | 'substituido' | 'nao_adquirido'; exec_note?: string | null;
 };
 
 /** Valor unitário e total de um item (RH usa salário × meses + encargos; os demais, quantidade × valor adotado). */

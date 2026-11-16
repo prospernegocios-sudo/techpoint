@@ -30,7 +30,9 @@ export default function ProjetoPainel() {
   const { project: p, plans, teamIds, beneficiaries, sponsors, reports, goals } = project.data;
   const i = ind.data?.indicators;
 
+  const fromProposal = Boolean((p as { proposal_id?: string | null }).proposal_id);
   const links: { title: string; desc: string; href: Href }[] = [
+    ...(fromProposal && isManager ? [{ title: 'Execução e prestação de contas (RCO)', desc: 'Repasses, despesas com comprovantes, combinado × gasto e o RCO em Word', href: { pathname: '/projeto/[id]/execucao', params: { id } } as Href }] : []),
     { title: 'Relatórios emitidos', desc: `${reports.length} emitido(s) · emitir, abrir PDF, retificar`, href: { pathname: '/projeto/[id]/relatorios', params: { id } } },
     { title: 'Metas', desc: `${goals.filter((g) => g.active).length} meta(s)`, href: { pathname: '/projeto/[id]/metas', params: { id } } },
     { title: 'Equipes e beneficiários', desc: `${teamIds.length} equipe(s) · ${beneficiaries.length} beneficiário(s)`, href: { pathname: '/projeto/[id]/beneficiarios', params: { id } } },

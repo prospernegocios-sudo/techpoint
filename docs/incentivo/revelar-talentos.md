@@ -158,3 +158,34 @@ Para os clientes do TechPoint, que são clubes, o instrumento principal é o **T
 | Custos e orçamento | — | Meta/Ação/Etapa, 3 cotações, GND, RH com encargos e cronogramas |
 | Declarações | — | Geração dos 15 modelos preenchidos com os dados da entidade |
 | Cursos do COB | — | Certificados por beneficiário e painel de pendências |
+
+## 8. Modelo de RCO — Relatório de Prestação de Contas (enviado pelo TG em 16/11)
+Documento de 5 páginas (Anexo Modelo de RCO, SEI 71000.042304/2020-44), em papel timbrado da entidade. É anexado na aba **"Cumprimento do Objeto"** do Transferegov.br, no **fim** do projeto.
+
+1. **Identificação:** nº do convênio/TED/termo de fomento, CNPJ, entidade, objeto, vigência, valor global, valor de repasse e contrapartida financeira.
+2. **Resultados alcançados:**
+   - 2.1 alcance de cada objetivo e meta (qualitativa e quantitativa) do Projeto Técnico;
+   - 2.2 links de matérias com os resultados;
+   - 2.3 **beneficiários diretos reais comparados com os previstos**.
+3. **Execução das metas:** quadro Meta/Etapa × **valor pactuado** × **valor executado**, mais os ajustes de plano, local, objetivos ou metas. O detalhamento é por etapa, sempre com pactuado e executado e com os anexos exigidos:
+   - **RH:** cargos, carga horária, quantidade, meses e valores. Anexos: relatórios de todos os profissionais, **folhas de ponto** e recibos.
+   - **Encargos de RH:** impostos e percentuais. Anexos: recibos dos encargos.
+   - **Material esportivo:** item, quantidade e valores. Anexos: notas fiscais e **fotos dos itens em uso pelos atletas**.
+   - **Passagens aéreas:** beneficiários, quantidade e trechos. Anexos: processo de compra, notas e **comprovantes de embarque**.
+   - **Hospedagem:** beneficiários, quantidade e destino. Anexos: notas e **lista de hóspedes com nome, CPF e telefone**.
+   - **Diárias:** beneficiários, quantidade, dias e destino. Anexos: recibos e composição da diária.
+   - **Locação de transporte:** item, quantidade, dias e destino. Anexos: notas, trechos, beneficiários e fotos.
+   - **Locação de infraestrutura:** item, quantidade e dias. Anexos: notas e fotos.
+   - **Regras gerais:**
+     - justificar itens trocados ou não comprados;
+     - para cada despesa: cotações, contrato, nota, recibo e **comprovante de pagamento (transferência)**;
+     - anexar a execução físico-financeira;
+     - anexar fotos, vídeos e **instrumentos de inscrição, avaliação e frequência**;
+     - recibo de pessoa física com valor bruto, descontos (ISS, INSS, IRRF), líquido, RG, CPF e assinatura, e comprovante de recolhimento dos impostos;
+     - pessoa jurídica só com nota fiscal acompanhada de recibo;
+     - valores em reais;
+     - nenhum comprovante com rasura.
+4. **Plano de mídia:** fotos e reportagens com a marca do Governo Federal.
+5. **Conclusão:** benefícios e resultados obtidos.
+
+**Impacto no módulo:** o RCO é a saída final da Fase C. Para ele sair quase pronto, a Fase B tem que guardar o orçamento já no formato Meta → Etapa, com quantidade e valor pactuado, e a Fase C tem que registrar o executado e os anexos de cada despesa na mesma estrutura. Frequência, folhas de ponto, beneficiários reais × previstos e fotos com data e GPS já são pontos fortes do TechPoint.

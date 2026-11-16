@@ -9,6 +9,7 @@
     "@react-native-community/datetimepicker": "^9.2.1",
     "@supabase/supabase-js": "^2.119.0",
     "@tanstack/react-query": "^5.107.1",
+    "docx": "^9.15.4",
     "expo": "~58.0.24",
     "expo-application": "~58.1.2",
     "expo-camera": "~58.0.14",

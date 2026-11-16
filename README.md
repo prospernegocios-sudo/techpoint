@@ -30,6 +30,7 @@ Veja o [CHANGELOG.md](CHANGELOG.md). Para publicar uma versão: subir o número 
 
 - [Concorrentes e cronograma](docs/roadmap.md)
 - [Lastro Social e métricas para projetos incentivados](docs/lastro-e-metricas-regulatorias.md) (requisitos R01–R20)
+- [Revelar Talentos: regras de negócio do incentivo](docs/incentivo/revelar-talentos.md) (Termo de Fomento, Convênio, TED, Projeto Técnico e RCO; Fase A "Clube apto" na versão 0.12.0)
 
 - [DECISOES.md](DECISOES.md) — decisões tomadas e o porquê
 - [docs/modelo-de-dados.md](docs/modelo-de-dados.md) — tabelas do banco

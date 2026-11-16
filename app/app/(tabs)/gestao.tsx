@@ -18,6 +18,7 @@ export default function Gestao() {
     ] },
     { title: 'Projetos', items: [
       { title: 'Projetos incentivados', desc: 'Plano aprovado, metas, beneficiários e indicadores', href: '/projeto', icon: 'ribbon-outline', show: isStaff && hasModule('investimentos') },
+      { title: 'Clube apto (Revelar Talentos)', desc: 'Checklist de documentos, certidões e declarações do Termo de Fomento', href: '/habilitacao', icon: 'shield-checkmark-outline', show: isManager && hasModule('investimentos') },
     ] },
     { title: 'Estrutura', items: [
       { title: 'Equipes', desc: 'Categorias e turmas (Sub 15, Sub 17...)', href: '/cadastro/equipes', icon: 'shirt-outline', show: isManager },

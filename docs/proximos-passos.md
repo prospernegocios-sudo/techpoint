@@ -15,6 +15,14 @@
 4. **Editar e apagar evento** (o treinador ainda não consegue pelo app).
 5. **Abrir endereço interno direto no navegador** (ex.: /relatorios) leva ao Início: corrigir.
 
+## Módulo de incentivo (Revelar Talentos)
+- Fase A (Clube apto) pronta na 0.12.0. Pendências:
+  - conferir o **modelo oficial do Anexo XV** (nepotismo) com o Ministério e trocar a minuta;
+  - advogado revisar as regras automáticas (3 anos de CNPJ, 3 meses dos comprovantes, validade das certidões);
+  - módulo ligado em teste (trial) só no BT Sport Club; ligar para clientes conforme contrato.
+- Fase B: Projeto Técnico (21 seções, custos Meta → Etapa com 3 cotações, RH com encargos, cronogramas, Word no modelo).
+- Fase C: execução e RCO (pactuado × executado por etapa, comprovantes, folha de ponto dos profissionais, cursos do COB).
+
 ## Pendentes de antes
 - Fase 4: convocações ("vou / não vou" e autorização de viagem).
 - Google Play: cadastro da Prosper (D-U-N-S).

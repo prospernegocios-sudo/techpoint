@@ -52,6 +52,8 @@ export const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
 export type CnpjInfo = {
   legal_name: string; trade_name: string; status: string; cep: string; street: string; street_number: string;
   complement: string; district: string; city: string; uf: string; phone: string; email: string;
+  /** Data de abertura (aaaa-mm-dd), quando a Receita informa. */
+  founded_on: string | null;
   partners: { name: string; role: string }[];
 };
 
@@ -77,6 +79,7 @@ export async function lookupCnpj(cnpj: string): Promise<CnpjInfo | null> {
       uf: title(j.uf).toUpperCase(),
       phone: digits(j.ddd_telefone_1),
       email: title(j.email).toLowerCase(),
+      founded_on: /^\d{4}-\d{2}-\d{2}$/.test(String(j.data_inicio_atividade ?? '')) ? String(j.data_inicio_atividade) : null,
       partners: Array.isArray(j.qsa) ? j.qsa.map((s: { nome_socio?: string; qualificacao_socio?: string }) => ({ name: title(s.nome_socio), role: title(s.qualificacao_socio) })) : [],
     };
   } catch {

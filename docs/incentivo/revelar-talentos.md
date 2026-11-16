@@ -214,4 +214,4 @@ Documento de 5 páginas (Anexo Modelo de RCO, SEI 71000.042304/2020-44), em pape
 - **Fase A (0.12.0):** Clube apto: checklist, dirigentes e declarações em Word.
 - **Fase B (0.13.0):** Projeto Técnico com eixo e faixas, público-alvo, metas, orçamento Meta → Ação → Etapa com 3 cotações (menor, média ou mediana), equipe com encargos, cronogramas, conferências, painel de indicadores, Word e planilha.
 - **Fase C onda 1 (0.14.0):** aprovação vira projeto, repasses, despesas com comprovantes por tipo, combinado × executado, RCO em Word.
-- **Fase C onda 2 (a fazer):** ponto dos profissionais pelo app, cursos do COB, plano de mídia, pacote ZIP dos anexos.
+- **Fase C onda 2 (0.15.0):** ponto dos profissionais pelo app, cursos do COB, plano de mídia, pacote ZIP dos anexos.

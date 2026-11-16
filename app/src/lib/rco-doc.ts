@@ -10,6 +10,10 @@ export type RcoCtx = {
   project: ExecProject; proposal: Proposal; goals: Goal[]; items: ExecItem[]; expenses: Expense[]; transfers: Transfer[];
   goalResults: RcoGoalResult[]; realBeneficiaries: number | null; avgFrequency: number | null;
   org: { name: string; legal_name?: string | null; cnpj?: string | null };
+  /** Onda 2: plano de mídia, cursos do COB e folha de ponto (opcionais). */
+  media?: { kind: string; description: string | null; link: string | null; taken_on: string | null; file_path: string | null }[];
+  cob?: { athletes: { complete: number; total: number }; staff: { complete: number; total: number } };
+  points?: { people: number; minutes: number; records: number };
 };
 
 export const RCO_TEXTS: { key: string; title: string; hint: string }[] = [
@@ -145,7 +149,19 @@ export function buildRcoDoc(c: RcoCtx): Document {
   out.push(P(`Repasses recebidos: ${money(sum.received)} (Ministério: ${money(sum.receivedMesp)}). Pago: ${money(sum.paid)}. Saldo em conta: ${money(sum.inAccount)}.`, { before: 120, size: 19 }));
   out.push(P('Todos os valores em moeda nacional. Pessoa jurídica: nota fiscal acompanhada de recibo. Pessoa física: recibo com valor bruto, descontos (ISS, INSS, IRRF), líquido, RG, CPF e assinatura, com o comprovante de recolhimento dos impostos. Comprovantes sem rasuras.', { italic: true, size: 17 }));
 
+  if (c.points || c.cob) {
+    out.push(H('COMPROVAÇÃO DA EXECUÇÃO'));
+    if (c.points) out.push(P(`Folha de ponto dos profissionais: ${c.points.people} profissional(is), ${c.points.records} registro(s) de entrada e saída, ${Math.floor(c.points.minutes / 60)}h${String(c.points.minutes % 60).padStart(2, '0')} registradas pelo app (localização, foto e hora do servidor). Folhas em anexo.`));
+    if (c.cob) out.push(P(`Cursos obrigatórios do COB ("Esporte Antirracista" e "Combate à Manipulação de Resultados"): ${c.cob.athletes.complete} de ${c.cob.athletes.total} atletas e ${c.cob.staff.complete} de ${c.cob.staff.total} profissionais com os 2 certificados. Certificados em anexo.`));
+  }
   out.push(H('4. PLANO DE MÍDIA'));
+  if (c.media?.length) {
+    out.push(T([
+      ['TIPO', 'DESCRIÇÃO', 'DATA', 'COMPROVAÇÃO'],
+      ...c.media.map((m) => [m.kind.replace('_', ' '), m.description ?? '', d(m.taken_on), [m.file_path ? 'foto em anexo' : '', m.link ?? ''].filter(Boolean).join(' · ')]),
+    ], { size: 17, widths: [1.2, 3, 1, 2.5] }));
+    out.push(new Paragraph({ children: [] }));
+  }
   note('midia');
   out.push(H('5. CONCLUSÃO'));
   note('conclusao');

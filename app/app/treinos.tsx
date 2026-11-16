@@ -10,6 +10,7 @@ import { formatDay, formatTime } from '@/lib/format';
 import { useMe } from '@/lib/me';
 import { useEvents, type EventRow } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
+import { useMyStaffPoints } from '@/lib/staff';
 import { useTheme } from '@/lib/theme';
 
 type View_ = 'hoje' | 'proximos' | 'anteriores';
@@ -20,6 +21,7 @@ export default function Treinos() {
   const { colors } = useTheme();
   const [view, setView] = useState<View_>('hoje');
   const events = useEvents(me.org?.id, 30, 30);
+  const points = useMyStaffPoints((events.data ?? []).filter((e) => dayKey(new Date(e.starts_at)) === dayKey(new Date())).map((e) => e.id));
   const all = events.data ?? [];
   const today = dayKey(new Date());
   const now = Date.now();
@@ -76,6 +78,16 @@ export default function Treinos() {
               {live ? <Badge label="Agora" tone="success" /> : <Badge label={e.type === 'match' ? 'Jogo' : 'Treino'} tone="primary" />}
             </View>
             <T variant="muted">{e.teams?.name} · {e.venues?.name}</T>
+            {view === 'hoje' && (() => {
+              const mine = (points.data ?? []).filter((x) => x.event_id === e.id).map((x) => x.kind);
+              const end = new Date(e.ends_at).getTime();
+              if (mine.includes('check_out') || now > end + 60 * 60000) return mine.length ? <T variant="small" color={colors.success}>Ponto registrado (entrada e saída)</T> : null;
+              const k = mine.includes('check_in') ? 'check_out' : 'check_in';
+              return (
+                <Button kind="tonal" icon="finger-print-outline" title={k === 'check_in' ? 'Bater ponto: entrada' : 'Bater ponto: saída'}
+                  onPress={() => router.push({ pathname: '/ponto/[eventId]', params: { eventId: e.id, kind: k } })} />
+              );
+            })()}
             <View style={[styles.row, { justifyContent: 'space-between' }]}>
               <Text style={{ color: colors.text, fontWeight: '600' }}>
                 {c ? `${c.present} de ${c.expected} presentes${c.pending ? ` · ${c.pending} para aprovar` : ''}` : ' '}

@@ -20,11 +20,14 @@ import { useMe } from '@/lib/me';
 import { brl } from '@/lib/proposal';
 import { useIndicators } from '@/lib/projects';
 import { RCO_TEXTS } from '@/lib/rco-doc';
+import { downloadRcoPack } from '@/lib/rco-pack';
+import { CobTab, MidiaTab, PontoTab } from '@/components/execution-extra';
+import { STORAGE_WARN, cobProgress, mb, useCobStatus, useProjectMedia, useProjectPoints, useStorageUsage } from '@/lib/staff';
 import { exportRco } from '@/lib/rco-export';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme';
 
-const TABS = ['Resumo', 'Repasses', 'Despesas', 'RCO'] as const;
+const TABS = ['Resumo', 'Repasses', 'Despesas', 'Ponto', 'Cursos COB', 'Mídia', 'RCO'] as const;
 type Tab = (typeof TABS)[number];
 const num = (s: string) => { const n = Number(String(s).replace(/\./g, '').replace(',', '.')); return String(s).trim() && Number.isFinite(n) ? n : 0; };
 const isoOf = (s: string) => { const d = parseBrDate(s); return d ? toIsoDate(d) : null; };
@@ -50,6 +53,18 @@ export default function Execucao() {
   const { colors } = useTheme();
   const [tab, setTab] = useState<Tab>('Resumo');
   const sum = useMemo(() => (q.data ? executionSummary(q.data.items, q.data.expenses, q.data.transfers) : null), [q.data]);
+  const teamIds = useQuery({
+    queryKey: ['project-teams', id], enabled: Boolean(id && allowed),
+    queryFn: async () => ((await supabase.from('project_teams').select('team_id').eq('project_id', id!)).data ?? []).map((x: { team_id: string }) => x.team_id),
+  });
+  const p0 = q.data?.project;
+  const today = new Date().toISOString().slice(0, 10);
+  const pFrom = p0?.starts_on ?? today;
+  const pTo = p0 ? (p0.ends_on < today ? p0.ends_on : today) : today;
+  const points = useProjectPoints(orgId, teamIds.data ?? [], pFrom, pTo);
+  const cob = useCobStatus(orgId, id);
+  const media = useProjectMedia(id);
+  const usage = useStorageUsage(Boolean(me.isPlatformAdmin));
 
   if (!allowed) return <Screen><Stack.Screen options={{ title: 'Execução' }} /><Notice tone="info" text="Disponível para gestores e administradores com o módulo de Gestão de Investimentos." /></Screen>;
   if (q.isLoading) return <Loading />;
@@ -58,6 +73,21 @@ export default function Execucao() {
   if (!proposal) return <Screen><Notice tone="info" text="Este projeto não veio de um Projeto Técnico aprovado no TechPoint." /></Screen>;
   const refresh = () => qc.invalidateQueries({ queryKey: ['execution', id] });
   const global = Number(proposal.mesp_value) + Number(proposal.counterpart_value);
+  const rcoCtx = (texts: Record<string, string>) => {
+    const goalResults = goals.map((_, i) => {
+      const g = ind.data?.goals.find((x) => x.code === `Meta ${i + 1}`);
+      return { code: `Meta ${i + 1}`, result: g?.result ?? null, reached: g?.reached ?? null, unit: g?.unit ?? null, target: g?.target ?? null };
+    });
+    const rows = points.data ?? [];
+    return {
+      project: { ...project, rco: texts }, proposal, goals, items, expenses, transfers, goalResults,
+      realBeneficiaries: ind.data?.indicators.unique_beneficiaries ?? null, avgFrequency: ind.data?.indicators.avg_frequency_pct ?? null,
+      org: org.data ?? { name: me.org?.name ?? '' },
+      media: media.data ?? [],
+      cob: cob.data ? { athletes: cobProgress(cob.data.athletes), staff: cobProgress(cob.data.staff) } : undefined,
+      points: { people: new Set(rows.map((r) => r.profileId)).size, minutes: rows.reduce((s, r) => s + (r.minutes ?? 0), 0), records: rows.length },
+    };
+  };
 
   return (
     <Screen>
@@ -77,6 +107,8 @@ export default function Execucao() {
               </View>
             ))}
           </View>
+          {usage.data && usage.data.total_bytes > usage.data.limit_bytes * STORAGE_WARN && <Notice tone="danger" text={`Armazenamento da plataforma em ${mb(usage.data.total_bytes)} de ${mb(usage.data.limit_bytes)} (plano grátis). Hora de decidir sobre o plano pago.`} />}
+          {usage.data && usage.data.total_bytes <= usage.data.limit_bytes * STORAGE_WARN && <T variant="small">Armazenamento da plataforma (só a equipe TechPoint vê): {mb(usage.data.total_bytes)} de {mb(usage.data.limit_bytes)}.</T>}
           {sum.over > 0 && <Notice tone="danger" text={`${sum.over} item(ns) com gasto acima do combinado.`} />}
           {sum.pendingDocs > 0 && <Notice text={`${sum.pendingDocs} despesa(s) sem todos os comprovantes que o RCO pede.`} />}
           <Card style={{ gap: 10 }}>
@@ -108,19 +140,19 @@ export default function Execucao() {
 
       {tab === 'Repasses' && <Repasses orgId={project.org_id} projectId={project.id} transfers={transfers} total={global} received={sum.received} refresh={refresh} />}
       {tab === 'Despesas' && <Despesas projectId={project.id} orgId={project.org_id} userId={me.profile?.id ?? ''} byItem={sum.byItem} refresh={refresh} />}
+      {tab === 'Ponto' && <PontoTab rows={points.data ?? []} loading={points.isLoading} orgName={org.data?.legal_name || org.data?.name || ''} projectName={project.name} from={pFrom} to={pTo} />}
+      {tab === 'Cursos COB' && <CobTab data={cob.data} loading={cob.isLoading} orgId={project.org_id} userId={me.profile?.id ?? ''} refresh={() => cob.refetch()} />}
+      {tab === 'Mídia' && <MidiaTab media={media.data ?? []} loading={media.isLoading} orgId={project.org_id} projectId={project.id} userId={me.profile?.id ?? ''} refresh={() => media.refetch()} />}
       {tab === 'RCO' && (
         <Rco
           project={project}
-          onExport={async (texts) => {
-            const goalResults = goals.map((_, i) => {
-              const g = ind.data?.goals.find((x) => x.code === `Meta ${i + 1}`);
-              return { code: `Meta ${i + 1}`, result: g?.result ?? null, reached: g?.reached ?? null, unit: g?.unit ?? null, target: g?.target ?? null };
-            });
-            await exportRco({
-              project: { ...project, rco: texts }, proposal, goals, items, expenses, transfers, goalResults,
-              realBeneficiaries: ind.data?.indicators.unique_beneficiaries ?? null, avgFrequency: ind.data?.indicators.avg_frequency_pct ?? null,
-              org: org.data ?? { name: me.org?.name ?? '' },
-            });
+          onExport={async (texts) => { await exportRco(rcoCtx(texts)); }}
+          onPack={async (texts, progress) => {
+            const n = await downloadRcoPack({
+              rco: rcoCtx(texts), media: media.data ?? [], cob: cob.data ?? { athletes: [], staff: [] },
+              points: { rows: points.data ?? [], from: pFrom, to: pTo, orgName: org.data?.legal_name || org.data?.name || '' },
+            }, progress);
+            toast(`Pacote com ${n} arquivo(s) baixado.`);
           }}
           refresh={refresh}
           pending={{ docs: sum.pendingDocs, over: sum.over }}
@@ -294,7 +326,8 @@ function Despesas({ projectId, orgId, userId, byItem, refresh }: { projectId: st
   );
 }
 
-function Rco({ project, onExport, refresh, pending }: { project: { id: string; rco: Record<string, string> }; onExport: (texts: Record<string, string>) => Promise<void>; refresh: () => void; pending: { docs: number; over: number } }) {
+function Rco({ project, onExport, onPack, refresh, pending }: { project: { id: string; rco: Record<string, string> }; onExport: (texts: Record<string, string>) => Promise<void>; onPack: (texts: Record<string, string>, progress: (t: string) => void) => Promise<void>; refresh: () => void; pending: { docs: number; over: number } }) {
+  const [packMsg, setPackMsg] = useState<string | null>(null);
   const [t, setT] = useState<Record<string, string>>({ ...(project.rco ?? {}) });
   const [busy, setBusy] = useState<string | null>(null);
   const dirty = JSON.stringify(t) !== JSON.stringify(project.rco ?? {});
@@ -313,6 +346,10 @@ function Rco({ project, onExport, refresh, pending }: { project: { id: string; r
       {dirty && <Button title="Salvar textos" onPress={save} loading={busy === 'save'} />}
       <Button big icon="document-text-outline" title="Baixar RCO (Word)" loading={busy === 'doc'}
         onPress={async () => { setBusy('doc'); try { if (dirty) await saveRcoTexts(project.id, t); await onExport(t); } catch (e) { toast(toFriendlyError(e).message, 'danger'); } finally { setBusy(null); } }} />
+      <Button kind="tonal" icon="archive-outline" title="Baixar pacote de anexos (ZIP)" loading={busy === 'zip'}
+        onPress={async () => { setBusy('zip'); try { if (dirty) await saveRcoTexts(project.id, t); await onPack(t, setPackMsg); } catch (e) { toast(toFriendlyError(e).message, 'danger'); } finally { setBusy(null); setPackMsg(null); } }} />
+      {packMsg && <T variant="small">{packMsg}</T>}
+      <T variant="small">O pacote traz o RCO, a folha de ponto, os comprovantes em pastas por etapa, as fotos do plano de mídia e os certificados do COB, prontos para subir no Transferegov.br.</T>
     </View>
   );
 }

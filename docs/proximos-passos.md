@@ -22,7 +22,7 @@
   - módulo ligado em teste (trial) só no BT Sport Club; ligar para clientes conforme contrato.
 - Fase B (Projeto Técnico) pronta na 0.13.0. Pendência: contador conferir o cálculo dos encargos de CLT.
 - Fase C onda 1 (aprovação → projeto, repasses, despesas com comprovantes, RCO) pronta na 0.14.0.
-- Fase C onda 2: ponto dos profissionais pelo app (1a), certificados dos cursos do COB pelo atleta/responsável e equipe (3a), plano de mídia com fotos, pacote ZIP dos anexos por etapa, aviso de uso do armazenamento (1 GB do plano grátis).
+- Fase C onda 2 (ponto, cursos do COB, mídia, ZIP, aviso de armazenamento) pronta na 0.15.0. Observação: o botão de ponto no celular entra no próximo APK (usa a câmera e o GPS já existentes); no site já funciona.
 
 ## Pendentes de antes
 - Fase 4: convocações ("vou / não vou" e autorização de viagem).

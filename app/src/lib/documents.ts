@@ -8,13 +8,15 @@ import { supabase } from './supabase';
 export const DOCS_BUCKET = 'athlete-docs';
 export const MAX_DOC_BYTES = 10 * 1024 * 1024;
 
-export type DocKind = 'atestado' | 'identidade' | 'cpf' | 'comprovante_residencia' | 'autorizacao' | 'doc_responsavel' | 'outro';
+export type DocKind = 'atestado' | 'identidade' | 'cpf' | 'comprovante_residencia' | 'autorizacao' | 'doc_responsavel' | 'cob_antirracismo' | 'cob_manipulacao' | 'outro';
 /** Tipos que aparecem para envio (D94). "Único": o novo substitui o anterior, que vira histórico. */
 export const DOC_KINDS: { key: DocKind; label: string; single: boolean; hint: string }[] = [
   { key: 'atestado', label: 'Atestado médico', single: false, hint: 'Sem limite. Cada atestado fica registrado com a validade.' },
   { key: 'identidade', label: 'Documento de identidade', single: true, hint: 'RG, CNH ou certidão. O novo substitui o atual.' },
   { key: 'comprovante_residencia', label: 'Comprovante de residência', single: true, hint: 'O novo substitui o atual.' },
   { key: 'autorizacao', label: 'Autorização assinada', single: false, hint: 'Ex.: autorização de viagem de uma competição.' },
+  { key: 'cob_antirracismo', label: 'Curso COB: Esporte Antirracista', single: true, hint: 'Certificado do curso do COB (obrigatório nos projetos do Revelar Talentos).' },
+  { key: 'cob_manipulacao', label: 'Curso COB: Manipulação de Resultados', single: true, hint: 'Certificado do curso do COB (obrigatório nos projetos do Revelar Talentos).' },
   { key: 'outro', label: 'Outro', single: false, hint: 'Qualquer outro documento.' },
 ];
 const LEGACY: Record<string, string> = { cpf: 'CPF', doc_responsavel: 'Documento do responsável' };

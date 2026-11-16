@@ -189,3 +189,23 @@ Documento de 5 páginas (Anexo Modelo de RCO, SEI 71000.042304/2020-44), em pape
 5. **Conclusão:** benefícios e resultados obtidos.
 
 **Impacto no módulo:** o RCO é a saída final da Fase C. Para ele sair quase pronto, a Fase B tem que guardar o orçamento já no formato Meta → Etapa, com quantidade e valor pactuado, e a Fase C tem que registrar o executado e os anexos de cada despesa na mesma estrutura. Frequência, folhas de ponto, beneficiários reais × previstos e fotos com data e GPS já são pontos fortes do TechPoint.
+
+## 9. Apresentação da SNE sobre o programa (enviada pelo TG em 16/11; tem um slide marcado como "Painel de uso interno": não usar em material público)
+- **Estrutura:** a Secretaria Nacional de Excelência Esportiva tem uma Coordenação-Geral de Especialização e Aperfeiçoamento Esportivo, que cuida do Revelar Talentos, e uma Coordenação-Geral de **Acompanhamento de Parcerias**, que fiscaliza a execução.
+- **Fases do esporte** (Lei Geral do Esporte 14.597/2023): Especialização → Aperfeiçoamento → Alto Rendimento → Transição de Carreira. O Revelar Talentos cobre as duas primeiras.
+- **Valores por eixo:**
+  - Eixo 1 (núcleos): **R$ 400 mil a R$ 1 milhão**;
+  - Eixo 2 (competições): **R$ 200 mil a R$ 5 milhões**;
+  - Eixo 3 (capacitação e inovação): **R$ 250 mil a R$ 1 milhão**.
+- **Público:** atletas até 21 anos, equipe técnica e multidisciplinar, gestores, profissionais do esporte e pesquisadores.
+- **Modalidade de aplicação:** 30 (estados e DF), 40 (municípios), 90 (TED) e **50 (OSCs, com CRC)**. Despesas GND 3 (custeio) e 4 (investimento).
+- **Orçamento 2025 da ação 20YA:** LOA de R$ 9,56 milhões e **emendas de R$ 11,3 milhões** (DF: R$ 2,5 milhões; GO: R$ 4 milhões). Mais da metade do dinheiro veio de emenda parlamentar. Núcleos típicos de **R$ 400 mil** (atletismo, boxe, canoagem, badminton, remo e rugby); judô com R$ 1,058 milhão.
+- **Painel interno da SNE:** 14 parcerias, 25 núcleos, 634 beneficiados (58% homens, 42% mulheres), R$ 7,29 milhões repassados e R$ 5,69 milhões pagos. Filtros por programa, instrumento, convenente, modalidade, estado, situação e vigência, e parcerias por região. **O Ministério acompanha número de beneficiados por sexo, núcleos, valores e vigência**: são os indicadores que o TechPoint deve entregar prontos.
+- **Núcleos em vigência citados:** no DF, 2 por Termo de Fomento: atletismo (Sobradinho, 10 atletas) e **vôlei (Elite Sport Academy – Escola Salesiana, 90 atletas)**; além de confederações, institutos federais e associações em AM, RN, RR, RS, PR, MG, SP e CE.
+- **Contato institucional:** sne.esporte@esporte.gov.br, (61) 3020-6881/6855.
+
+**Impacto no módulo:**
+1. A Fase B ganha a escolha do **eixo**, com aviso quando o valor fica fora da faixa.
+2. O cadastro do beneficiário já tem sexo e nascimento; falta o painel com **beneficiados por sexo e faixa etária e a trava de 21 anos**.
+3. Como a maior parte da verba vem de emenda, os itens de emenda (ofício do parlamentar, Anexos XI, XIV e XV) ganham peso.
+4. **Comercial:** as entidades com núcleo em vigência são clientes em potencial para a prestação de contas. Uso interno; não entra em material público.

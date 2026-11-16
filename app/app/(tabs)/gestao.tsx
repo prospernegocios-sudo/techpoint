@@ -18,6 +18,7 @@ export default function Gestao() {
     ] },
     { title: 'Projetos', items: [
       { title: 'Projetos incentivados', desc: 'Plano aprovado, metas, beneficiários e indicadores', href: '/projeto', icon: 'ribbon-outline', show: isStaff && hasModule('investimentos') },
+      { title: 'Projeto Técnico (Revelar Talentos)', desc: 'Plano de trabalho no modelo do Ministério: metas, orçamento com 3 cotações, cronogramas e Word', href: '/proposta', icon: 'document-text-outline', show: isManager && hasModule('investimentos') },
       { title: 'Clube apto (Revelar Talentos)', desc: 'Checklist de documentos, certidões e declarações do Termo de Fomento', href: '/habilitacao', icon: 'shield-checkmark-outline', show: isManager && hasModule('investimentos') },
     ] },
     { title: 'Estrutura', items: [

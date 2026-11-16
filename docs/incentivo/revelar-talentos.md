@@ -209,3 +209,8 @@ Documento de 5 páginas (Anexo Modelo de RCO, SEI 71000.042304/2020-44), em pape
 2. O cadastro do beneficiário já tem sexo e nascimento; falta o painel com **beneficiados por sexo e faixa etária e a trava de 21 anos**.
 3. Como a maior parte da verba vem de emenda, os itens de emenda (ofício do parlamentar, Anexos XI, XIV e XV) ganham peso.
 4. **Comercial:** as entidades com núcleo em vigência são clientes em potencial para a prestação de contas. Uso interno; não entra em material público.
+
+## 10. O que já está no TechPoint
+- **Fase A (0.12.0):** Clube apto: checklist, dirigentes e declarações em Word.
+- **Fase B (0.13.0):** Projeto Técnico com eixo e faixas, público-alvo, metas, orçamento Meta → Ação → Etapa com 3 cotações (menor, média ou mediana), equipe com encargos, cronogramas, conferências, painel de indicadores, Word e planilha.
+- **Fase C (a fazer):** execução, valor executado por etapa, comprovantes, folha de ponto dos profissionais, cursos do COB e RCO.

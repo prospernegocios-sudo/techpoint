@@ -20,7 +20,7 @@
   - conferir o **modelo oficial do Anexo XV** (nepotismo) com o Ministério e trocar a minuta;
   - advogado revisar as regras automáticas (3 anos de CNPJ, 3 meses dos comprovantes, validade das certidões);
   - módulo ligado em teste (trial) só no BT Sport Club; ligar para clientes conforme contrato.
-- Fase B: Projeto Técnico (21 seções, custos Meta → Etapa com 3 cotações, RH com encargos, cronogramas, Word no modelo).
+- Fase B (Projeto Técnico) pronta na 0.13.0. Pendência: contador conferir o cálculo dos encargos de CLT; definir se a proposta aprovada vira automaticamente o projeto da execução (Fase C).
 - Fase C: execução e RCO (pactuado × executado por etapa, comprovantes, folha de ponto dos profissionais, cursos do COB).
 
 ## Pendentes de antes
